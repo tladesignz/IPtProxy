@@ -1,0 +1,90 @@
+diff --git a/client/client_test.go b/client/client_test.go
+index 84e9cc1..52a4cfe 100644
+--- a/client/client_test.go
++++ b/client/client_test.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeclient
+ 
+ import (
+ 	"testing"
+diff --git a/client/snowflake.go b/client/snowflake.go
+index a1b97fa..e50bcea 100644
+--- a/client/snowflake.go
++++ b/client/snowflake.go
+@@ -1,5 +1,5 @@
+ // Client transport plugin for the Snowflake pluggable transport.
+-package main
++package snowflakeclient
+ 
+ import (
+ 	"flag"
+@@ -74,16 +74,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+ 	return servers
+ }
+ 
+-func main() {
+-	iceServersCommas := flag.String("ice", "", "comma-separated list of ICE servers")
+-	brokerURL := flag.String("url", "", "URL of signaling broker")
+-	frontDomain := flag.String("front", "", "front domain")
+-	logFilename := flag.String("log", "", "name of log file")
+-	logToStateDir := flag.Bool("log-to-state-dir", false, "resolve the log file relative to tor's pt state dir")
+-	keepLocalAddresses := flag.Bool("keep-local-addresses", false, "keep local LAN address ICE candidates")
+-	unsafeLogging := flag.Bool("unsafe-logging", false, "prevent logs from being scrubbed")
+-	max := flag.Int("max", DefaultSnowflakeCapacity,
+-		"capacity for number of multiplexed WebRTC peers")
++// Start the Snowflake client.
++func Main(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
++	// Workaround for missing session configurability via SOCKS username/password.
++	// (As it actually should be per Pluggable Transports spec v1.)
++	if maxPeers < DefaultSnowflakeCapacity {
++		maxPeers = DefaultSnowflakeCapacity
++	}
++
++	iceServersCommas := flag.String("ice", ice, "comma-separated list of ICE servers")
++	brokerURL := flag.String("url", url, "URL of signaling broker")
++	frontDomain := flag.String("front", front, "front domain")
++	logFilename := flag.String("log", logFile, "name of log file")
++	logToStateDir = *flag.Bool("log-to-state-dir", logToStateDir, "resolve the log file relative to tor's pt state dir")
++	keepLocalAddresses = *flag.Bool("keep-local-addresses", keepLocalAddresses, "keep local LAN address ICE candidates")
++	unsafeLogging = *flag.Bool("unsafe-logging", unsafeLogging, "prevent logs from being scrubbed")
++	max := flag.Int("max", maxPeers,"capacity for number of multiplexed WebRTC peers")
+ 
+ 	// Deprecated
+ 	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
+@@ -100,7 +106,7 @@ func main() {
+ 	// https://bugs.torproject.org/25600#comment:14
+ 	var logOutput = ioutil.Discard
+ 	if *logFilename != "" {
+-		if *logToStateDir || *oldLogToStateDir {
++		if logToStateDir || *oldLogToStateDir {
+ 			stateDir, err := pt.MakeStateDir()
+ 			if err != nil {
+ 				log.Fatal(err)
+@@ -115,7 +121,7 @@ func main() {
+ 		defer logFile.Close()
+ 		logOutput = logFile
+ 	}
+-	if *unsafeLogging {
++	if unsafeLogging {
+ 		log.SetOutput(logOutput)
+ 	} else {
+ 		// We want to send the log output through our scrubber first
+@@ -141,7 +147,7 @@ func main() {
+ 	// Use potentially domain-fronting broker to rendezvous.
+ 	broker, err := sf.NewBrokerChannel(
+ 		*brokerURL, *frontDomain, sf.CreateBrokerTransport(),
+-		*keepLocalAddresses || *oldKeepLocalAddresses)
++		keepLocalAddresses || *oldKeepLocalAddresses)
+ 	if err != nil {
+ 		log.Fatalf("parsing broker URL: %v", err)
+ 	}
+@@ -164,7 +170,7 @@ func main() {
+ 		switch methodName {
+ 		case "snowflake":
+ 			// TODO: Be able to recover when SOCKS dies.
+-			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
++			ln, err := pt.ListenSocks("tcp", "127.0.0.1:52610")
+ 			if err != nil {
+ 				pt.CmethodError(methodName, err.Error())
+ 				break

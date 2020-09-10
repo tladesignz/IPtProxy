@@ -1,0 +1,111 @@
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index 1dd00b2..dcf4973 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -27,7 +27,7 @@
+ 
+ // Go language Tor Pluggable Transport suite.  Works only as a managed
+ // client/server.
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"flag"
+@@ -85,7 +85,22 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+ 			continue
+ 		}
+ 
+-		ln, err := net.Listen("tcp", socksAddr)
++		// TODO: remove port hardcoding once we figure out how to
++		//       communicate better with the parent iObfs thread
++		realSocksAddr := socksAddr
++		if name == "obfs4" {
++			realSocksAddr = "127.0.0.1:47351"
++		} else if name == "meek_lite" {
++			realSocksAddr = "127.0.0.1:47352"
++		} else if name == "obfs2" {
++			realSocksAddr = "127.0.0.1:47353"
++		} else if name == "obfs3" {
++			realSocksAddr = "127.0.0.1:47354"
++		} else if name == "scramblesuit" {
++			realSocksAddr = "127.0.0.1:47355"
++		}
++
++		ln, err := net.Listen("tcp", realSocksAddr)
+ 		if err != nil {
+ 			_ = pt.CmethodError(name, err.Error())
+ 			continue
+@@ -304,7 +319,7 @@ func getVersion() string {
+ 	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
+ }
+ 
+-func main() {
++func Main() {
+ 	// Initialize the termination state monitor as soon as possible.
+ 	termMon = newTermMonitor()
+ 
+diff --git a/obfs4proxy/proxy_http.go b/obfs4proxy/proxy_http.go
+index 1adadf8..7ff608d 100644
+--- a/obfs4proxy/proxy_http.go
++++ b/obfs4proxy/proxy_http.go
+@@ -25,7 +25,7 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"bufio"
+diff --git a/obfs4proxy/proxy_socks4.go b/obfs4proxy/proxy_socks4.go
+index ac8be9e..8922e15 100644
+--- a/obfs4proxy/proxy_socks4.go
++++ b/obfs4proxy/proxy_socks4.go
+@@ -31,7 +31,7 @@
+  * license that can be found in the LICENSE file.
+  */
+ 
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"errors"
+diff --git a/obfs4proxy/pt_extras.go b/obfs4proxy/pt_extras.go
+index 18bc2df..766811e 100644
+--- a/obfs4proxy/pt_extras.go
++++ b/obfs4proxy/pt_extras.go
+@@ -25,7 +25,7 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"errors"
+diff --git a/obfs4proxy/termmon.go b/obfs4proxy/termmon.go
+index 59304c9..53ba1e2 100644
+--- a/obfs4proxy/termmon.go
++++ b/obfs4proxy/termmon.go
+@@ -25,7 +25,7 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"io"
+diff --git a/obfs4proxy/termmon_linux.go b/obfs4proxy/termmon_linux.go
+index 926e630..abbadde 100644
+--- a/obfs4proxy/termmon_linux.go
++++ b/obfs4proxy/termmon_linux.go
+@@ -25,7 +25,7 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-package main
++package obfs4proxy
+ 
+ import (
+ 	"fmt"
