@@ -26,11 +26,11 @@ else
     # No .git directory - That's a normal install.
     git clone https://github.com/Yawning/obfs4.git
     cd obfs4
-    git checkout --force 2d8f3c8b
+    git checkout --force --quiet 2d8f3c8b
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake
-    git checkout --force 2d43dd26
+    git checkout --force --quiet 2d43dd26
     cd ..
 fi
 
