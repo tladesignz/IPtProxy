@@ -45,6 +45,8 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '11.0'
 
+  s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*', 'obfs4/*', 'snowflake/*'
+
   # This will only be executed once.
   s.prepare_command = './build.sh'
 
@@ -53,7 +55,7 @@ Pod::Spec.new do |s|
   s.script_phase = {
     :name => 'Go build of IPtProxy.framework',
     :execution_position => :before_compile,
-    :script => 'sh "$PROJECT_DIR/../../build.sh"',
+    :script => 'sh "$PODS_TARGET_SRCROOT/build.sh"',
   }
 
   # This will only work, if `prepare_command` was successful, or if you
