@@ -13,13 +13,26 @@ echo "--- Installing gomobile...\n"
 go get -v golang.org/x/mobile/cmd/gomobile
 
 # Fetch submodules obfs4 and snowflake.
-echo "\n\n--- Fetching Obfs4proxy and Snowflake dependencies via Git submodules...\n"
-git submodule update --init --recursive
-cd obfs4
-git restore .
-cd ../snowflake
-git restore .
-cd ..
+echo "\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n"
+if test -e ".git"; then
+    # There's a .git directory - we must be in the development pod.
+    git submodule update --init --recursive
+    cd obfs4
+    git restore .
+    cd ../snowflake
+    git restore .
+    cd ..
+else
+    # No .git directory - That's a normal install.
+    git clone https://github.com/Yawning/obfs4.git
+    cd obfs4
+    git checkout --force 2d8f3c8b
+    cd ..
+    git clone https://git.torproject.org/pluggable-transports/snowflake.git
+    cd snowflake
+    git checkout --force 2d43dd26
+    cd ..
+fi
 
 # Apply patches.
 echo "\n\n--- Apply patches to Obfs4proxy and Snowflake...\n"

@@ -45,7 +45,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '11.0'
 
-  s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*', 'obfs4/*', 'snowflake/*'
+  s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*'
 
   # This will only be executed once.
   s.prepare_command = './build.sh'
