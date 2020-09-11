@@ -1,6 +1,6 @@
 # IPtProxy
 
-Obfs4proxy and Snowflake Pluggable Transports for iOS
+Obfs4proxy and Snowflake Pluggable Transports for iOS (and Android!)
 
 [![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
@@ -33,17 +33,25 @@ Both PTs are contained at their latest `master` commit, as per 2020-09-10.
 
 ## Requirements
 
-This repository contains a precompiled version of IPtProxy.
+This repository contains a precompiled iOS version of IPtProxy.
 If you want to compile it yourself, you'll need Go 1.15 as a prerequisite.
 
-## Installation
+You will also need Xcode installed when compiling for iOS and an Android NDK
+when compiling for Android.
+
+## Installation (iOS)
 
 IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'IPtProxy'
+pod 'IPtProxy', '~> 0.1'
 ```
+
+## Installation (Android)
+
+Use `build.sh android` to compile an AAR for Android. You can directly drop that
+in your app.
 
 ## Author
 
