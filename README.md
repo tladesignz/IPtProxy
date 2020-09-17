@@ -56,6 +56,7 @@ in your app.
 ## Author
 
 Benjamin Erhart, berhart@netzarchitekten.com
+for the Guardian Project https://guardianproject.info
 
 ## License
 
