@@ -6,17 +6,29 @@ import (
 	"os"
 )
 
+//goland:noinspection GoUnusedConst
 const MeekSocksPort = 47352
+
+//goland:noinspection GoUnusedConst
 const Obfs2SocksPort = 47353
+
+//goland:noinspection GoUnusedConst
 const Obfs3SocksPort = 47354
+
+//goland:noinspection GoUnusedConst
 const Obfs4SocksPort = 47351
+
+//goland:noinspection GoUnusedConst
 const ScramblesuitSocksPort = 47355
+
+//goland:noinspection GoUnusedConst
 const SnowflakeSocksPort = 52610
 
 var snowflakeRunning = false
 var obfs4ProxyRunning = false
 
 // Start the Obfs4Proxy.
+//goland:noinspection GoUnusedExportedFunction
 func StartObfs4Proxy() {
 	if obfs4ProxyRunning {
 		return
@@ -30,6 +42,7 @@ func StartObfs4Proxy() {
 }
 
 // Start the Snowflake client.
+//goland:noinspection GoUnusedExportedFunction
 func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
 	if snowflakeRunning {
 		return
@@ -51,7 +64,7 @@ func fixEnv() {
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
 
 	tmpdir := os.Getenv("TMPDIR")
-	if (tmpdir == "") {
+	if tmpdir == "" {
 		os.Exit(1)
 	}
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", tmpdir+"/pt_state")
