@@ -3,7 +3,7 @@
 TARGET=ios
 OUTPUT=IPtProxy.framework
 
-if test "$1" == "android"; then
+if test "$1" = "android"; then
   TARGET=android
   OUTPUT=IPtProxy.aar
 fi
@@ -16,7 +16,7 @@ if test -e $OUTPUT; then
 fi
 
 # Install dependencies. Go itself is a prerequisite.
-echo "--- Golang 1.15 or up needs to be installed! Try 'brew install go' on MacOS or 'apt install golang' on Linux if we fail further down!\n"
+echo "--- Golang 1.15 or up needs to be installed! Try 'brew install go' on MacOS or snap install go on Linux if we fail further down!\n"
 echo "--- Installing gomobile...\n"
 go get -v golang.org/x/mobile/cmd/gomobile
 
@@ -26,9 +26,9 @@ if test -e ".git"; then
     # There's a .git directory - we must be in the development pod.
     git submodule update --init --recursive
     cd obfs4 || exit 1
-    git restore .
+    git reset --hard
     cd ../snowflake || exit 1
-    git restore .
+    git reset --hard
     cd ..
 else
     # No .git directory - That's a normal install.
@@ -51,6 +51,7 @@ patch --directory=snowflake --strip=1 < snowflake.patch
 echo "\n\n--- Compile $OUTPUT...\n"
 export PATH=~/go/bin:$PATH
 cd IPtProxy.go || exit 1
+gomobile init
 gomobile bind -target=$TARGET -o ../$OUTPUT -v
 
 echo "\n\n--- Done."
