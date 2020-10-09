@@ -50,7 +50,18 @@ pod 'IPtProxy', '~> 0.1'
 
 ## Installation (Android)
 
-Use `build.sh android` to compile an AAR for Android. You can directly drop that
+If it's not already, add `$GOPATH/bin` to `$PATH`. The default location for `$GOPATH` is `$HOME/go` 
+
+```bash
+export PATH=$HOME/go/bin/:$PATH` 
+```
+
+Then, if they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` environment variables are set:
+```bash
+export ANDROID_HOME=~/Android/Sdk`
+export ANDROID_NDK_HOME=~/Android/Sdk/ndk/NDK_VERSION`
+```
+Then use `build.sh android` to compile an AAR for Android. You can directly drop that
 in your app.
 
 ## Author
