@@ -16,7 +16,7 @@ if test -e $OUTPUT; then
 fi
 
 # Install dependencies. Go itself is a prerequisite.
-echo "--- Golang 1.15 or up needs to be installed! Try 'brew install go' on MacOS or snap install go on Linux if we fail further down!\n"
+echo "--- Golang 1.15 or up needs to be installed! Try 'brew install go' on MacOS or 'snap install go' on Linux if we fail further down!\n"
 echo "--- Installing gomobile...\n"
 go get -v golang.org/x/mobile/cmd/gomobile
 
@@ -51,7 +51,11 @@ patch --directory=snowflake --strip=1 < snowflake.patch
 echo "\n\n--- Compile $OUTPUT...\n"
 export PATH=~/go/bin:$PATH
 cd IPtProxy.go || exit 1
-gomobile init
+
+if test "$1" = "android"; then
+  gomobile init
+fi
+
 gomobile bind -target=$TARGET -o ../$OUTPUT -v
 
 echo "\n\n--- Done."
