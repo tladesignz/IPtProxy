@@ -66,9 +66,10 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 * unsafe-logging: prevent logs from being scrubbed
 * keep-local-addresses: keep local LAN address ICE candidates
 **/
-func StartSnowProxy (capacity uint, stunURL string, logFilename string, relayURL string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
+func StartSnowflakeProxy (capacity int, stunURL string, logFilename string, relayURL string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
 
-	go snowflakeproxy.InitProxy(capacity, stunURL, logFilename, relayURL, rawBrokerURL, unsafeLogging, keepLocalAddress)
+	uCapacity := uint(capacity)
+	go snowflakeproxy.InitProxy(uCapacity, stunURL, logFilename, relayURL, rawBrokerURL, unsafeLogging, keepLocalAddress)
 }
 
 // Hack: Set some environment variables that are either
