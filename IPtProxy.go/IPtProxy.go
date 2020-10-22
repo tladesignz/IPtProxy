@@ -5,6 +5,7 @@ import (
 	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
 	"os"
+	"runtime"
 )
 
 //goland:noinspection GoUnusedConst
@@ -39,7 +40,7 @@ func StartObfs4Proxy() {
 
 	fixEnv()
 
-	go obfs4proxy.Main()
+	go obfs4proxy.InitClient("debug",false,false)
 }
 
 // Start the Snowflake client.
@@ -53,7 +54,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 
 	fixEnv()
 
-	go snowflakeclient.Main(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
+	go snowflakeclient.InitClient(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
 }
 
 /** Start the Snowflake proxy
@@ -65,9 +66,9 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 * unsafe-logging: prevent logs from being scrubbed
 * keep-local-addresses: keep local LAN address ICE candidates
 **/
-func StartSnowflakeProxy (capacity uint, stunURL string, logFilename string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
+func StartSnowflakeProxy (capacity uint, stunURL string, logFilename string, relayURL string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
 
-	go snowflakeproxy.Main()
+	go snowflakeproxy.InitProxy(capacity, stunURL, logFilename, relayURL, rawBrokerURL, unsafeLogging, keepLocalAddress)
 }
 
 // Hack: Set some environment variables that are either
@@ -81,12 +82,12 @@ func fixEnv() {
 	tmpdir := os.Getenv("TMPDIR")
 	if tmpdir == "" {
 		if runtime.GOOS == "android" {
-		//for Android
 			_ = os.Setenv("TMPDIR", "/data/local/tmp")
 			tmpdir = os.Getenv("TMPDIR")
-		}
-		else
+		} else {
 			os.Exit(1)
+		}
 	}
+
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", tmpdir+"/pt_state")
 }

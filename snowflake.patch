@@ -1,3 +1,421 @@
+From 8467c01e9e88523fcdef22fed8efadbd07484966 Mon Sep 17 00:00:00 2001
+From: Peter Gerber <peter@arbitrary.ch>
+Date: Mon, 21 Sep 2020 15:53:24 +0000
+Subject: [PATCH 1/5] Consider more IPs to be local
+
+---
+ common/util/util.go      | 6 +++++-
+ common/util/util_test.go | 2 ++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/common/util/util.go b/common/util/util.go
+index ac254fa..b317e0b 100644
+--- a/common/util/util.go
++++ b/common/util/util.go
+@@ -56,7 +56,11 @@ func IsLocal(ip net.IP) bool {
+ 		// Local IPv4 addresses are defined in https://tools.ietf.org/html/rfc1918
+ 		return ip4[0] == 10 ||
+ 			(ip4[0] == 172 && ip4[1]&0xf0 == 16) ||
+-			(ip4[0] == 192 && ip4[1] == 168)
++			(ip4[0] == 192 && ip4[1] == 168) ||
++			// Carrier-Grade NAT as per https://tools.ietf.org/htm/rfc6598
++			(ip4[0] == 100 && ip4[1]&0xc0 == 64) ||
++			// Dynamic Configuration as per https://tools.ietf.org/htm/rfc3927
++			(ip4[0] == 169 && ip4[1] == 254)
+ 	}
+ 	// Local IPv6 addresses are defined in https://tools.ietf.org/html/rfc4193
+ 	return len(ip) == net.IPv6len && ip[0]&0xfe == 0xfc
+diff --git a/common/util/util_test.go b/common/util/util_test.go
+index 271619a..9d52f62 100644
+--- a/common/util/util_test.go
++++ b/common/util/util_test.go
+@@ -14,6 +14,8 @@ func TestUtil(t *testing.T) {
+ 
+ 		offer := offerStart + goodCandidate +
+ 			"a=candidate:3769337065 1 udp 2122260223 192.168.0.100 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
++			"a=candidate:3769337065 1 udp 2122260223 100.127.50.5 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
++			"a=candidate:3769337065 1 udp 2122260223 169.254.250.88 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
+ 			"a=candidate:3769337065 1 udp 2122260223 fdf8:f53b:82e4::53 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv6
+ 			"a=candidate:3769337065 1 udp 2122260223 0.0.0.0 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsUnspecified IPv4
+ 			"a=candidate:3769337065 1 udp 2122260223 :: 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsUnspecified IPv6
+-- 
+2.17.1
+
+From d7aa9b835645bc52c29ba13cdab461fe0d0e4e66 Mon Sep 17 00:00:00 2001
+From: Cecylia Bocovich <cohosh@torproject.org>
+Date: Wed, 30 Sep 2020 10:10:29 -0400
+Subject: [PATCH 2/5] Extract remote address from ICE candidates
+
+Parse the received ICE candidates as well as the Connection Data
+field for a non-local IP address to pass to the bridge. This fixes
+bug #33157.
+---
+ proxy/proxy-go_test.go | 126 ++++++++++++++++++++++++++++++++++++++---
+ proxy/snowflake.go     |  41 ++++++++++++--
+ 2 files changed, 154 insertions(+), 13 deletions(-)
+
+diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
+index 168ca25..1218289 100644
+--- a/proxy/proxy-go_test.go
++++ b/proxy/proxy-go_test.go
+@@ -64,6 +64,51 @@ m=audio 49170 RTP/AVP 0
+ m=video 51372 RTP/AVP 99
+ a=rtpmap:99 h263-1998/90000
+ `, net.ParseIP("224.2.17.12")},
++		// local addresses only
++		{`v=0
++o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
++s=SDP Seminar
++i=A Seminar on the session description protocol
++u=http://www.example.com/seminars/sdp.pdf
++e=j.doe@example.com (Jane Doe)
++c=IN IP4 10.47.16.5/127
++t=2873397496 2873404696
++a=recvonly
++m=audio 49170 RTP/AVP 0
++m=video 51372 RTP/AVP 99
++a=rtpmap:99 h263-1998/90000
++`, nil},
++		// Remote IP in candidate attribute only
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 0.0.0.0
++a=candidate:3769337065 1 udp 2122260223 1.2.3.4 56688 typ host generation 0 network-id 1 network-cost 50
++a=ice-ufrag:aMAZ
++a=ice-pwd:jcHb08Jjgrazp2dzjdrvPPvV
++a=ice-options:trickle
++a=fingerprint:sha-256 C8:88:EE:B9:E7:02:2E:21:37:ED:7A:D1:EB:2B:A3:15:A2:3B:5B:1C:3D:D4:D5:1F:06:CF:52:40:03:F8:DD:66
++a=setup:actpass
++a=mid:data
++a=sctpmap:5000 webrtc-datachannel 1024
++`, net.ParseIP("1.2.3.4")},
++		// Unspecified address
++		{`v=0
++o=jdoe 2890844526 2890842807 IN IP4 0.0.0.0
++s=SDP Seminar
++i=A Seminar on the session description protocol
++u=http://www.example.com/seminars/sdp.pdf
++e=j.doe@example.com (Jane Doe)
++t=2873397496 2873404696
++a=recvonly
++m=audio 49170 RTP/AVP 0
++m=video 51372 RTP/AVP 99
++a=rtpmap:99 h263-1998/90000
++`, nil},
+ 		// Missing c= line
+ 		{`v=0
+ o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+@@ -78,22 +123,64 @@ m=video 51372 RTP/AVP 99
+ a=rtpmap:99 h263-1998/90000
+ `, nil},
+ 		// Single line, IP address only
+-		{`c=IN IP4 224.2.1.1
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 224.2.1.1
+ `, net.ParseIP("224.2.1.1")},
+ 		// Same, with TTL
+-		{`c=IN IP4 224.2.1.1/127
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 224.2.1.1/127
+ `, net.ParseIP("224.2.1.1")},
+ 		// Same, with TTL and multicast addresses
+-		{`c=IN IP4 224.2.1.1/127/3
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 224.2.1.1/127/3
+ `, net.ParseIP("224.2.1.1")},
+ 		// IPv6, address only
+-		{`c=IN IP6 FF15::101
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP6 FF15::101
+ `, net.ParseIP("ff15::101")},
+ 		// Same, with multicast addresses
+-		{`c=IN IP6 FF15::101/3
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP6 FF15::101/3
+ `, net.ParseIP("ff15::101")},
+ 		// Multiple c= lines
+-		{`c=IN IP4 1.2.3.4
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 1.2.3.4
+ c=IN IP4 5.6.7.8
+ `, net.ParseIP("1.2.3.4")},
+ 		// Modified from SDP sent by snowflake-client.
+@@ -116,13 +203,34 @@ a=mid:data
+ a=sctpmap:5000 webrtc-datachannel 1024
+ `, net.ParseIP("1.2.3.4")},
+ 		// Improper character within IPv4
+-		{`c=IN IP4 224.2z.1.1
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP4 224.2z.1.1
+ `, nil},
+ 		// Improper character within IPv6
+-		{`c=IN IP6 ff15:g::101
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP6 ff15:g::101
+ `, nil},
+ 		// Bogus "IP7" addrtype
+-		{`c=IN IP7 1.2.3.4
++		{`v=0
++o=- 4358805017720277108 2 IN IP4 0.0.0.0
++s=-
++t=0 0
++a=group:BUNDLE data
++a=msid-semantic: WMS
++m=application 56688 DTLS/SCTP 5000
++c=IN IP7 1.2.3.4
+ `, nil},
+ 	}
+ 
+diff --git a/proxy/snowflake.go b/proxy/snowflake.go
+index b880b36..ac85527 100644
+--- a/proxy/snowflake.go
++++ b/proxy/snowflake.go
+@@ -24,6 +24,7 @@ import (
+ 	"git.torproject.org/pluggable-transports/snowflake.git/common/util"
+ 	"git.torproject.org/pluggable-transports/snowflake.git/common/websocketconn"
+ 	"github.com/gorilla/websocket"
++	"github.com/pion/sdp/v2"
+ 	"github.com/pion/webrtc/v2"
+ )
+ 
+@@ -65,15 +66,47 @@ var remoteIPPatterns = []*regexp.Regexp{
+ 	regexp.MustCompile(`(?m)^c=IN IP6 ([0-9A-Fa-f:.]+)(?:\/\d+)?(:? |\r?\n)`),
+ }
+ 
+-// https://tools.ietf.org/html/rfc4566#section-5.7
+-func remoteIPFromSDP(sdp string) net.IP {
++// Checks whether an IP address is a remote address for the client
++func isRemoteAddress(ip net.IP) bool {
++	return !(util.IsLocal(ip) || ip.IsUnspecified() || ip.IsLoopback())
++}
++
++func remoteIPFromSDP(str string) net.IP {
++	// Look for remote IP in "a=candidate" attribute fields
++	// https://tools.ietf.org/html/rfc5245#section-15.1
++	var desc sdp.SessionDescription
++	err := desc.Unmarshal([]byte(str))
++	if err != nil {
++		log.Println("Error parsing SDP: ", err.Error())
++		return nil
++	}
++	for _, m := range desc.MediaDescriptions {
++		for _, a := range m.Attributes {
++			if a.IsICECandidate() {
++				ice, err := a.ToICECandidate()
++				if err == nil {
++					ip := net.ParseIP(ice.Address)
++					if ip != nil && isRemoteAddress(ip) {
++						return ip
++					}
++				}
++			}
++		}
++	}
++	// Finally look for remote IP in "c=" Connection Data field
++	// https://tools.ietf.org/html/rfc4566#section-5.7
+ 	for _, pattern := range remoteIPPatterns {
+-		m := pattern.FindStringSubmatch(sdp)
++		m := pattern.FindStringSubmatch(str)
+ 		if m != nil {
+ 			// Ignore parsing errors, ParseIP returns nil.
+-			return net.ParseIP(m[1])
++			ip := net.ParseIP(m[1])
++			if ip != nil && isRemoteAddress(ip) {
++				return ip
++			}
++
+ 		}
+ 	}
++
+ 	return nil
+ }
+ 
+-- 
+2.17.1
+
+From 49e43db64cd76b532b0ad518fb57956062843666 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 10:01:49 -0400
+Subject: [PATCH 3/5] remove unused main() and update InitProxy
+
+---
+ proxy/snowflake.go | 71 +++++++++++-----------------------------------
+ 1 file changed, 17 insertions(+), 54 deletions(-)
+
+diff --git a/proxy/snowflake.go b/proxy/snowflake.go
+index ac85527..992504f 100644
+--- a/proxy/snowflake.go
++++ b/proxy/snowflake.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+@@ -24,7 +24,6 @@ import (
+ 	"git.torproject.org/pluggable-transports/snowflake.git/common/util"
+ 	"git.torproject.org/pluggable-transports/snowflake.git/common/websocketconn"
+ 	"github.com/gorilla/websocket"
+-	"github.com/pion/sdp/v2"
+ 	"github.com/pion/webrtc/v2"
+ )
+ 
+@@ -66,47 +65,15 @@ var remoteIPPatterns = []*regexp.Regexp{
+ 	regexp.MustCompile(`(?m)^c=IN IP6 ([0-9A-Fa-f:.]+)(?:\/\d+)?(:? |\r?\n)`),
+ }
+ 
+-// Checks whether an IP address is a remote address for the client
+-func isRemoteAddress(ip net.IP) bool {
+-	return !(util.IsLocal(ip) || ip.IsUnspecified() || ip.IsLoopback())
+-}
+-
+-func remoteIPFromSDP(str string) net.IP {
+-	// Look for remote IP in "a=candidate" attribute fields
+-	// https://tools.ietf.org/html/rfc5245#section-15.1
+-	var desc sdp.SessionDescription
+-	err := desc.Unmarshal([]byte(str))
+-	if err != nil {
+-		log.Println("Error parsing SDP: ", err.Error())
+-		return nil
+-	}
+-	for _, m := range desc.MediaDescriptions {
+-		for _, a := range m.Attributes {
+-			if a.IsICECandidate() {
+-				ice, err := a.ToICECandidate()
+-				if err == nil {
+-					ip := net.ParseIP(ice.Address)
+-					if ip != nil && isRemoteAddress(ip) {
+-						return ip
+-					}
+-				}
+-			}
+-		}
+-	}
+-	// Finally look for remote IP in "c=" Connection Data field
+-	// https://tools.ietf.org/html/rfc4566#section-5.7
++// https://tools.ietf.org/html/rfc4566#section-5.7
++func remoteIPFromSDP(sdp string) net.IP {
+ 	for _, pattern := range remoteIPPatterns {
+-		m := pattern.FindStringSubmatch(str)
++		m := pattern.FindStringSubmatch(sdp)
+ 		if m != nil {
+ 			// Ignore parsing errors, ParseIP returns nil.
+-			ip := net.ParseIP(m[1])
+-			if ip != nil && isRemoteAddress(ip) {
+-				return ip
+-			}
+-
++			return net.ParseIP(m[1])
+ 		}
+ 	}
+-
+ 	return nil
+ }
+ 
+@@ -461,22 +428,18 @@ func runSession(sid string) {
+ 	}
+ }
+ 
+-func main() {
+-	var capacity uint
+-	var stunURL string
+-	var logFilename string
+-	var rawBrokerURL string
+-	var unsafeLogging bool
+-	var keepLocalAddresses bool
+-
+-	flag.UintVar(&capacity, "capacity", 10, "maximum concurrent clients")
+-	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
+-	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
+-	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
+-	flag.StringVar(&logFilename, "log", "", "log filename")
+-	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
+-	flag.BoolVar(&keepLocalAddresses, "keep-local-addresses", false, "keep local LAN address ICE candidates")
+-	flag.Parse()
++/**
++* capacity: max concurrent clients
++* rawBrokerURL: broke url
++* stunURL: stun server location
++* newRelayURL: websocket relay URL
++* logFilename: path to the log file
++* unsafeLogging: prevents logs from being scrubbed
++* keepLocalAddresses: keep local LAN address ICE candidates
++**/
++func InitProxy(capacity uint,stunURL string,logFilename string,newRelayURL string,rawBrokerURL string,unsafeLogging bool,keepLocalAddresses bool) {
++
++	relayURL := newRelayURL
+ 
+ 	var logOutput io.Writer = os.Stderr
+ 	log.SetFlags(log.LstdFlags | log.LUTC)
+-- 
+2.17.1
+
+From 64bbdca5e69f4e5ec880cb672d4e7bee39fa1a35 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 10:02:49 -0400
+Subject: [PATCH 4/5] updates for IPtProxy
+
+---
+ client/client_test.go    |   2 +-
+ client/snowflake.go      |  36 ++++++-----
+ common/util/util.go      |   6 +-
+ common/util/util_test.go |   2 -
+ proxy/proxy-go_test.go   | 128 +++------------------------------------
+ 5 files changed, 33 insertions(+), 141 deletions(-)
+
 diff --git a/client/client_test.go b/client/client_test.go
 index 84e9cc1..52a4cfe 100644
 --- a/client/client_test.go
@@ -9,7 +427,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..e50bcea 100644
+index a1b97fa..cebedff 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,5 +1,5 @@
@@ -34,7 +452,7 @@ index a1b97fa..e50bcea 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Main(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
++func InitClient(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
 +	// Workaround for missing session configurability via SOCKS username/password.
 +	// (As it actually should be per Pluggable Transports spec v1.)
 +	if maxPeers < DefaultSnowflakeCapacity {
@@ -88,3 +506,231 @@ index a1b97fa..e50bcea 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
+diff --git a/common/util/util.go b/common/util/util.go
+index b317e0b..ac254fa 100644
+--- a/common/util/util.go
++++ b/common/util/util.go
+@@ -56,11 +56,7 @@ func IsLocal(ip net.IP) bool {
+ 		// Local IPv4 addresses are defined in https://tools.ietf.org/html/rfc1918
+ 		return ip4[0] == 10 ||
+ 			(ip4[0] == 172 && ip4[1]&0xf0 == 16) ||
+-			(ip4[0] == 192 && ip4[1] == 168) ||
+-			// Carrier-Grade NAT as per https://tools.ietf.org/htm/rfc6598
+-			(ip4[0] == 100 && ip4[1]&0xc0 == 64) ||
+-			// Dynamic Configuration as per https://tools.ietf.org/htm/rfc3927
+-			(ip4[0] == 169 && ip4[1] == 254)
++			(ip4[0] == 192 && ip4[1] == 168)
+ 	}
+ 	// Local IPv6 addresses are defined in https://tools.ietf.org/html/rfc4193
+ 	return len(ip) == net.IPv6len && ip[0]&0xfe == 0xfc
+diff --git a/common/util/util_test.go b/common/util/util_test.go
+index 9d52f62..271619a 100644
+--- a/common/util/util_test.go
++++ b/common/util/util_test.go
+@@ -14,8 +14,6 @@ func TestUtil(t *testing.T) {
+ 
+ 		offer := offerStart + goodCandidate +
+ 			"a=candidate:3769337065 1 udp 2122260223 192.168.0.100 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
+-			"a=candidate:3769337065 1 udp 2122260223 100.127.50.5 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
+-			"a=candidate:3769337065 1 udp 2122260223 169.254.250.88 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv4
+ 			"a=candidate:3769337065 1 udp 2122260223 fdf8:f53b:82e4::53 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsLocal IPv6
+ 			"a=candidate:3769337065 1 udp 2122260223 0.0.0.0 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsUnspecified IPv4
+ 			"a=candidate:3769337065 1 udp 2122260223 :: 56688 typ host generation 0 network-id 1 network-cost 50\r\n" + // IsUnspecified IPv6
+diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
+index 1218289..d51772b 100644
+--- a/proxy/proxy-go_test.go
++++ b/proxy/proxy-go_test.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+@@ -64,51 +64,6 @@ m=audio 49170 RTP/AVP 0
+ m=video 51372 RTP/AVP 99
+ a=rtpmap:99 h263-1998/90000
+ `, net.ParseIP("224.2.17.12")},
+-		// local addresses only
+-		{`v=0
+-o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+-s=SDP Seminar
+-i=A Seminar on the session description protocol
+-u=http://www.example.com/seminars/sdp.pdf
+-e=j.doe@example.com (Jane Doe)
+-c=IN IP4 10.47.16.5/127
+-t=2873397496 2873404696
+-a=recvonly
+-m=audio 49170 RTP/AVP 0
+-m=video 51372 RTP/AVP 99
+-a=rtpmap:99 h263-1998/90000
+-`, nil},
+-		// Remote IP in candidate attribute only
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 0.0.0.0
+-a=candidate:3769337065 1 udp 2122260223 1.2.3.4 56688 typ host generation 0 network-id 1 network-cost 50
+-a=ice-ufrag:aMAZ
+-a=ice-pwd:jcHb08Jjgrazp2dzjdrvPPvV
+-a=ice-options:trickle
+-a=fingerprint:sha-256 C8:88:EE:B9:E7:02:2E:21:37:ED:7A:D1:EB:2B:A3:15:A2:3B:5B:1C:3D:D4:D5:1F:06:CF:52:40:03:F8:DD:66
+-a=setup:actpass
+-a=mid:data
+-a=sctpmap:5000 webrtc-datachannel 1024
+-`, net.ParseIP("1.2.3.4")},
+-		// Unspecified address
+-		{`v=0
+-o=jdoe 2890844526 2890842807 IN IP4 0.0.0.0
+-s=SDP Seminar
+-i=A Seminar on the session description protocol
+-u=http://www.example.com/seminars/sdp.pdf
+-e=j.doe@example.com (Jane Doe)
+-t=2873397496 2873404696
+-a=recvonly
+-m=audio 49170 RTP/AVP 0
+-m=video 51372 RTP/AVP 99
+-a=rtpmap:99 h263-1998/90000
+-`, nil},
+ 		// Missing c= line
+ 		{`v=0
+ o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
+@@ -123,64 +78,22 @@ m=video 51372 RTP/AVP 99
+ a=rtpmap:99 h263-1998/90000
+ `, nil},
+ 		// Single line, IP address only
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 224.2.1.1
++		{`c=IN IP4 224.2.1.1
+ `, net.ParseIP("224.2.1.1")},
+ 		// Same, with TTL
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 224.2.1.1/127
++		{`c=IN IP4 224.2.1.1/127
+ `, net.ParseIP("224.2.1.1")},
+ 		// Same, with TTL and multicast addresses
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 224.2.1.1/127/3
++		{`c=IN IP4 224.2.1.1/127/3
+ `, net.ParseIP("224.2.1.1")},
+ 		// IPv6, address only
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP6 FF15::101
++		{`c=IN IP6 FF15::101
+ `, net.ParseIP("ff15::101")},
+ 		// Same, with multicast addresses
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP6 FF15::101/3
++		{`c=IN IP6 FF15::101/3
+ `, net.ParseIP("ff15::101")},
+ 		// Multiple c= lines
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 1.2.3.4
++		{`c=IN IP4 1.2.3.4
+ c=IN IP4 5.6.7.8
+ `, net.ParseIP("1.2.3.4")},
+ 		// Modified from SDP sent by snowflake-client.
+@@ -203,34 +116,13 @@ a=mid:data
+ a=sctpmap:5000 webrtc-datachannel 1024
+ `, net.ParseIP("1.2.3.4")},
+ 		// Improper character within IPv4
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP4 224.2z.1.1
++		{`c=IN IP4 224.2z.1.1
+ `, nil},
+ 		// Improper character within IPv6
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP6 ff15:g::101
++		{`c=IN IP6 ff15:g::101
+ `, nil},
+ 		// Bogus "IP7" addrtype
+-		{`v=0
+-o=- 4358805017720277108 2 IN IP4 0.0.0.0
+-s=-
+-t=0 0
+-a=group:BUNDLE data
+-a=msid-semantic: WMS
+-m=application 56688 DTLS/SCTP 5000
+-c=IN IP7 1.2.3.4
++		{`c=IN IP7 1.2.3.4
+ `, nil},
+ 	}
+ 
+-- 
+2.17.1
+
+From 293983419b229735c654ff06e53df213f026f126 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 14:17:22 -0400
+Subject: [PATCH 5/5] flag lib no longer used by proxy
+
+---
+ proxy/snowflake.go | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/proxy/snowflake.go b/proxy/snowflake.go
+index 992504f..f7e2dad 100644
+--- a/proxy/snowflake.go
++++ b/proxy/snowflake.go
+@@ -4,7 +4,6 @@ import (
+ 	"bytes"
+ 	"crypto/rand"
+ 	"encoding/base64"
+-	"flag"
+ 	"fmt"
+ 	"io"
+ 	"io/ioutil"
+-- 
+2.17.1
+

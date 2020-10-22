@@ -1,3 +1,17 @@
+From af32e0bea0eb969fad328eaa782ad846e9c40338 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 09:11:15 -0400
+Subject: [PATCH 1/5] changes for IPtProxy use
+
+---
+ obfs4proxy/obfs4proxy.go    | 21 ++++++++++++++++++---
+ obfs4proxy/proxy_http.go    |  2 +-
+ obfs4proxy/proxy_socks4.go  |  2 +-
+ obfs4proxy/pt_extras.go     |  2 +-
+ obfs4proxy/termmon.go       |  2 +-
+ obfs4proxy/termmon_linux.go |  2 +-
+ 6 files changed, 23 insertions(+), 8 deletions(-)
+
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
 index 1dd00b2..dcf4973 100644
 --- a/obfs4proxy/obfs4proxy.go
@@ -109,3 +123,191 @@ index 926e630..abbadde 100644
  
  import (
  	"fmt"
+-- 
+2.17.1
+
+From 6366941abcaa957f02e5dfbac6e32bc6461c6bc6 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 09:14:58 -0400
+Subject: [PATCH 2/5] add initClient() method for obfs4 for android use
+
+---
+ obfs4proxy/obfs4proxy.go | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index dcf4973..7699e79 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -319,9 +319,7 @@ func getVersion() string {
+ 	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
+ }
+ 
+-func Main() {
+-	// Initialize the termination state monitor as soon as possible.
+-	termMon = newTermMonitor()
++func main () {
+ 
+ 	// Handle the command line arguments.
+ 	_, execName := path.Split(os.Args[0])
+@@ -335,6 +333,20 @@ func Main() {
+ 		fmt.Printf("%s\n", getVersion())
+ 		os.Exit(0)
+ 	}
++
++	initClient (logLevelStr, enableLogging, unsafeLogging)
++
++}
++
++func initClient(flagLogLevel string, flagEnableLogging bool, flagUnsafeLogging bool) {
++	// Initialize the termination state monitor as soon as possible.
++	termMon = newTermMonitor()
++
++	showVer = false
++	logLevelStr = flagLogLevel
++	enableLogging = flagEnableLogging
++	unsafeLogging = flagUnsafeLogging
++
+ 	if err := log.SetLogLevel(*logLevelStr); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
+ 	}
+-- 
+2.17.1
+
+From 496d61d06355bb858ca40189d91b33bc4b8a18ec Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 09:20:52 -0400
+Subject: [PATCH 3/5] fixes for Android initClient change
+
+---
+ obfs4proxy/obfs4proxy.go | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index 7699e79..3735150 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -334,18 +334,17 @@ func main () {
+ 		os.Exit(0)
+ 	}
+ 
+-	initClient (logLevelStr, enableLogging, unsafeLogging)
++	initClient (execName, logLevelStr, enableLogging, unsafeLogging)
+ 
+ }
+ 
+-func initClient(flagLogLevel string, flagEnableLogging bool, flagUnsafeLogging bool) {
++func initClient(execName string,flagLogLevel *string, flagEnableLogging *bool, flagUnsafeLogging *bool) {
+ 	// Initialize the termination state monitor as soon as possible.
+ 	termMon = newTermMonitor()
+ 
+-	showVer = false
+-	logLevelStr = flagLogLevel
+-	enableLogging = flagEnableLogging
+-	unsafeLogging = flagUnsafeLogging
++	logLevelStr := flagLogLevel
++	enableLogging := flagEnableLogging
++	unsafeLogging := flagUnsafeLogging
+ 
+ 	if err := log.SetLogLevel(*logLevelStr); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
+-- 
+2.17.1
+
+From f72d95998387ffc48c03bb9ec060adb3416b91e9 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 09:41:50 -0400
+Subject: [PATCH 4/5] remove main() method and just support initClient()
+
+---
+ obfs4proxy/obfs4proxy.go | 32 +++++---------------------------
+ 1 file changed, 5 insertions(+), 27 deletions(-)
+
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index 3735150..0e04371 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -30,7 +30,6 @@
+ package obfs4proxy
+ 
+ import (
+-	"flag"
+ 	"fmt"
+ 	"io"
+ 	golog "log"
+@@ -319,34 +318,13 @@ func getVersion() string {
+ 	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
+ }
+ 
+-func main () {
+-
+-	// Handle the command line arguments.
+-	_, execName := path.Split(os.Args[0])
+-	showVer := flag.Bool("version", false, "Print version and exit")
+-	logLevelStr := flag.String("logLevel", "ERROR", "Log level (ERROR/WARN/INFO/DEBUG)")
+-	enableLogging := flag.Bool("enableLogging", false, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
+-	unsafeLogging := flag.Bool("unsafeLogging", false, "Disable the address scrubber")
+-	flag.Parse()
+-
+-	if *showVer {
+-		fmt.Printf("%s\n", getVersion())
+-		os.Exit(0)
+-	}
+-
+-	initClient (execName, logLevelStr, enableLogging, unsafeLogging)
+-
+-}
+-
+-func initClient(execName string,flagLogLevel *string, flagEnableLogging *bool, flagUnsafeLogging *bool) {
++func initClient(logLevelStr string, enableLogging bool, unsafeLogging bool) {
+ 	// Initialize the termination state monitor as soon as possible.
+-	termMon = newTermMonitor()
+ 
+-	logLevelStr := flagLogLevel
+-	enableLogging := flagEnableLogging
+-	unsafeLogging := flagUnsafeLogging
++	execName := "obfs4"
++	termMon = newTermMonitor()
+ 
+-	if err := log.SetLogLevel(*logLevelStr); err != nil {
++	if err := log.SetLogLevel(logLevelStr); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
+ 	}
+ 
+@@ -360,7 +338,7 @@ func initClient(execName string,flagLogLevel *string, flagEnableLogging *bool, f
+ 	if stateDir, err = pt.MakeStateDir(); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - No state directory: %s", execName, err)
+ 	}
+-	if err = log.Init(*enableLogging, path.Join(stateDir, obfs4proxyLogFile), *unsafeLogging); err != nil {
++	if err = log.Init(enableLogging, path.Join(stateDir, obfs4proxyLogFile), unsafeLogging); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
+ 	}
+ 	if err = transports.Init(); err != nil {
+-- 
+2.17.1
+
+From 9feab7ac8208421b9cd5ddebb900f9283d0bfb31 Mon Sep 17 00:00:00 2001
+From: n8fr8 <nathan@guardianproject.info>
+Date: Thu, 22 Oct 2020 09:49:44 -0400
+Subject: [PATCH 5/5] externalize to InitClient
+
+---
+ obfs4proxy/obfs4proxy.go | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
+index 0e04371..e4563c9 100644
+--- a/obfs4proxy/obfs4proxy.go
++++ b/obfs4proxy/obfs4proxy.go
+@@ -318,7 +318,7 @@ func getVersion() string {
+ 	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
+ }
+ 
+-func initClient(logLevelStr string, enableLogging bool, unsafeLogging bool) {
++func InitClient(logLevelStr string, enableLogging bool, unsafeLogging bool) {
+ 	// Initialize the termination state monitor as soon as possible.
+ 
+ 	execName := "obfs4"
+-- 
+2.17.1
+
