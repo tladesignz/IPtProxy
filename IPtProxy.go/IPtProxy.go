@@ -2,6 +2,7 @@ package IPtProxy
 
 import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
+	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
 	"os"
 )
@@ -55,6 +56,20 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 	go snowflakeclient.Main(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
 }
 
+/** Start the Snowflake proxy
+* capacity: maximum concurrent clients
+* broker: broker URL
+* relay: websocket relay URL
+* stunURL: stun URL
+* log: log filename
+* unsafe-logging: prevent logs from being scrubbed
+* keep-local-addresses: keep local LAN address ICE candidates
+**/
+func StartSnowflakeProxy (capacity uint, stunURL string, logFilename string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
+
+	go snowflakeproxy.Main()
+}
+
 // Hack: Set some environment variables that are either
 // required, or values that we want. have to do this here, since we can only
 // launch this in a thread and the manipulation of environment variables
@@ -65,7 +80,13 @@ func fixEnv() {
 
 	tmpdir := os.Getenv("TMPDIR")
 	if tmpdir == "" {
-		os.Exit(1)
+		if runtime.GOOS == "android" {
+		//for Android
+			_ = os.Setenv("TMPDIR", "/data/local/tmp")
+			tmpdir = os.Getenv("TMPDIR")
+		}
+		else
+			os.Exit(1)
 	}
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", tmpdir+"/pt_state")
 }
