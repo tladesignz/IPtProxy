@@ -31,7 +31,7 @@ var obfs4ProxyRunning = false
 
 // Start the Obfs4Proxy.
 //goland:noinspection GoUnusedExportedFunction
-func StartObfs4Proxy() {
+func StartObfs4Proxy(logLevel string,unsafeLogging bool,keepLocalAddresses bool) {
 	if obfs4ProxyRunning {
 		return
 	}
@@ -40,7 +40,7 @@ func StartObfs4Proxy() {
 
 	fixEnv()
 
-	go obfs4proxy.InitClient("debug",false,false)
+	go obfs4proxy.InitClient(logLevel, unsafeLogging, keepLocalAddresses)
 }
 
 // Start the Snowflake client.
@@ -66,7 +66,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 * unsafe-logging: prevent logs from being scrubbed
 * keep-local-addresses: keep local LAN address ICE candidates
 **/
-func StartSnowflakeProxy (capacity uint, stunURL string, logFilename string, relayURL string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
+func StartSnowProxy (capacity uint, stunURL string, logFilename string, relayURL string, rawBrokerURL string, unsafeLogging bool, keepLocalAddress bool) {
 
 	go snowflakeproxy.InitProxy(capacity, stunURL, logFilename, relayURL, rawBrokerURL, unsafeLogging, keepLocalAddress)
 }
