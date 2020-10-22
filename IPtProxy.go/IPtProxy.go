@@ -5,7 +5,6 @@ import (
 	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
 	"os"
-	"runtime"
 )
 
 //goland:noinspection GoUnusedConst
@@ -31,14 +30,14 @@ var obfs4ProxyRunning = false
 
 // Start the Obfs4Proxy.
 //goland:noinspection GoUnusedExportedFunction
-func StartObfs4Proxy(logLevel string,unsafeLogging bool,keepLocalAddresses bool) {
+func StartObfs4Proxy(logLevel string,logFolderPath string,unsafeLogging bool,keepLocalAddresses bool) {
 	if obfs4ProxyRunning {
 		return
 	}
 
 	obfs4ProxyRunning = true
 
-	fixEnv()
+	fixEnv(logFolderPath)
 
 	go obfs4proxy.InitClient(logLevel, unsafeLogging, keepLocalAddresses)
 }
@@ -52,7 +51,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 
 	snowflakeRunning = true
 
-	fixEnv()
+	fixEnv("")
 
 	go snowflakeclient.InitClient(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
 }
@@ -76,18 +75,12 @@ func StartSnowflakeProxy (capacity int, stunURL string, logFilename string, rela
 // required, or values that we want. have to do this here, since we can only
 // launch this in a thread and the manipulation of environment variables
 // from within an iOS app won't end up in goptlib properly.
-func fixEnv() {
+func fixEnv(tmpdir string) {
 	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
 
-	tmpdir := os.Getenv("TMPDIR")
 	if tmpdir == "" {
-		if runtime.GOOS == "android" {
-			_ = os.Setenv("TMPDIR", "/data/local/tmp")
-			tmpdir = os.Getenv("TMPDIR")
-		} else {
-			os.Exit(1)
-		}
+		tmpdir = os.Getenv("TMPDIR")
 	}
 
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", tmpdir+"/pt_state")
