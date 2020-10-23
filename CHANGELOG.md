@@ -2,7 +2,9 @@
 
 ## 0.2.0
 
-- Added patch to be able to stop a threaded Snowflake again.
+- Improved Android support.
+- Improved documentation.
+- Updated Snowflake to latest master.
 
 ## 0.1.0
 

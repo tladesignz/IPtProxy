@@ -1,5 +1,5 @@
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index 1dd00b2..dcf4973 100644
+index 1dd00b2..576beb9 100644
 --- a/obfs4proxy/obfs4proxy.go
 +++ b/obfs4proxy/obfs4proxy.go
 @@ -27,7 +27,7 @@
@@ -11,13 +11,11 @@ index 1dd00b2..dcf4973 100644
  
  import (
  	"flag"
-@@ -85,7 +85,22 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+@@ -85,7 +85,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
 -		ln, err := net.Listen("tcp", socksAddr)
-+		// TODO: remove port hardcoding once we figure out how to
-+		//       communicate better with the parent iObfs thread
 +		realSocksAddr := socksAddr
 +		if name == "obfs4" {
 +			realSocksAddr = "127.0.0.1:47351"
@@ -35,15 +33,32 @@ index 1dd00b2..dcf4973 100644
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -304,7 +319,7 @@ func getVersion() string {
+@@ -304,16 +317,20 @@ func getVersion() string {
  	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
  }
  
 -func main() {
-+func Main() {
++func Start(logLevel string, enableLogging *bool, unsafeLogging *bool) {
  	// Initialize the termination state monitor as soon as possible.
  	termMon = newTermMonitor()
  
++	if logLevel == "" {
++		logLevel = "ERROR"
++	}
++
+ 	// Handle the command line arguments.
+-	_, execName := path.Split(os.Args[0])
++	execName := "obfs4"
+ 	showVer := flag.Bool("version", false, "Print version and exit")
+-	logLevelStr := flag.String("logLevel", "ERROR", "Log level (ERROR/WARN/INFO/DEBUG)")
+-	enableLogging := flag.Bool("enableLogging", false, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
+-	unsafeLogging := flag.Bool("unsafeLogging", false, "Disable the address scrubber")
++	logLevelStr := flag.String("logLevel", logLevel, "Log level (ERROR/WARN/INFO/DEBUG)")
++	enableLogging = flag.Bool("enableLogging", *enableLogging, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
++	unsafeLogging = flag.Bool("unsafeLogging", *unsafeLogging, "Disable the address scrubber")
+ 	flag.Parse()
+ 
+ 	if *showVer {
 diff --git a/obfs4proxy/proxy_http.go b/obfs4proxy/proxy_http.go
 index 1adadf8..7ff608d 100644
 --- a/obfs4proxy/proxy_http.go
