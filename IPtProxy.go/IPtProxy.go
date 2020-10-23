@@ -70,7 +70,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) {
 //
 // @param front Front domain.
 //
-// @param logFilename Name of log file. OPTIONAL
+// @param logFile Name of log file. OPTIONAL
 //
 // @param logToStateDir Resolve the log file relative to Tor's PT state dir.
 //
@@ -78,7 +78,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) {
 //
 // @param unsafeLogging Prevent logs from being scrubbed.
 //
-// @param max Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
+// @param maxPeers Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
