@@ -18,13 +18,44 @@ FOUNDATION_EXPORT const int64_t IPtProxyObfs4SocksPort;
 FOUNDATION_EXPORT const int64_t IPtProxyScramblesuitSocksPort;
 FOUNDATION_EXPORT const int64_t IPtProxySnowflakeSocksPort;
 
+@interface IPtProxy : NSObject
+/**
+ * Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
+ */
++ (NSString* _Nonnull) stateLocation;
++ (void) setStateLocation:(NSString* _Nonnull)v;
+
+@end
+
 /**
  * Start the Obfs4Proxy.
+
+- parameter logLevel: Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
+
+- parameter enableLogging: Log to TOR_PT_STATE_LOCATION/obfs4proxy.log.
+
+- parameter unsafeLogging: Disable the address scrubber.
  */
-FOUNDATION_EXPORT void IPtProxyStartObfs4Proxy(void);
+FOUNDATION_EXPORT void IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging);
 
 /**
  * Start the Snowflake client.
+
+- parameter ice: Comma-separated list of ICE servers.
+
+- parameter url: URL of signaling broker.
+
+- parameter front: Front domain.
+
+- parameter logFilename: Name of log file. OPTIONAL
+
+- parameter logToStateDir: Resolve the log file relative to Tor's PT state dir.
+
+- parameter keepLocalAddresses: Keep local LAN address ICE candidates.
+
+- parameter unsafeLogging: Prevent logs from being scrubbed.
+
+- parameter max: Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
  */
 FOUNDATION_EXPORT void IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 

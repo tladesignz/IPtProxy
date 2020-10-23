@@ -24,11 +24,9 @@ Problems solved in particular are:
 - The ports where the PTs will listen on are hardcoded, since communicating
   the used ports back to the app would be quite some work (e.g. trying to
   read it from STDOUT) for very little benefit.
-- Snowflake currently can only be configured via command line, not via the
-  PT spec's method of using SOCKS username and password arguments.
-  Therefore Snowflake is patched to accept arguments via its `Main` method.
+- Snowflake and Obfs4proxy are patched to accept configuration parameters directly.
 
-Both PTs are contained at their latest `master` commit, as per 2020-09-10.
+Both PTs are contained at their latest `master` commit, as per 2020-10-23.
 
 
 ## Requirements
@@ -45,7 +43,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'IPtProxy', '~> 0.1'
+pod 'IPtProxy', '~> 0.2'
 ```
 
 ## Installation (Android)
