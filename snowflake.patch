@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..e50bcea 100644
+index a1b97fa..53492bf 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,5 +1,5 @@
@@ -34,7 +34,7 @@ index a1b97fa..e50bcea 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Main(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
++func Start(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, maxPeers int) {
 +	// Workaround for missing session configurability via SOCKS username/password.
 +	// (As it actually should be per Pluggable Transports spec v1.)
 +	if maxPeers < DefaultSnowflakeCapacity {
@@ -45,40 +45,13 @@ index a1b97fa..e50bcea 100644
 +	brokerURL := flag.String("url", url, "URL of signaling broker")
 +	frontDomain := flag.String("front", front, "front domain")
 +	logFilename := flag.String("log", logFile, "name of log file")
-+	logToStateDir = *flag.Bool("log-to-state-dir", logToStateDir, "resolve the log file relative to tor's pt state dir")
-+	keepLocalAddresses = *flag.Bool("keep-local-addresses", keepLocalAddresses, "keep local LAN address ICE candidates")
-+	unsafeLogging = *flag.Bool("unsafe-logging", unsafeLogging, "prevent logs from being scrubbed")
++	logToStateDir = flag.Bool("log-to-state-dir", *logToStateDir, "resolve the log file relative to tor's pt state dir")
++	keepLocalAddresses = flag.Bool("keep-local-addresses", *keepLocalAddresses, "keep local LAN address ICE candidates")
++	unsafeLogging = flag.Bool("unsafe-logging", *unsafeLogging, "prevent logs from being scrubbed")
 +	max := flag.Int("max", maxPeers,"capacity for number of multiplexed WebRTC peers")
  
  	// Deprecated
  	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -100,7 +106,7 @@ func main() {
- 	// https://bugs.torproject.org/25600#comment:14
- 	var logOutput = ioutil.Discard
- 	if *logFilename != "" {
--		if *logToStateDir || *oldLogToStateDir {
-+		if logToStateDir || *oldLogToStateDir {
- 			stateDir, err := pt.MakeStateDir()
- 			if err != nil {
- 				log.Fatal(err)
-@@ -115,7 +121,7 @@ func main() {
- 		defer logFile.Close()
- 		logOutput = logFile
- 	}
--	if *unsafeLogging {
-+	if unsafeLogging {
- 		log.SetOutput(logOutput)
- 	} else {
- 		// We want to send the log output through our scrubber first
-@@ -141,7 +147,7 @@ func main() {
- 	// Use potentially domain-fronting broker to rendezvous.
- 	broker, err := sf.NewBrokerChannel(
- 		*brokerURL, *frontDomain, sf.CreateBrokerTransport(),
--		*keepLocalAddresses || *oldKeepLocalAddresses)
-+		keepLocalAddresses || *oldKeepLocalAddresses)
- 	if err != nil {
- 		log.Fatalf("parsing broker URL: %v", err)
- 	}
 @@ -164,7 +170,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
