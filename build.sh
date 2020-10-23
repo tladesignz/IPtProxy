@@ -22,29 +22,29 @@ go get -v golang.org/x/mobile/cmd/gomobile
 
 # Fetch submodules obfs4 and snowflake.
 echo "\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n"
-if test -e ".git"; then
-    # There's a .git directory - we must be in the development pod.
-    git submodule update --init --recursive
-    cd obfs4 || exit 1
-    git reset --hard
-    cd ../snowflake || exit 1
-    git reset --hard
-    cd ..
-else
-    # No .git directory - That's a normal install.
-    git clone https://github.com/Yawning/obfs4.git
-    cd obfs4 || exit 1
-    git checkout --force --quiet 2d8f3c8b
-    cd ..
-    git clone https://git.torproject.org/pluggable-transports/snowflake.git
-    cd snowflake || exit 1
-    git checkout --force --quiet d7aa9b83
-    cd ..
-fi
+#if test -e ".git"; then
+#    # There's a .git directory - we must be in the development pod.
+#    git submodule update --init --recursive
+#    cd obfs4 || exit 1
+#    git reset --hard
+#    cd ../snowflake || exit 1
+#    git reset --hard
+#    cd ..
+#else
+#    # No .git directory - That's a normal install.
+#    git clone https://github.com/Yawning/obfs4.git
+#    cd obfs4 || exit 1
+#    git checkout --force --quiet 2d8f3c8b
+#    cd ..
+#    git clone https://git.torproject.org/pluggable-transports/snowflake.git
+#    cd snowflake || exit 1
+#    git checkout --force --quiet d7aa9b83
+#    cd ..
+#fi
 
 # Apply patches.
 echo "\n\n--- Apply patches to Obfs4proxy and Snowflake...\n"
-patch --directory=obfs4 --strip=1 < obfs4.patch
+#patch --directory=obfs4 --strip=1 < obfs4.patch
 patch --directory=snowflake --strip=1 < snowflake.patch
 
 # Compile framework.

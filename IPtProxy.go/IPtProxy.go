@@ -1,6 +1,7 @@
 package IPtProxy
 
 import (
+	"fmt"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
 	"os"
@@ -44,6 +45,8 @@ func StartObfs4Proxy() {
 // Start the Snowflake client.
 //goland:noinspection GoUnusedExportedFunction
 func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
+	_, _ = fmt.Fprint(os.Stdout, "Try to start snowflake.", snowflakeRunning)
+
 	if snowflakeRunning {
 		return
 	}
@@ -52,7 +55,20 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 
 	fixEnv()
 
-	go snowflakeclient.Main(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
+	go snowflakeclient.Start(ice, url, front, logFile, logToStateDir, keepLocalAddresses, unsafeLogging, maxPeers)
+}
+
+//goland:noinspection GoUnusedExportedFunction
+func StopSnowflake() {
+	_, _ = fmt.Fprint(os.Stdout, "Try to stop snowflake.", snowflakeRunning)
+
+	if !snowflakeRunning {
+		return
+	}
+
+	go snowflakeclient.Stop()
+
+	snowflakeRunning = false
 }
 
 // Hack: Set some environment variables that are either

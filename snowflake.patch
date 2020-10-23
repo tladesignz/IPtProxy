@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..e50bcea 100644
+index a1b97fa..8ddb900 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,5 +1,5 @@
@@ -19,7 +19,24 @@ index a1b97fa..e50bcea 100644
  
  import (
  	"flag"
-@@ -74,16 +74,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -18,7 +18,6 @@ import (
+ 	pt "git.torproject.org/pluggable-transports/goptlib.git"
+ 	sf "git.torproject.org/pluggable-transports/snowflake.git/client/lib"
+ 	"git.torproject.org/pluggable-transports/snowflake.git/common/nat"
+-	"git.torproject.org/pluggable-transports/snowflake.git/common/safelog"
+ 	"github.com/pion/webrtc/v2"
+ )
+ 
+@@ -26,6 +25,8 @@ const (
+ 	DefaultSnowflakeCapacity = 1
+ )
+ 
++var sigChan = make(chan os.Signal, 1)
++
+ // Accept local SOCKS connections and pass them to the handler.
+ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
+ 	defer ln.Close()
+@@ -74,16 +75,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -34,7 +51,7 @@ index a1b97fa..e50bcea 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Main(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
++func Start(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
 +	// Workaround for missing session configurability via SOCKS username/password.
 +	// (As it actually should be per Pluggable Transports spec v1.)
 +	if maxPeers < DefaultSnowflakeCapacity {
@@ -52,25 +69,37 @@ index a1b97fa..e50bcea 100644
  
  	// Deprecated
  	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -100,7 +106,7 @@ func main() {
+@@ -98,9 +105,9 @@ func main() {
+ 	// buffer is full.
+ 	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
- 	var logOutput = ioutil.Discard
+-	var logOutput = ioutil.Discard
++	//var logOutput = ioutil.Discard
  	if *logFilename != "" {
 -		if *logToStateDir || *oldLogToStateDir {
 +		if logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
  			if err != nil {
  				log.Fatal(err)
-@@ -115,7 +121,7 @@ func main() {
+@@ -113,13 +120,13 @@ func main() {
+ 			log.Fatal(err)
+ 		}
  		defer logFile.Close()
- 		logOutput = logFile
+-		logOutput = logFile
++		//logOutput = logFile
  	}
 -	if *unsafeLogging {
+-		log.SetOutput(logOutput)
 +	if unsafeLogging {
- 		log.SetOutput(logOutput)
++		//log.SetOutput(logOutput)
  	} else {
  		// We want to send the log output through our scrubber first
-@@ -141,7 +147,7 @@ func main() {
+-		log.SetOutput(&safelog.LogScrubber{Output: logOutput})
++		//log.SetOutput(&safelog.LogScrubber{Output: logOutput})
+ 	}
+ 
+ 	log.Println("\n\n\n --- Starting Snowflake Client ---")
+@@ -141,7 +148,7 @@ func main() {
  	// Use potentially domain-fronting broker to rendezvous.
  	broker, err := sf.NewBrokerChannel(
  		*brokerURL, *frontDomain, sf.CreateBrokerTransport(),
@@ -79,7 +108,7 @@ index a1b97fa..e50bcea 100644
  	if err != nil {
  		log.Fatalf("parsing broker URL: %v", err)
  	}
-@@ -164,7 +170,7 @@ func main() {
+@@ -164,7 +171,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -88,3 +117,23 @@ index a1b97fa..e50bcea 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
+@@ -179,7 +186,6 @@ func main() {
+ 	}
+ 	pt.CmethodsDone()
+ 
+-	sigChan := make(chan os.Signal, 1)
+ 	signal.Notify(sigChan, syscall.SIGTERM)
+ 
+ 	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
+@@ -204,6 +210,11 @@ func main() {
+ 	log.Println("snowflake is done.")
+ }
+ 
++func Stop() {
++	log.Println("synthesizing SIGTERM because of explicit Stop call")
++	sigChan <- syscall.SIGTERM
++}
++
+ // loop through all provided STUN servers until we exhaust the list or find
+ // one that is compatable with RFC 5780
+ func updateNATType(servers []webrtc.ICEServer, broker *sf.BrokerChannel) {
