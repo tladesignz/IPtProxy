@@ -9,17 +9,28 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..42ec5d4 100644
+index a1b97fa..d3db124 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
-@@ -1,5 +1,5 @@
+@@ -1,24 +1,19 @@
  // Client transport plugin for the Snowflake pluggable transport.
 -package main
 +package snowflakeclient
  
  import (
  	"flag"
-@@ -18,7 +18,6 @@ import (
+-	"io"
+-	"io/ioutil"
+ 	"log"
+ 	"math/rand"
+ 	"net"
+ 	"os"
+-	"os/signal"
+ 	"path/filepath"
+ 	"strings"
+-	"syscall"
+ 	"time"
+ 
  	pt "git.torproject.org/pluggable-transports/goptlib.git"
  	sf "git.torproject.org/pluggable-transports/snowflake.git/client/lib"
  	"git.torproject.org/pluggable-transports/snowflake.git/common/nat"
@@ -27,7 +38,7 @@ index a1b97fa..42ec5d4 100644
  	"github.com/pion/webrtc/v2"
  )
  
-@@ -26,6 +25,9 @@ const (
+@@ -26,6 +21,9 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
@@ -37,7 +48,7 @@ index a1b97fa..42ec5d4 100644
  // Accept local SOCKS connections and pass them to the handler.
  func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
  	defer ln.Close()
-@@ -74,16 +76,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -74,16 +72,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -70,7 +81,7 @@ index a1b97fa..42ec5d4 100644
  
  	// Deprecated
  	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -98,7 +106,7 @@ func main() {
+@@ -98,7 +102,7 @@ func main() {
  	// buffer is full.
  	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
@@ -79,7 +90,7 @@ index a1b97fa..42ec5d4 100644
  	if *logFilename != "" {
  		if *logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
-@@ -113,13 +121,13 @@ func main() {
+@@ -113,13 +117,13 @@ func main() {
  			log.Fatal(err)
  		}
  		defer logFile.Close()
@@ -96,7 +107,7 @@ index a1b97fa..42ec5d4 100644
  	}
  
  	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -159,12 +167,12 @@ func main() {
+@@ -159,12 +163,12 @@ func main() {
  		pt.ProxyError("proxy is not supported")
  		os.Exit(1)
  	}
@@ -111,13 +122,31 @@ index a1b97fa..42ec5d4 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -198,6 +206,10 @@ func main() {
- 	<-sigChan
- 
- 	// Signal received, shut down.
-+	Stop()
+@@ -178,26 +182,9 @@ func main() {
+ 		}
+ 	}
+ 	pt.CmethodsDone()
 +}
-+
+ 
+-	sigChan := make(chan os.Signal, 1)
+-	signal.Notify(sigChan, syscall.SIGTERM)
+-
+-	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
+-		// This environment variable means we should treat EOF on stdin
+-		// just like SIGTERM: https://bugs.torproject.org/15435.
+-		go func() {
+-			if _, err := io.Copy(ioutil.Discard, os.Stdin); err != nil {
+-				log.Printf("calling io.Copy(ioutil.Discard, os.Stdin) returned error: %v", err)
+-			}
+-			log.Printf("synthesizing SIGTERM because of stdin close")
+-			sigChan <- syscall.SIGTERM
+-		}()
+-	}
+-
+-	// Wait for a signal.
+-	<-sigChan
+-
+-	// Signal received, shut down.
 +func Stop() {
  	for _, ln := range listeners {
  		ln.Close()
