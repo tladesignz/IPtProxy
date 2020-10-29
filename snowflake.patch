@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..93d3751 100644
+index a1b97fa..42ec5d4 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,5 +1,5 @@
@@ -27,16 +27,17 @@ index a1b97fa..93d3751 100644
  	"github.com/pion/webrtc/v2"
  )
  
-@@ -26,6 +25,8 @@ const (
+@@ -26,6 +25,9 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
-+var sigChan = make(chan os.Signal, 1)
++var listeners = make([]net.Listener, 0)
++
 +
  // Accept local SOCKS connections and pass them to the handler.
  func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
  	defer ln.Close()
-@@ -74,16 +75,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -74,16 +76,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -69,7 +70,7 @@ index a1b97fa..93d3751 100644
  
  	// Deprecated
  	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -98,7 +105,7 @@ func main() {
+@@ -98,7 +106,7 @@ func main() {
  	// buffer is full.
  	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
@@ -78,7 +79,7 @@ index a1b97fa..93d3751 100644
  	if *logFilename != "" {
  		if *logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
-@@ -113,13 +120,13 @@ func main() {
+@@ -113,13 +121,13 @@ func main() {
  			log.Fatal(err)
  		}
  		defer logFile.Close()
@@ -95,7 +96,13 @@ index a1b97fa..93d3751 100644
  	}
  
  	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -164,7 +171,7 @@ func main() {
+@@ -159,12 +167,12 @@ func main() {
+ 		pt.ProxyError("proxy is not supported")
+ 		os.Exit(1)
+ 	}
+-	listeners := make([]net.Listener, 0)
++
+ 	for _, methodName := range ptInfo.MethodNames {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -104,23 +111,14 @@ index a1b97fa..93d3751 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -179,7 +186,6 @@ func main() {
- 	}
- 	pt.CmethodsDone()
+@@ -198,6 +206,10 @@ func main() {
+ 	<-sigChan
  
--	sigChan := make(chan os.Signal, 1)
- 	signal.Notify(sigChan, syscall.SIGTERM)
- 
- 	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -204,6 +210,11 @@ func main() {
- 	log.Println("snowflake is done.")
- }
- 
-+func Stop() {
-+	log.Println("synthesizing SIGTERM because of explicit Stop call")
-+	sigChan <- syscall.SIGTERM
+ 	// Signal received, shut down.
++	Stop()
 +}
 +
- // loop through all provided STUN servers until we exhaust the list or find
- // one that is compatable with RFC 5780
- func updateNATType(servers []webrtc.ICEServer, broker *sf.BrokerChannel) {
++func Stop() {
+ 	for _, ln := range listeners {
+ 		ln.Close()
+ 	}
