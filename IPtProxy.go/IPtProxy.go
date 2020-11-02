@@ -93,7 +93,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 
 	fixEnv()
 
-	go snowflakeclient.Start(ice, url, front, logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, maxPeers)
+	go snowflakeclient.Start(&ice, &url, &front, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 }
 
 // Stop the Snowflake client.

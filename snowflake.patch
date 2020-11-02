@@ -9,28 +9,20 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..d3db124 100644
+index a1a679e..09d34c4 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
-@@ -1,24 +1,19 @@
+@@ -1,8 +1,7 @@
  // Client transport plugin for the Snowflake pluggable transport.
 -package main
 +package snowflakeclient
  
  import (
- 	"flag"
--	"io"
--	"io/ioutil"
+-	"flag"
+ 	"io"
+ 	"io/ioutil"
  	"log"
- 	"math/rand"
- 	"net"
- 	"os"
--	"os/signal"
- 	"path/filepath"
- 	"strings"
--	"syscall"
- 	"time"
- 
+@@ -18,7 +17,6 @@ import (
  	pt "git.torproject.org/pluggable-transports/goptlib.git"
  	sf "git.torproject.org/pluggable-transports/snowflake.git/client/lib"
  	"git.torproject.org/pluggable-transports/snowflake.git/common/nat"
@@ -38,17 +30,17 @@ index a1b97fa..d3db124 100644
  	"github.com/pion/webrtc/v2"
  )
  
-@@ -26,6 +21,9 @@ const (
+@@ -26,6 +24,9 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
-+var listeners = make([]net.Listener, 0)
++var sigChan = make(chan os.Signal, 1)
 +
 +
  // Accept local SOCKS connections and pass them to the handler.
- func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
+ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}) {
  	defer ln.Close()
-@@ -74,16 +72,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -86,22 +87,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -63,25 +55,22 @@ index a1b97fa..d3db124 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Start(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, maxPeers int) {
-+	// Workaround for missing session configurability via SOCKS username/password.
-+	// (As it actually should be per Pluggable Transports spec v1.)
-+	if maxPeers < DefaultSnowflakeCapacity {
-+		maxPeers = DefaultSnowflakeCapacity
++func Start(iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++	if *max < DefaultSnowflakeCapacity {
++		*max = DefaultSnowflakeCapacity
 +	}
-+
-+	iceServersCommas := flag.String("ice", ice, "comma-separated list of ICE servers")
-+	brokerURL := flag.String("url", url, "URL of signaling broker")
-+	frontDomain := flag.String("front", front, "front domain")
-+	logFilename := flag.String("log", logFile, "name of log file")
-+	logToStateDir = flag.Bool("log-to-state-dir", *logToStateDir, "resolve the log file relative to tor's pt state dir")
-+	keepLocalAddresses = flag.Bool("keep-local-addresses", *keepLocalAddresses, "keep local LAN address ICE candidates")
-+	unsafeLogging = flag.Bool("unsafe-logging", *unsafeLogging, "prevent logs from being scrubbed")
-+	max := flag.Int("max", maxPeers, "capacity for number of multiplexed WebRTC peers")
  
  	// Deprecated
- 	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -98,7 +102,7 @@ func main() {
+-	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
+-	oldKeepLocalAddresses := flag.Bool("keepLocalAddresses", false, "use -keep-local-addresses instead")
+-
+-	flag.Parse()
++	oldLogToStateDir := logToStateDir
++	oldKeepLocalAddresses := keepLocalAddresses
+ 
+ 	log.SetFlags(log.LstdFlags | log.LUTC)
+ 
+@@ -110,7 +104,7 @@ func main() {
  	// buffer is full.
  	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
@@ -90,7 +79,7 @@ index a1b97fa..d3db124 100644
  	if *logFilename != "" {
  		if *logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
-@@ -113,13 +117,13 @@ func main() {
+@@ -125,13 +119,13 @@ func main() {
  			log.Fatal(err)
  		}
  		defer logFile.Close()
@@ -107,13 +96,7 @@ index a1b97fa..d3db124 100644
  	}
  
  	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -159,12 +163,12 @@ func main() {
- 		pt.ProxyError("proxy is not supported")
- 		os.Exit(1)
- 	}
--	listeners := make([]net.Listener, 0)
-+
- 	for _, methodName := range ptInfo.MethodNames {
+@@ -177,7 +171,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -122,32 +105,23 @@ index a1b97fa..d3db124 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -178,26 +182,9 @@ func main() {
- 		}
+@@ -192,7 +186,6 @@ func main() {
  	}
  	pt.CmethodsDone()
-+}
  
 -	sigChan := make(chan os.Signal, 1)
--	signal.Notify(sigChan, syscall.SIGTERM)
--
--	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
--		// This environment variable means we should treat EOF on stdin
--		// just like SIGTERM: https://bugs.torproject.org/15435.
--		go func() {
--			if _, err := io.Copy(ioutil.Discard, os.Stdin); err != nil {
--				log.Printf("calling io.Copy(ioutil.Discard, os.Stdin) returned error: %v", err)
--			}
--			log.Printf("synthesizing SIGTERM because of stdin close")
--			sigChan <- syscall.SIGTERM
--		}()
--	}
--
--	// Wait for a signal.
--	<-sigChan
--
--	// Signal received, shut down.
+ 	signal.Notify(sigChan, syscall.SIGTERM)
+ 
+ 	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
+@@ -219,6 +212,11 @@ func main() {
+ 	log.Println("snowflake is done.")
+ }
+ 
 +func Stop() {
- 	for _, ln := range listeners {
- 		ln.Close()
- 	}
++	log.Printf("synthesizing SIGTERM because of Stop call")
++	sigChan <- syscall.SIGTERM
++}
++
+ // loop through all provided STUN servers until we exhaust the list or find
+ // one that is compatable with RFC 5780
+ func updateNATType(servers []webrtc.ICEServer, broker *sf.BrokerChannel) {
