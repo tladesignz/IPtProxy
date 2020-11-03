@@ -9,17 +9,20 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..53492bf 100644
+index a1b97fa..6583361 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
-@@ -1,5 +1,5 @@
+@@ -1,8 +1,7 @@
  // Client transport plugin for the Snowflake pluggable transport.
 -package main
 +package snowflakeclient
  
  import (
- 	"flag"
-@@ -74,16 +74,22 @@ func parseIceServers(s string) []webrtc.ICEServer {
+-	"flag"
+ 	"io"
+ 	"io/ioutil"
+ 	"log"
+@@ -74,22 +73,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -34,25 +37,22 @@ index a1b97fa..53492bf 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Start(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, maxPeers int) {
-+	// Workaround for missing session configurability via SOCKS username/password.
-+	// (As it actually should be per Pluggable Transports spec v1.)
-+	if maxPeers < DefaultSnowflakeCapacity {
-+		maxPeers = DefaultSnowflakeCapacity
++func Start(iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++	if *max < DefaultSnowflakeCapacity {
++		*max = DefaultSnowflakeCapacity
 +	}
-+
-+	iceServersCommas := flag.String("ice", ice, "comma-separated list of ICE servers")
-+	brokerURL := flag.String("url", url, "URL of signaling broker")
-+	frontDomain := flag.String("front", front, "front domain")
-+	logFilename := flag.String("log", logFile, "name of log file")
-+	logToStateDir = flag.Bool("log-to-state-dir", *logToStateDir, "resolve the log file relative to tor's pt state dir")
-+	keepLocalAddresses = flag.Bool("keep-local-addresses", *keepLocalAddresses, "keep local LAN address ICE candidates")
-+	unsafeLogging = flag.Bool("unsafe-logging", *unsafeLogging, "prevent logs from being scrubbed")
-+	max := flag.Int("max", maxPeers,"capacity for number of multiplexed WebRTC peers")
  
  	// Deprecated
- 	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
-@@ -164,7 +170,7 @@ func main() {
+-	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
+-	oldKeepLocalAddresses := flag.Bool("keepLocalAddresses", false, "use -keep-local-addresses instead")
+-
+-	flag.Parse()
++	oldLogToStateDir := logToStateDir
++	oldKeepLocalAddresses := keepLocalAddresses
+ 
+ 	log.SetFlags(log.LstdFlags | log.LUTC)
+ 
+@@ -164,7 +156,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
