@@ -61,3 +61,68 @@ index a1b97fa..6583361 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
+diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
+index e2fb82e..f3232b8 100644
+--- a/proxy/proxy-go_test.go
++++ b/proxy/proxy-go_test.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+diff --git a/proxy/snowflake.go b/proxy/snowflake.go
+index 276ebed..e91b550 100644
+--- a/proxy/snowflake.go
++++ b/proxy/snowflake.go
+@@ -1,10 +1,9 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+ 	"crypto/rand"
+ 	"encoding/base64"
+-	"flag"
+ 	"fmt"
+ 	"io"
+ 	"io/ioutil"
+@@ -465,22 +464,22 @@ func runSession(sid string) {
+ 	}
+ }
+ 
+-func main() {
+-	var capacity uint
+-	var stunURL string
+-	var logFilename string
+-	var rawBrokerURL string
+-	var unsafeLogging bool
+-	var keepLocalAddresses bool
+-
+-	flag.UintVar(&capacity, "capacity", 10, "maximum concurrent clients")
+-	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
+-	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
+-	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
+-	flag.StringVar(&logFilename, "log", "", "log filename")
+-	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
+-	flag.BoolVar(&keepLocalAddresses, "keep-local-addresses", false, "keep local LAN address ICE candidates")
+-	flag.Parse()
++func Start(capacity uint, rawBrokerURL, relayURL, stunURL, logFilename string, unsafeLogging, keepLocalAddresses bool) {
++	if capacity < 1 {
++		capacity = 10
++	}
++
++	if rawBrokerURL == "" {
++		rawBrokerURL = defaultBrokerURL
++	}
++
++	if relayURL == "" {
++		relayURL = defaultRelayURL
++	}
++
++	if stunURL == "" {
++		stunURL = defaultSTUNURL
++	}
+ 
+ 	var logOutput io.Writer = os.Stderr
+ 	log.SetFlags(log.LstdFlags | log.LUTC)
