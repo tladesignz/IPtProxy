@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..c39a82e 100644
+index a1b97fa..19d00aa 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -30,17 +30,47 @@ index a1b97fa..c39a82e 100644
  	"github.com/pion/webrtc/v2"
  )
  
-@@ -26,6 +24,9 @@ const (
+@@ -26,8 +24,11 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
-+var sigChan = make(chan os.Signal, 1)
-+
++var listeners = make([]net.Listener, 0)
++var shutdown = make(chan struct{})
 +
  // Accept local SOCKS connections and pass them to the handler.
- func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
+-func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
++func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}) {
  	defer ln.Close()
-@@ -74,22 +75,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
+ 	for {
+ 		conn, err := ln.AcceptSocks()
+@@ -48,11 +49,23 @@ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
+ 				return
+ 			}
+ 
+-			err = sf.Handler(conn, tongue)
+-			if err != nil {
+-				log.Printf("handler error: %s", err)
++			handler := make(chan struct{})
++			go func() {
++				err = sf.Handler(conn, tongue)
++				if err != nil {
++					log.Printf("handler error: %s", err)
++				}
++				close(handler)
+ 				return
++
++			}()
++			select {
++			case <-shutdown:
++				log.Println("Received shutdown signal")
++			case <-handler:
++				log.Println("Handler ended")
+ 			}
++			return
+ 		}()
+ 	}
+ }
+@@ -74,22 +87,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -70,7 +100,7 @@ index a1b97fa..c39a82e 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -98,7 +92,7 @@ func main() {
+@@ -98,7 +104,7 @@ func main() {
  	// buffer is full.
  	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
@@ -79,7 +109,7 @@ index a1b97fa..c39a82e 100644
  	if *logFilename != "" {
  		if *logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
-@@ -113,13 +107,13 @@ func main() {
+@@ -113,13 +119,13 @@ func main() {
  			log.Fatal(err)
  		}
  		defer logFile.Close()
@@ -96,7 +126,13 @@ index a1b97fa..c39a82e 100644
  	}
  
  	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -164,7 +158,7 @@ func main() {
+@@ -159,18 +165,18 @@ func main() {
+ 		pt.ProxyError("proxy is not supported")
+ 		os.Exit(1)
+ 	}
+-	listeners := make([]net.Listener, 0)
++
+ 	for _, methodName := range ptInfo.MethodNames {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -105,26 +141,32 @@ index a1b97fa..c39a82e 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -179,7 +173,6 @@ func main() {
+ 			}
+ 			log.Printf("Started SOCKS listener at %v.", ln.Addr())
+-			go socksAcceptLoop(ln, dialer)
++			go socksAcceptLoop(ln, dialer, shutdown)
+ 			pt.Cmethod(methodName, ln.Version(), ln.Addr())
+ 			listeners = append(listeners, ln)
+ 		default:
+@@ -193,14 +199,16 @@ func main() {
+ 			sigChan <- syscall.SIGTERM
+ 		}()
  	}
- 	pt.CmethodsDone()
++}
  
--	sigChan := make(chan os.Signal, 1)
- 	signal.Notify(sigChan, syscall.SIGTERM)
+-	// Wait for a signal.
+-	<-sigChan
++func Stop() {
++	log.Println("stopping snowflake")
  
- 	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -204,6 +197,11 @@ func main() {
+ 	// Signal received, shut down.
+ 	for _, ln := range listeners {
+ 		ln.Close()
+ 	}
++	close(shutdown)
  	log.Println("snowflake is done.")
  }
  
-+func Stop() {
-+	log.Printf("synthesizing SIGTERM because of Stop call")
-+	sigChan <- syscall.SIGTERM
-+}
-+
- // loop through all provided STUN servers until we exhaust the list or find
- // one that is compatable with RFC 5780
- func updateNATType(servers []webrtc.ICEServer, broker *sf.BrokerChannel) {
 diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
 index e2fb82e..f3232b8 100644
 --- a/proxy/proxy-go_test.go
