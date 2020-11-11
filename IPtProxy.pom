@@ -4,6 +4,6 @@
   <modelVersion>0.1</modelVersion>
   <groupId>info.guardianproject.pluggabletransports</groupId>
   <artifactId>IPtProxy</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <packaging>aar</packaging>
 </project>
