@@ -1,7 +1,6 @@
 package IPtProxy
 
 import (
-	"fmt"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
 	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
@@ -97,8 +96,6 @@ func StopObfs4Proxy() {
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
-	_, _ = fmt.Fprint(os.Stdout, "Try to start snowflake.", snowflakeRunning)
-
 	if snowflakeRunning {
 		return
 	}
@@ -113,8 +110,6 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 // Stop the Snowflake client.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflake() {
-	_, _ = fmt.Fprint(os.Stdout, "Try to stop snowflake.", snowflakeRunning)
-
 	if !snowflakeRunning {
 		return
 	}

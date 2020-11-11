@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..19d00aa 100644
+index a1b97fa..28e16ff 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -22,15 +22,7 @@ index a1b97fa..19d00aa 100644
  	"io"
  	"io/ioutil"
  	"log"
-@@ -18,7 +17,6 @@ import (
- 	pt "git.torproject.org/pluggable-transports/goptlib.git"
- 	sf "git.torproject.org/pluggable-transports/snowflake.git/client/lib"
- 	"git.torproject.org/pluggable-transports/snowflake.git/common/nat"
--	"git.torproject.org/pluggable-transports/snowflake.git/common/safelog"
- 	"github.com/pion/webrtc/v2"
- )
- 
-@@ -26,8 +24,11 @@ const (
+@@ -26,8 +25,11 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
@@ -43,7 +35,7 @@ index a1b97fa..19d00aa 100644
  	defer ln.Close()
  	for {
  		conn, err := ln.AcceptSocks()
-@@ -48,11 +49,23 @@ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
+@@ -48,11 +50,23 @@ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
  				return
  			}
  
@@ -70,7 +62,7 @@ index a1b97fa..19d00aa 100644
  		}()
  	}
  }
-@@ -74,22 +87,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -74,22 +88,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -100,33 +92,16 @@ index a1b97fa..19d00aa 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -98,7 +104,7 @@ func main() {
- 	// buffer is full.
- 	// https://bugs.torproject.org/26360
- 	// https://bugs.torproject.org/25600#comment:14
--	var logOutput = ioutil.Discard
-+	//var logOutput = ioutil.Discard
- 	if *logFilename != "" {
- 		if *logToStateDir || *oldLogToStateDir {
- 			stateDir, err := pt.MakeStateDir()
-@@ -113,13 +119,13 @@ func main() {
- 			log.Fatal(err)
- 		}
- 		defer logFile.Close()
--		logOutput = logFile
-+		//logOutput = logFile
+@@ -116,7 +123,7 @@ func main() {
+ 		logOutput = logFile
  	}
  	if *unsafeLogging {
 -		log.SetOutput(logOutput)
 +		//log.SetOutput(logOutput)
  	} else {
  		// We want to send the log output through our scrubber first
--		log.SetOutput(&safelog.LogScrubber{Output: logOutput})
-+		//log.SetOutput(&safelog.LogScrubber{Output: logOutput})
- 	}
- 
- 	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -159,18 +165,18 @@ func main() {
+ 		log.SetOutput(&safelog.LogScrubber{Output: logOutput})
+@@ -159,18 +166,18 @@ func main() {
  		pt.ProxyError("proxy is not supported")
  		os.Exit(1)
  	}
@@ -148,7 +123,7 @@ index a1b97fa..19d00aa 100644
  			pt.Cmethod(methodName, ln.Version(), ln.Addr())
  			listeners = append(listeners, ln)
  		default:
-@@ -193,14 +199,16 @@ func main() {
+@@ -193,14 +200,16 @@ func main() {
  			sigChan <- syscall.SIGTERM
  		}()
  	}
@@ -163,7 +138,7 @@ index a1b97fa..19d00aa 100644
  	for _, ln := range listeners {
  		ln.Close()
  	}
-+	close(shutdown)
++	//close(shutdown)
  	log.Println("snowflake is done.")
  }
  
