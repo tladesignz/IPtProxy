@@ -1,8 +1,8 @@
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index 1dd00b2..576beb9 100644
+index 1dd00b2..c267858 100644
 --- a/obfs4proxy/obfs4proxy.go
 +++ b/obfs4proxy/obfs4proxy.go
-@@ -27,7 +27,7 @@
+@@ -27,10 +27,9 @@
  
  // Go language Tor Pluggable Transport suite.  Works only as a managed
  // client/server.
@@ -10,8 +10,11 @@ index 1dd00b2..576beb9 100644
 +package obfs4proxy
  
  import (
- 	"flag"
-@@ -85,7 +85,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+-	"flag"
+ 	"fmt"
+ 	"io"
+ 	golog "log"
+@@ -85,7 +84,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
@@ -33,32 +36,57 @@ index 1dd00b2..576beb9 100644
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -304,16 +317,20 @@ func getVersion() string {
+@@ -304,22 +316,16 @@ func getVersion() string {
  	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
  }
  
 -func main() {
-+func Start(logLevel string, enableLogging *bool, unsafeLogging *bool) {
++func Start(logLevelStr *string, enableLogging *bool, unsafeLogging *bool) {
  	// Initialize the termination state monitor as soon as possible.
  	termMon = newTermMonitor()
  
-+	if logLevel == "" {
-+		logLevel = "ERROR"
-+	}
-+
- 	// Handle the command line arguments.
+-	// Handle the command line arguments.
 -	_, execName := path.Split(os.Args[0])
-+	execName := "obfs4"
- 	showVer := flag.Bool("version", false, "Print version and exit")
+-	showVer := flag.Bool("version", false, "Print version and exit")
 -	logLevelStr := flag.String("logLevel", "ERROR", "Log level (ERROR/WARN/INFO/DEBUG)")
 -	enableLogging := flag.Bool("enableLogging", false, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
 -	unsafeLogging := flag.Bool("unsafeLogging", false, "Disable the address scrubber")
-+	logLevelStr := flag.String("logLevel", logLevel, "Log level (ERROR/WARN/INFO/DEBUG)")
-+	enableLogging = flag.Bool("enableLogging", *enableLogging, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
-+	unsafeLogging = flag.Bool("unsafeLogging", *unsafeLogging, "Disable the address scrubber")
- 	flag.Parse()
+-	flag.Parse()
+-
+-	if *showVer {
+-		fmt.Printf("%s\n", getVersion())
+-		os.Exit(0)
++	if *logLevelStr == "" {
++		*logLevelStr = "ERROR"
+ 	}
++
++	execName := "obfs4"
++
+ 	if err := log.SetLogLevel(*logLevelStr); err != nil {
+ 		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
+ 	}
+@@ -338,8 +344,7 @@ func main() {
+ 		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
+ 	}
+ 	if err = transports.Init(); err != nil {
+-		log.Errorf("%s - failed to initialize transports: %s", execName, err)
+-		os.Exit(-1)
++		log.Noticef("%s - failed to initialize transports: %s", execName, err)
+ 	}
  
- 	if *showVer {
+ 	log.Noticef("%s - launched", getVersion())
+@@ -379,3 +384,11 @@ func main() {
+ 	}
+ 	termMon.wait(true)
+ }
++
++func Stop() {
++	log.Noticef("obfs4 Stop: synthesizing SIGINT and SIGTERM")
++
++	termMon.sigChan <- syscall.SIGINT
++
++	termMon.sigChan <- syscall.SIGTERM
++}
 diff --git a/obfs4proxy/proxy_http.go b/obfs4proxy/proxy_http.go
 index 1adadf8..7ff608d 100644
 --- a/obfs4proxy/proxy_http.go

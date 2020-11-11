@@ -61,7 +61,19 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) {
 
 	fixEnv()
 
-	go obfs4proxy.Start(logLevel, &enableLogging, &unsafeLogging)
+	go obfs4proxy.Start(&logLevel, &enableLogging, &unsafeLogging)
+}
+
+// Stop the Obfs4Proxy.
+//goland:noinspection GoUnusedExportedFunction
+func StopObfs4Proxy() {
+	if !obfs4ProxyRunning {
+		return
+	}
+
+	go obfs4proxy.Stop()
+
+	obfs4ProxyRunning = false
 }
 
 // Start the Snowflake client.
