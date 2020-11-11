@@ -3,6 +3,7 @@ package IPtProxy
 import (
 	"fmt"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
+	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"github.com/Yawning/obfs4.git/obfs4proxy"
 	"os"
 	"runtime"
@@ -26,8 +27,9 @@ const ScramblesuitSocksPort = 47355
 //goland:noinspection GoUnusedConst
 const SnowflakeSocksPort = 52610
 
-var snowflakeRunning = false
 var obfs4ProxyRunning = false
+var snowflakeRunning = false
+var snowflakeProxyRunning = false
 
 // Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
 var StateLocation string
@@ -108,6 +110,35 @@ func StopSnowflake() {
 	go snowflakeclient.Stop()
 
 	snowflakeRunning = false
+}
+
+// Start the Snowflake proxy.
+//
+// @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
+//
+// @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.bamsoftware.com/, if empty.
+//
+// @param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
+//
+// @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
+//
+// @param logFile Name of log file. OPTIONAL
+//
+// @param keepLocalAddresses Keep local LAN address ICE candidates.
+//
+// @param unsafeLogging Prevent logs from being scrubbed.
+//
+//goland:noinspection GoUnusedExportedFunction
+func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool) {
+	if snowflakeProxyRunning {
+		return
+	}
+
+	snowflakeProxyRunning = true
+
+	fixEnv()
+
+	go snowflakeproxy.Start(uint(capacity), broker, relay, stun, logFile, unsafeLogging, keepLocalAddresses)
 }
 
 // Hack: Set some environment variables that are either

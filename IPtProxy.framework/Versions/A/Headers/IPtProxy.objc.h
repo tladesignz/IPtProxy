@@ -60,6 +60,25 @@ FOUNDATION_EXPORT void IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOO
 FOUNDATION_EXPORT void IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
+ * Start the Snowflake proxy.
+
+@param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
+
+@param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.bamsoftware.com/, if empty.
+
+@param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
+
+@param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
+
+@param logFile Name of log file. OPTIONAL
+
+@param keepLocalAddresses Keep local LAN address ICE candidates.
+
+@param unsafeLogging Prevent logs from being scrubbed.
+ */
+FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging);
+
+/**
  * Stop the Snowflake client.
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);

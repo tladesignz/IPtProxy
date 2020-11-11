@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1a679e..09d34c4 100644
+index a1b97fa..c39a82e 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -38,9 +38,9 @@ index a1a679e..09d34c4 100644
 +
 +
  // Accept local SOCKS connections and pass them to the handler.
- func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}) {
+ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
  	defer ln.Close()
-@@ -86,22 +87,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -74,22 +75,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -70,7 +70,7 @@ index a1a679e..09d34c4 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -110,7 +104,7 @@ func main() {
+@@ -98,7 +92,7 @@ func main() {
  	// buffer is full.
  	// https://bugs.torproject.org/26360
  	// https://bugs.torproject.org/25600#comment:14
@@ -79,7 +79,7 @@ index a1a679e..09d34c4 100644
  	if *logFilename != "" {
  		if *logToStateDir || *oldLogToStateDir {
  			stateDir, err := pt.MakeStateDir()
-@@ -125,13 +119,13 @@ func main() {
+@@ -113,13 +107,13 @@ func main() {
  			log.Fatal(err)
  		}
  		defer logFile.Close()
@@ -96,7 +96,7 @@ index a1a679e..09d34c4 100644
  	}
  
  	log.Println("\n\n\n --- Starting Snowflake Client ---")
-@@ -177,7 +171,7 @@ func main() {
+@@ -164,7 +158,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -105,7 +105,7 @@ index a1a679e..09d34c4 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -192,7 +186,6 @@ func main() {
+@@ -179,7 +173,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -113,7 +113,7 @@ index a1a679e..09d34c4 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -219,6 +212,11 @@ func main() {
+@@ -204,6 +197,11 @@ func main() {
  	log.Println("snowflake is done.")
  }
  
@@ -125,3 +125,68 @@ index a1a679e..09d34c4 100644
  // loop through all provided STUN servers until we exhaust the list or find
  // one that is compatable with RFC 5780
  func updateNATType(servers []webrtc.ICEServer, broker *sf.BrokerChannel) {
+diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
+index e2fb82e..f3232b8 100644
+--- a/proxy/proxy-go_test.go
++++ b/proxy/proxy-go_test.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+diff --git a/proxy/snowflake.go b/proxy/snowflake.go
+index 276ebed..e91b550 100644
+--- a/proxy/snowflake.go
++++ b/proxy/snowflake.go
+@@ -1,10 +1,9 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"bytes"
+ 	"crypto/rand"
+ 	"encoding/base64"
+-	"flag"
+ 	"fmt"
+ 	"io"
+ 	"io/ioutil"
+@@ -465,22 +464,22 @@ func runSession(sid string) {
+ 	}
+ }
+ 
+-func main() {
+-	var capacity uint
+-	var stunURL string
+-	var logFilename string
+-	var rawBrokerURL string
+-	var unsafeLogging bool
+-	var keepLocalAddresses bool
+-
+-	flag.UintVar(&capacity, "capacity", 10, "maximum concurrent clients")
+-	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
+-	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
+-	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
+-	flag.StringVar(&logFilename, "log", "", "log filename")
+-	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
+-	flag.BoolVar(&keepLocalAddresses, "keep-local-addresses", false, "keep local LAN address ICE candidates")
+-	flag.Parse()
++func Start(capacity uint, rawBrokerURL, relayURL, stunURL, logFilename string, unsafeLogging, keepLocalAddresses bool) {
++	if capacity < 1 {
++		capacity = 10
++	}
++
++	if rawBrokerURL == "" {
++		rawBrokerURL = defaultBrokerURL
++	}
++
++	if relayURL == "" {
++		relayURL = defaultRelayURL
++	}
++
++	if stunURL == "" {
++		stunURL = defaultSTUNURL
++	}
+ 
+ 	var logOutput io.Writer = os.Stderr
+ 	log.SetFlags(log.LstdFlags | log.LUTC)
