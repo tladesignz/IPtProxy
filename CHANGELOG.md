@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 0.4.0
+
+- Added `StopObfs4Proxy` function.
+- Updated Snowflake to latest master.
+
 ## 0.3.0
 
 - Added Snowflake Proxy support, so contributors can run proxies on their 

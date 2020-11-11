@@ -78,4 +78,9 @@ FOUNDATION_EXPORT void IPtProxyStartSnowflake(NSString* _Nullable ice, NSString*
  */
 FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging);
 
+/**
+ * Stop the Obfs4Proxy.
+ */
+FOUNDATION_EXPORT void IPtProxyStopObfs4Proxy(void);
+
 #endif
