@@ -16,12 +16,12 @@ if test -e $OUTPUT; then
 fi
 
 # Install dependencies. Go itself is a prerequisite.
-echo "--- Golang 1.15 or up needs to be installed! Try 'brew install go' on MacOS or 'snap install go' on Linux if we fail further down!\n"
-echo "--- Installing gomobile...\n"
+printf '\n--- Golang 1.15 or up needs to be installed! Try "brew install go" on MacOS or "snap install go" on Linux if we fail further down!'
+printf '\n--- Installing gomobile...\n'
 go get -v golang.org/x/mobile/cmd/gomobile
 
 # Fetch submodules obfs4 and snowflake.
-echo "\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n"
+printf '\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n'
 if test -e ".git"; then
     # There's a .git directory - we must be in the development pod.
     git submodule update --init --recursive
@@ -43,12 +43,12 @@ else
 fi
 
 # Apply patches.
-echo "\n\n--- Apply patches to Obfs4proxy and Snowflake...\n"
+printf '\n\n--- Apply patches to Obfs4proxy and Snowflake...\n'
 patch --directory=obfs4 --strip=1 < obfs4.patch
 patch --directory=snowflake --strip=1 < snowflake.patch
 
 # Compile framework.
-echo "\n\n--- Compile $OUTPUT...\n"
+printf '\n\n--- Compile %s...\n' "$OUTPUT"
 export PATH=~/go/bin:$PATH
 cd IPtProxy.go || exit 1
 
@@ -58,4 +58,4 @@ fi
 
 gomobile bind -target=$TARGET -o ../$OUTPUT -v
 
-echo "\n\n--- Done."
+printf '\n\n--- Done.\n\n'
