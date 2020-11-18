@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 0.5.0
+
+- Added `StopSnowflake` function.
+
 ## 0.4.0
 
 - Added `StopObfs4Proxy` function.
