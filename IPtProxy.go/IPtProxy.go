@@ -148,6 +148,18 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 	go snowflakeproxy.Start(uint(capacity), broker, relay, stun, logFile, unsafeLogging, keepLocalAddresses)
 }
 
+// Stop the Snowflake proxy.
+//goland:noinspection GoUnusedExportedFunction
+func StopSnowflakeProxy() {
+	if !snowflakeProxyRunning {
+		return
+	}
+
+	go snowflakeproxy.Stop()
+
+	snowflakeProxyRunning = false
+}
+
 // Hack: Set some environment variables that are either
 // required, or values that we want. have to do this here, since we can only
 // launch this in a thread and the manipulation of environment variables
