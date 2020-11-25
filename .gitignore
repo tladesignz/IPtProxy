@@ -146,7 +146,3 @@ iOSInjectionProject/
 
 # No IntelliJ stuff.
 .idea
-
-# Android build artifacts
-*jar
-*aar
