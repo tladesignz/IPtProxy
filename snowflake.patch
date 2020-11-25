@@ -21,45 +21,6 @@ index e888160..6ac0a51 100644
  	return nil
  }
  
-diff --git a/client/lib/webrtc.go b/client/lib/webrtc.go
-index af5a45a..3a23ffc 100644
---- a/client/lib/webrtc.go
-+++ b/client/lib/webrtc.go
-@@ -112,7 +112,10 @@ func (c *WebRTCPeer) connect(config *webrtc.Configuration, broker *BrokerChannel
- 	if err != nil {
- 		return err
- 	}
--	answer := exchangeSDP(broker, c.pc.LocalDescription())
-+	answer, err := broker.Negotiate(c.pc.LocalDescription())
-+	if err != nil {
-+		return err
-+	}
- 	log.Printf("Received Answer.\n")
- 	err = c.pc.SetRemoteDescription(*answer)
- 	if nil != err {
-@@ -217,22 +220,6 @@ func (c *WebRTCPeer) establishDataChannel() (*webrtc.DataChannel, error) {
- 	}
- }
- 
--// exchangeSDP sends the local SDP offer to the Broker, awaits the SDP answer,
--// and returns the answer.
--func exchangeSDP(broker *BrokerChannel, offer *webrtc.SessionDescription) *webrtc.SessionDescription {
--	// Keep trying the same offer until a valid answer arrives.
--	for {
--		// Send offer to broker (blocks).
--		answer, err := broker.Negotiate(offer)
--		if err == nil {
--			return answer
--		}
--		log.Printf("BrokerChannel Error: %s", err)
--		log.Printf("Failed to retrieve answer. Retrying in %v", ReconnectTimeout)
--		<-time.After(ReconnectTimeout)
--	}
--}
--
- // Close all channels and transports
- func (c *WebRTCPeer) cleanup() {
- 	// Close this side of the SOCKS pipe.
 diff --git a/client/snowflake.go b/client/snowflake.go
 index a1b97fa..42ddcb4 100644
 --- a/client/snowflake.go
