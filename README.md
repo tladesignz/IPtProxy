@@ -82,8 +82,8 @@ If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME`
 environment variables are set:
 
 ```bash
-export ANDROID_HOME=~/Android/Sdk`
-export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION`
+export ANDROID_HOME=~/Android/Sdk
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION
 
 rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 ```
