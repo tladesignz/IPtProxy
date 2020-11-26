@@ -1,14 +1,15 @@
 # IPtProxy
 
-Obfs4proxy and Snowflake Pluggable Transports for iOS (and Android!)
+Obfs4proxy and Snowflake Pluggable Transports for iOS and Android
 
+[![JitPack](https://jitpack.io/v/tladesignz/IPtProxy.svg)](https://jitpack.io/#tladesignz/IPtProxy)
 [![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
-is a little annoying to use on iOS.
-This pod encapsulates all the machinations to make it work and provides an
+is a little annoying to use on iOS and Android.
+This project encapsulates all the machinations to make it work and provides an
 easy to install binary including a wrapper around both.
 
 Problems solved in particular are:
@@ -16,7 +17,7 @@ Problems solved in particular are:
 - One cannot compile `main` packages with `gomobile`. Both PTs are patched
   to avoid this.
 - Both PTs are gathered under one roof here, since you cannot have two
-  `gomobile` frameworks in your iOS code, since there are some common Go
+  `gomobile` frameworks as dependencies, since there are some common Go
   runtime functions exported, which will create a name clash.
 - Environment variable changes during runtime will not be recognized by
   `goptlib` when done from within Swift/Objective-C. Therefore, sensible
@@ -24,47 +25,78 @@ Problems solved in particular are:
 - The ports where the PTs will listen on are hardcoded, since communicating
   the used ports back to the app would be quite some work (e.g. trying to
   read it from STDOUT) for very little benefit.
-- Snowflake and Obfs4proxy are patched to accept configuration parameters directly.
+- Snowflake and Obfs4proxy are patched to accept all configuration parameters 
+  directly.
 
-Both PTs are contained at their latest `master` commit, as per 2020-10-23.
+Both PTs are contained at their latest `master` commit, as per 2020-11-26.
 
-
-## Requirements
-
-This repository contains a precompiled iOS version of IPtProxy.
-If you want to compile it yourself, you'll need Go 1.15 as a prerequisite.
-
-You will also need Xcode installed when compiling for iOS and an Android NDK
-when compiling for Android.
-
-## Installation (iOS)
+## iOS Installation
 
 IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+it, simply add the following line to your `Podfile`:
 
 ```ruby
 pod 'IPtProxy', '~> 0.5'
 ```
 
-## Installation (Android)
+## Android Installation
 
-If it's not already, add `$GOPATH/bin` to `$PATH`. The default location for `$GOPATH` is `$HOME/go` 
+IPtProxy is available through [JitPack](https://jitpack.io). To install
+it, simply add the following line to your `build.gradle` file:
+
+```groovy
+implementation 'com.github.tladesignz:IPtProxy:0.5.0'
+```
+
+## Build
+
+### Requirements
+
+This repository contains a precompiled iOS and Android version of IPtProxy.
+If you want to compile it yourself, you'll need Go 1.15 as a prerequisite.
+
+You will also need Xcode installed when compiling for iOS and an Android NDK
+when compiling for Android.
+
+If it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
+for `$GOPATH` is `$HOME/go` 
 
 ```bash
 export PATH=$HOME/go/bin/:$PATH` 
 ```
 
-Then, if they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` environment variables are set:
+### iOS
+
+Make sure Xcode and Xcode's command line tools are installed. Then run
+
+```bash
+rm -rf IPtProxy.framework && ./build.sh
+```
+
+This will create an `IPtProxy.framework`, which you can directly drop in your app,
+if you don't want to rely on CocoaPods.
+
+### Android
+
+If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` 
+environment variables are set:
+
 ```bash
 export ANDROID_HOME=~/Android/Sdk`
-export ANDROID_NDK_HOME=~/Android/Sdk/ndk/NDK_VERSION`
+export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION`
+
+rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 ```
-Then use `build.sh android` to compile an AAR for Android. You can directly drop that
-in your app.
 
-## Author
+This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
+if you don't want to rely on JitPack.
 
-Benjamin Erhart, berhart@netzarchitekten.com
+## Authors
+
+- Benjamin Erhart, berhart@netzarchitekten.com
+- Nathan Freitas
+- bitmold
+
 for the Guardian Project https://guardianproject.info
 
 ## License
