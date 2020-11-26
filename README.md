@@ -48,6 +48,17 @@ it, simply add the following line to your `build.gradle` file:
 implementation 'com.github.tladesignz:IPtProxy:0.5.0'
 ```
 
+And this to your root `build.gradle` at the end of repositories:
+
+```groovy
+allprojects {
+	repositories {
+		...
+		maven { url 'https://jitpack.io' }
+	}
+}
+```
+
 ## Build
 
 ### Requirements
