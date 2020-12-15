@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 0.5.1
+
+- Base on latest Snowflake master which contains a lot of patches we previously
+  had to provide ourselves.
+
 ## 0.5.0
 
 - Added `StopSnowflake` function.
