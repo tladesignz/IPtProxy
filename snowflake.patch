@@ -8,21 +8,8 @@ index 84e9cc1..52a4cfe 100644
  
  import (
  	"testing"
-diff --git a/client/lib/snowflake.go b/client/lib/snowflake.go
-index e888160..6ac0a51 100644
---- a/client/lib/snowflake.go
-+++ b/client/lib/snowflake.go
-@@ -174,6 +174,8 @@ func Handler(socks net.Conn, tongue Tongue) error {
- 	log.Printf("---- Handler: closed stream %v ---", stream.ID())
- 	snowflakes.End()
- 	log.Printf("---- Handler: end collecting snowflakes ---")
-+	// The session gets broken somehow. Remove it here, so we get a fresh one on restart.
-+	sessionManager.sess = nil
- 	return nil
- }
- 
 diff --git a/client/snowflake.go b/client/snowflake.go
-index a1b97fa..42ddcb4 100644
+index 55addc1..c71ab81 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -35,46 +22,16 @@ index a1b97fa..42ddcb4 100644
  	"io"
  	"io/ioutil"
  	"log"
-@@ -26,8 +25,10 @@ const (
+@@ -27,6 +26,8 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
 +var sigChan = make(chan os.Signal, 1)
 +
  // Accept local SOCKS connections and pass them to the handler.
--func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
-+func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}) {
+ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}, wg sync.WaitGroup) {
  	defer ln.Close()
- 	for {
- 		conn, err := ln.AcceptSocks()
-@@ -48,11 +49,23 @@ func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue) {
- 				return
- 			}
- 
--			err = sf.Handler(conn, tongue)
--			if err != nil {
--				log.Printf("handler error: %s", err)
-+			handler := make(chan struct{})
-+			go func() {
-+				err = sf.Handler(conn, tongue)
-+				if err != nil {
-+					log.Printf("handler error: %s", err)
-+				}
-+				close(handler)
- 				return
-+
-+			}()
-+			select {
-+			case <-shutdown:
-+				log.Println("Received shutdown signal")
-+			case <-handler:
-+				log.Println("Handler ended")
- 			}
-+			return
- 		}()
- 	}
- }
-@@ -74,22 +87,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -89,22 +90,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -104,12 +61,7 @@ index a1b97fa..42ddcb4 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -160,17 +166,18 @@ func main() {
- 		os.Exit(1)
- 	}
- 	listeners := make([]net.Listener, 0)
-+	shutdown := make(chan struct{})
- 	for _, methodName := range ptInfo.MethodNames {
+@@ -181,7 +175,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -118,14 +70,7 @@ index a1b97fa..42ddcb4 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
- 			}
- 			log.Printf("Started SOCKS listener at %v.", ln.Addr())
--			go socksAcceptLoop(ln, dialer)
-+			go socksAcceptLoop(ln, dialer, shutdown)
- 			pt.Cmethod(methodName, ln.Version(), ln.Addr())
- 			listeners = append(listeners, ln)
- 		default:
-@@ -179,7 +186,6 @@ func main() {
+@@ -196,7 +190,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -133,17 +78,7 @@ index a1b97fa..42ddcb4 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -196,14 +202,21 @@ func main() {
- 
- 	// Wait for a signal.
- 	<-sigChan
-+	log.Println("stopping snowflake")
- 
- 	// Signal received, shut down.
- 	for _, ln := range listeners {
- 		ln.Close()
- 	}
-+	close(shutdown)
+@@ -224,6 +217,11 @@ func main() {
  	log.Println("snowflake is done.")
  }
  
