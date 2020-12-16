@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 0.5.2
+- Updated Obfs4proxy to fix broken meek_lite due to Microsoft Azure certificate
+  changes. NOTE: If you still experience HPKP issues, you can use 
+  "disableHPKP=true" in the meek_lite configuration.
+
 ## 0.5.1
 
 - Base on latest Snowflake master which contains a lot of patches we previously
