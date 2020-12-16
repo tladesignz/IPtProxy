@@ -45,7 +45,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:0.5.1'
+implementation 'com.github.tladesignz:IPtProxy:0.5.2'
 ```
 
 And this to your root `build.gradle` at the end of repositories:
