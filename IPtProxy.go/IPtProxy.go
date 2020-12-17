@@ -3,7 +3,7 @@ package IPtProxy
 import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
 	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
-	"github.com/Yawning/obfs4.git/obfs4proxy"
+	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"os"
 	"runtime"
 )
