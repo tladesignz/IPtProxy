@@ -153,7 +153,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 // launch this in a thread and the manipulation of environment variables
 // from within an iOS app won't end up in goptlib properly.
 //
-// Note: This might be called multiple times when using different fuctions here,
+// Note: This might be called multiple times when using different functions here,
 // but that doesn't necessarily mean, that the values set are independent each
 // time this is called. It's still the ENVIRONMENT, we're changing here, so there might
 // be race conditions.
