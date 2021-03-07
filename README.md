@@ -28,7 +28,7 @@ Problems solved in particular are:
 - Snowflake and Obfs4proxy are patched to accept all configuration parameters 
   directly.
 
-Both PTs are contained at their latest `master` commit, as per 2020-11-26.
+Both PTs are contained at their latest `master` commit, as per 2021-03-07.
 
 ## iOS Installation
 

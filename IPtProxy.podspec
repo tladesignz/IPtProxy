@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
 
   s.description      = <<-DESC
     Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
-    is a little annoying to use on iOS.
-    This pod encapsulates all the machinations to make it work and provides an
+    is a little annoying to use on iOS and Android.
+    This project encapsulates all the machinations to make it work and provides an
     easy to install binary including a wrapper around both.
 
     Problems solved in particular are:
@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
     - One cannot compile `main` packages with `gomobile`. Both PTs are patched
       to avoid this.
     - Both PTs are gathered under one roof here, since you cannot have two
-      `gomobile` frameworks in your iOS code, since there are some common Go
+      `gomobile` frameworks as dependencies, since there are some common Go
       runtime functions exported, which will create a name clash.
     - Environment variable changes during runtime will not be recognized by
       `goptlib` when done from within Swift/Objective-C. Therefore, sensible
@@ -30,11 +30,10 @@ Pod::Spec.new do |s|
     - The ports where the PTs will listen on are hardcoded, since communicating
       the used ports back to the app would be quite some work (e.g. trying to
       read it from STDOUT) for very little benefit.
-    - Snowflake currently can only be configured via command line, not via the
-      PT spec's method of using SOCKS username and password arguments.
-      Therefore Snowflake is patched to accept arguments via its `Main` method.
+    - Snowflake and Obfs4proxy are patched to accept all configuration parameters
+      directly.
 
-    Both PTs are contained at their latest `master` commit, as per 2020-09-10.
+    Both PTs are contained at their latest `master` commit, as per 2021-03-07.
                        DESC
 
   s.homepage         = 'https://github.com/tladesignz/IPtProxy'
