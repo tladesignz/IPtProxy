@@ -1,7 +1,9 @@
 # IPtProxy Changelog
 
-## 
+## 0.6.0
 - Updated Obfs4proxy to latest master. Fixes support for unsafe logging.
+- Added `StopSnowflakeProxy` from feature branch.
+- Updated Snowflake to latest master. Fixes multiple minor issues.
 
 ## 0.5.2
 - Updated Obfs4proxy to fix broken meek_lite due to Microsoft Azure certificate
