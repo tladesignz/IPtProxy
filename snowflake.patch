@@ -101,7 +101,7 @@ index e2fb82e..f3232b8 100644
  import (
  	"bytes"
 diff --git a/proxy/snowflake.go b/proxy/snowflake.go
-index f0fa2c0..5e073f8 100644
+index f0fa2c0..1a6ab0c 100644
 --- a/proxy/snowflake.go
 +++ b/proxy/snowflake.go
 @@ -1,10 +1,9 @@
@@ -116,7 +116,20 @@ index f0fa2c0..5e073f8 100644
  	"fmt"
  	"io"
  	"io/ioutil"
-@@ -507,22 +506,22 @@ func runSession(sid string) {
+@@ -172,6 +171,12 @@ func getToken() {
+ }
+ 
+ func retToken() {
++	defer func() {
++		if r := recover(); r != nil {
++			// Recover if tokens got closed. That's ok, we're just getting stopped.
++		}
++	}()
++
+ 	tokens <- true
+ }
+ 
+@@ -507,22 +512,22 @@ func runSession(sid string) {
  	}
  }
  
@@ -155,3 +168,22 @@ index f0fa2c0..5e073f8 100644
  
  	var logOutput io.Writer = os.Stderr
  	log.SetFlags(log.LstdFlags | log.LUTC)
+@@ -577,13 +582,16 @@ func main() {
+ 	checkNATType(config, defaultProbeURL)
+ 	log.Printf("NAT type: %s", currentNATType)
+ 
+-	for {
+-		getToken()
++	for range tokens {
+ 		sessionID := genSessionID()
+ 		runSession(sessionID)
+ 	}
+ }
+ 
++func Stop() {
++	close(tokens)
++}
++
+ func checkNATType(config webrtc.Configuration, probeURL string) {
+ 
+ 	var err error
