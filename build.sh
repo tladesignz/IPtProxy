@@ -34,7 +34,7 @@ else
     # No .git directory - That's a normal install.
     git clone https://github.com/Yawning/obfs4.git
     cd obfs4 || exit 1
-    git checkout --force --quiet 40245c4a
+    git checkout --force --quiet f638c33f
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1

@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 
+- Updated Obfs4proxy to latest master. Fixes support for unsafe logging.
+
 ## 0.5.2
 - Updated Obfs4proxy to fix broken meek_lite due to Microsoft Azure certificate
   changes. NOTE: If you still experience HPKP issues, you can use 
