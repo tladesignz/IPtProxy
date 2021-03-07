@@ -187,3 +187,13 @@ index 86ae0b2..894d035 100644
  func checkNATType(config webrtc.Configuration, probeURL string) {
  
  	var err error
+diff --git a/proxy/util.go b/proxy/util.go
+index d737056..d63d5d0 100644
+--- a/proxy/util.go
++++ b/proxy/util.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"fmt"
