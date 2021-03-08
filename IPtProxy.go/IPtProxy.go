@@ -4,27 +4,60 @@ import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
 	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
 	"gitlab.com/yawning/obfs4.git/obfs4proxy"
+	"net"
 	"os"
 	"runtime"
+	"strconv"
+	"time"
 )
 
-//goland:noinspection GoUnusedConst
-const MeekSocksPort = 47352
+var meekPort = 47000
 
-//goland:noinspection GoUnusedConst
-const Obfs2SocksPort = 47353
+// Port where Obfs4proxy will provide its Meek service.
+// Only use this after calling StartObfs4Proxy! It might have changed after that!
+func MeekPort() int {
+	return meekPort
+}
 
-//goland:noinspection GoUnusedConst
-const Obfs3SocksPort = 47354
+var obfs2Port = 47100
 
-//goland:noinspection GoUnusedConst
-const Obfs4SocksPort = 47351
+// Port where Obfs4proxy will provide its Obfs2 service.
+// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+func Obfs2Port() int {
+	return obfs2Port
+}
 
-//goland:noinspection GoUnusedConst
-const ScramblesuitSocksPort = 47355
+var obfs3Port = 47200
 
-//goland:noinspection GoUnusedConst
-const SnowflakeSocksPort = 52610
+// Port where Obfs4proxy will provide its Obfs3 service.
+// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+func Obfs3Port() int {
+	return obfs3Port
+}
+
+var obfs4Port = 47300
+
+// Port where Obfs4proxy will provide its Obfs4 service.
+// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+func Obfs4Port() int {
+	return obfs4Port
+}
+
+var scramblesuitPort = 47400
+
+// Port where Obfs4proxy will provide its Scramblesuit service.
+// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+func ScramblesuitPort() int {
+	return scramblesuitPort
+}
+
+var snowflakePort = 52000
+
+// Port where Snowflike will provide its service.
+// Only use this property after calling StartSnowflake! It might have changed after that!
+func SnowflakePort() int {
+	return snowflakePort
+}
 
 var obfs4ProxyRunning = false
 var snowflakeRunning = false
@@ -45,23 +78,52 @@ func init() {
 
 // Start the Obfs4Proxy.
 //
+// This will test, if the default ports are available. If not, it will increment them until there is.
+// Only use the port properties after calling this, they might have been changed!
+//
 // @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 //
 // @param enableLogging Log to TOR_PT_STATE_LOCATION/obfs4proxy.log.
 //
 // @param unsafeLogging Disable the address scrubber.
 //
+// @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
+//	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
+//
+//
 //goland:noinspection GoUnusedExportedFunction
-func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) {
+func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	if obfs4ProxyRunning {
-		return
+		return obfs4Port
 	}
 
 	obfs4ProxyRunning = true
 
+	for !isAvailable(meekPort) {
+		meekPort++
+	}
+
+	for !isAvailable(obfs2Port) {
+		obfs2Port++
+	}
+
+	for !isAvailable(obfs3Port) {
+		obfs3Port++
+	}
+
+	for !isAvailable(obfs4Port) {
+		obfs4Port++
+	}
+
+	for !isAvailable(scramblesuitPort) {
+		scramblesuitPort++
+	}
+
 	fixEnv()
 
-	go obfs4proxy.Start(&logLevel, &enableLogging, &unsafeLogging)
+	go obfs4proxy.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &logLevel, &enableLogging, &unsafeLogging)
+
+	return obfs4Port
 }
 
 // Stop the Obfs4Proxy.
@@ -94,17 +156,25 @@ func StopObfs4Proxy() {
 //
 // @param maxPeers Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
 //
+// @return Port number where Snowflake will listen on, if no error happens during start up.
+//
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) {
+func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
 	if snowflakeRunning {
-		return
+		return snowflakePort
 	}
 
 	snowflakeRunning = true
 
+	for !isAvailable(snowflakePort) {
+		snowflakePort++
+	}
+
 	fixEnv()
 
-	go snowflakeclient.Start(&ice, &url, &front, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
+	go snowflakeclient.Start(&snowflakePort, &ice, &url, &front, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
+
+	return snowflakePort
 }
 
 // Stop the Snowflake client.
@@ -174,4 +244,18 @@ func fixEnv() {
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
 
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
+}
+
+func isAvailable(port int) bool {
+	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
+
+	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
+
+	if err != nil {
+		return false
+	}
+
+	err = conn.Close()
+
+	return true
 }

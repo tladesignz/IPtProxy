@@ -9,7 +9,7 @@ index 84e9cc1..52a4cfe 100644
  import (
  	"testing"
 diff --git a/client/snowflake.go b/client/snowflake.go
-index d79de97..2c1a057 100644
+index d79de97..3021e61 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -22,7 +22,15 @@ index d79de97..2c1a057 100644
  	"io"
  	"io/ioutil"
  	"log"
-@@ -27,6 +26,8 @@ const (
+@@ -11,6 +10,7 @@ import (
+ 	"os"
+ 	"os/signal"
+ 	"path/filepath"
++	"strconv"
+ 	"strings"
+ 	"sync"
+ 	"syscall"
+@@ -27,6 +27,8 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
@@ -31,7 +39,7 @@ index d79de97..2c1a057 100644
  // Accept local SOCKS connections and pass them to the handler.
  func socksAcceptLoop(ln *pt.SocksListener, tongue sf.Tongue, shutdown chan struct{}, wg *sync.WaitGroup) {
  	defer ln.Close()
-@@ -89,22 +90,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
+@@ -89,22 +91,15 @@ func parseIceServers(s string) []webrtc.ICEServer {
  	return servers
  }
  
@@ -46,7 +54,7 @@ index d79de97..2c1a057 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Start(iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++func Start(port *int, iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
 +	if *max < DefaultSnowflakeCapacity {
 +		*max = DefaultSnowflakeCapacity
 +	}
@@ -61,16 +69,16 @@ index d79de97..2c1a057 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -181,7 +175,7 @@ func main() {
+@@ -181,7 +176,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
 -			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
-+			ln, err := pt.ListenSocks("tcp", "127.0.0.1:52610")
++			ln, err := pt.ListenSocks("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(*port)))
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -196,7 +190,6 @@ func main() {
+@@ -196,7 +191,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -78,7 +86,7 @@ index d79de97..2c1a057 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -224,6 +217,11 @@ func main() {
+@@ -224,6 +218,11 @@ func main() {
  	log.Println("snowflake is done.")
  }
  
