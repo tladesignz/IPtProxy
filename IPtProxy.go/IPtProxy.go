@@ -103,16 +103,32 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 		meekPort++
 	}
 
+	if meekPort >= obfs2Port {
+		obfs2Port++
+	}
+
 	for !isAvailable(obfs2Port) {
 		obfs2Port++
+	}
+
+	if obfs2Port >= obfs3Port {
+		obfs3Port++
 	}
 
 	for !isAvailable(obfs3Port) {
 		obfs3Port++
 	}
 
+	if obfs3Port >= obfs4Port {
+		obfs4Port++
+	}
+
 	for !isAvailable(obfs4Port) {
 		obfs4Port++
+	}
+
+	if obfs4Port >= scramblesuitPort {
+		scramblesuitPort++
 	}
 
 	for !isAvailable(scramblesuitPort) {
@@ -252,10 +268,10 @@ func isAvailable(port int) bool {
 	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
 
 	if err != nil {
-		return false
+		return true
 	}
 
 	err = conn.Close()
 
-	return true
+	return false
 }
