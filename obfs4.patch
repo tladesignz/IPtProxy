@@ -1,5 +1,5 @@
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index 1dd00b2..c267858 100644
+index 1dd00b2..ce89df2 100644
 --- a/obfs4proxy/obfs4proxy.go
 +++ b/obfs4proxy/obfs4proxy.go
 @@ -27,10 +27,9 @@
@@ -14,34 +14,51 @@ index 1dd00b2..c267858 100644
  	"fmt"
  	"io"
  	golog "log"
-@@ -85,7 +84,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+@@ -38,6 +37,7 @@ import (
+ 	"net/url"
+ 	"os"
+ 	"path"
++	"strconv"
+ 	"sync"
+ 	"syscall"
+ 
+@@ -58,7 +58,7 @@ const (
+ var stateDir string
+ var termMon *termMonitor
+ 
+-func clientSetup() (launched bool, listeners []net.Listener) {
++func clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort *int) (launched bool, listeners []net.Listener) {
+ 	ptClientInfo, err := pt.ClientSetup(transports.Transports())
+ 	if err != nil {
+ 		golog.Fatal(err)
+@@ -85,7 +85,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
 -		ln, err := net.Listen("tcp", socksAddr)
 +		realSocksAddr := socksAddr
 +		if name == "obfs4" {
-+			realSocksAddr = "127.0.0.1:47351"
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*obfs4Port))
 +		} else if name == "meek_lite" {
-+			realSocksAddr = "127.0.0.1:47352"
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*meekPort))
 +		} else if name == "obfs2" {
-+			realSocksAddr = "127.0.0.1:47353"
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*obfs2Port))
 +		} else if name == "obfs3" {
-+			realSocksAddr = "127.0.0.1:47354"
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*obfs3Port))
 +		} else if name == "scramblesuit" {
-+			realSocksAddr = "127.0.0.1:47355"
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*scramblesuitPort))
 +		}
 +
 +		ln, err := net.Listen("tcp", realSocksAddr)
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -304,22 +316,16 @@ func getVersion() string {
+@@ -304,22 +317,16 @@ func getVersion() string {
  	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
  }
  
 -func main() {
-+func Start(logLevelStr *string, enableLogging *bool, unsafeLogging *bool) {
++func Start(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort *int, logLevelStr *string, enableLogging *bool, unsafeLogging *bool) {
  	// Initialize the termination state monitor as soon as possible.
  	termMon = newTermMonitor()
  
@@ -65,7 +82,7 @@ index 1dd00b2..c267858 100644
  	if err := log.SetLogLevel(*logLevelStr); err != nil {
  		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
  	}
-@@ -338,8 +344,7 @@ func main() {
+@@ -338,8 +345,7 @@ func main() {
  		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
  	}
  	if err = transports.Init(); err != nil {
@@ -75,7 +92,16 @@ index 1dd00b2..c267858 100644
  	}
  
  	log.Noticef("%s - launched", getVersion())
-@@ -379,3 +384,11 @@ func main() {
+@@ -347,7 +353,7 @@ func main() {
+ 	// Do the managed pluggable transport protocol configuration.
+ 	if isClient {
+ 		log.Infof("%s - initializing client transport listeners", execName)
+-		launched, ptListeners = clientSetup()
++		launched, ptListeners = clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort)
+ 	} else {
+ 		log.Infof("%s - initializing server transport listeners", execName)
+ 		launched, ptListeners = serverSetup()
+@@ -379,3 +385,11 @@ func main() {
  	}
  	termMon.wait(true)
  }
