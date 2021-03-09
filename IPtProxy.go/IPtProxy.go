@@ -104,7 +104,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	}
 
 	if meekPort >= obfs2Port {
-		obfs2Port++
+		obfs2Port = meekPort + 1
 	}
 
 	for !isAvailable(obfs2Port) {
@@ -112,7 +112,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	}
 
 	if obfs2Port >= obfs3Port {
-		obfs3Port++
+		obfs3Port = obfs2Port + 1
 	}
 
 	for !isAvailable(obfs3Port) {
@@ -120,7 +120,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	}
 
 	if obfs3Port >= obfs4Port {
-		obfs4Port++
+		obfs4Port = obfs3Port + 1
 	}
 
 	for !isAvailable(obfs4Port) {
@@ -128,7 +128,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	}
 
 	if obfs4Port >= scramblesuitPort {
-		scramblesuitPort++
+		scramblesuitPort = obfs4Port + 1
 	}
 
 	for !isAvailable(scramblesuitPort) {
