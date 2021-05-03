@@ -88,4 +88,9 @@ FOUNDATION_EXPORT void IPtProxyStopObfs4Proxy(void);
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);
 
+/**
+ * Stop the Snowflake proxy.
+ */
+FOUNDATION_EXPORT void IPtProxyStopSnowflakeProxy(void);
+
 #endif
