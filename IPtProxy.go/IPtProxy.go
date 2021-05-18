@@ -30,7 +30,7 @@ var obfs4ProxyRunning = false
 var snowflakeRunning = false
 var snowflakeProxyRunning = false
 
-// Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
+// StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
 var StateLocation string
 
 func init() {
@@ -43,7 +43,7 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
-// Start the Obfs4Proxy.
+// StartObfs4Proxy - Start the Obfs4Proxy.
 //
 // @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 //
@@ -64,7 +64,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) {
 	go obfs4proxy.Start(&logLevel, &enableLogging, &unsafeLogging)
 }
 
-// Stop the Obfs4Proxy.
+// StopObfs4Proxy - Stop the Obfs4Proxy.
 //goland:noinspection GoUnusedExportedFunction
 func StopObfs4Proxy() {
 	if !obfs4ProxyRunning {
@@ -76,7 +76,7 @@ func StopObfs4Proxy() {
 	obfs4ProxyRunning = false
 }
 
-// Start the Snowflake client.
+// StartSnowflake - Start the Snowflake client.
 //
 // @param ice Comma-separated list of ICE servers.
 //
@@ -107,7 +107,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 	go snowflakeclient.Start(&ice, &url, &front, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 }
 
-// Stop the Snowflake client.
+// StopSnowflake - Stop the Snowflake client.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflake() {
 	if !snowflakeRunning {
@@ -119,7 +119,7 @@ func StopSnowflake() {
 	snowflakeRunning = false
 }
 
-// Start the Snowflake proxy.
+// StartSnowflakeProxy - Start the Snowflake proxy.
 //
 // @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
 //
@@ -148,7 +148,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 	go snowflakeproxy.Start(uint(capacity), broker, relay, stun, logFile, unsafeLogging, keepLocalAddresses)
 }
 
-// Stop the Snowflake proxy.
+// StopSnowflakeProxy - Stop the Snowflake proxy.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflakeProxy() {
 	if !snowflakeProxyRunning {
