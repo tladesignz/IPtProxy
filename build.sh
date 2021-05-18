@@ -16,7 +16,7 @@ if test -e $OUTPUT; then
 fi
 
 # Install dependencies. Go itself is a prerequisite.
-printf '\n--- Golang 1.15 or up needs to be installed! Try "brew install go" on MacOS or "snap install go" on Linux if we fail further down!'
+printf '\n--- Golang 1.16 or up needs to be installed! Try "brew install go" on MacOS or "snap install go" on Linux if we fail further down!'
 printf '\n--- Installing gomobile...\n'
 go get -v golang.org/x/mobile/cmd/gomobile
 
@@ -38,7 +38,7 @@ else
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1
-    git checkout --force --quiet 7187f10
+    git checkout --force --quiet af6e2c30
     cd ..
 fi
 
