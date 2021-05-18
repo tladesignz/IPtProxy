@@ -13,48 +13,54 @@ import (
 
 var meekPort = 47000
 
-// Port where Obfs4proxy will provide its Meek service.
+// MeekPort - Port where Obfs4proxy will provide its Meek service.
 // Only use this after calling StartObfs4Proxy! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func MeekPort() int {
 	return meekPort
 }
 
 var obfs2Port = 47100
 
-// Port where Obfs4proxy will provide its Obfs2 service.
+// Obfs2Port - Port where Obfs4proxy will provide its Obfs2 service.
 // Only use this property after calling StartObfs4Proxy! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func Obfs2Port() int {
 	return obfs2Port
 }
 
 var obfs3Port = 47200
 
-// Port where Obfs4proxy will provide its Obfs3 service.
+// Obfs3Port - Port where Obfs4proxy will provide its Obfs3 service.
 // Only use this property after calling StartObfs4Proxy! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func Obfs3Port() int {
 	return obfs3Port
 }
 
 var obfs4Port = 47300
 
-// Port where Obfs4proxy will provide its Obfs4 service.
+// Obfs4Port - Port where Obfs4proxy will provide its Obfs4 service.
 // Only use this property after calling StartObfs4Proxy! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func Obfs4Port() int {
 	return obfs4Port
 }
 
 var scramblesuitPort = 47400
 
-// Port where Obfs4proxy will provide its Scramblesuit service.
+// ScramblesuitPort - Port where Obfs4proxy will provide its Scramblesuit service.
 // Only use this property after calling StartObfs4Proxy! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func ScramblesuitPort() int {
 	return scramblesuitPort
 }
 
 var snowflakePort = 52000
 
-// Port where Snowflike will provide its service.
+// SnowflakePort - Port where Snowflake will provide its service.
 // Only use this property after calling StartSnowflake! It might have changed after that!
+//goland:noinspection GoUnusedExportedFunction
 func SnowflakePort() int {
 	return snowflakePort
 }
@@ -63,7 +69,7 @@ var obfs4ProxyRunning = false
 var snowflakeRunning = false
 var snowflakeProxyRunning = false
 
-// Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
+// StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
 var StateLocation string
 
 func init() {
@@ -76,7 +82,7 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
-// Start the Obfs4Proxy.
+// StartObfs4Proxy - Start the Obfs4Proxy.
 //
 // This will test, if the default ports are available. If not, it will increment them until there is.
 // Only use the port properties after calling this, they might have been changed!
@@ -142,7 +148,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	return obfs4Port
 }
 
-// Stop the Obfs4Proxy.
+// StopObfs4Proxy - Stop the Obfs4Proxy.
 //goland:noinspection GoUnusedExportedFunction
 func StopObfs4Proxy() {
 	if !obfs4ProxyRunning {
@@ -154,7 +160,7 @@ func StopObfs4Proxy() {
 	obfs4ProxyRunning = false
 }
 
-// Start the Snowflake client.
+// StartSnowflake - Start the Snowflake client.
 //
 // @param ice Comma-separated list of ICE servers.
 //
@@ -193,7 +199,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 	return snowflakePort
 }
 
-// Stop the Snowflake client.
+// StopSnowflake - Stop the Snowflake client.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflake() {
 	if !snowflakeRunning {
@@ -205,7 +211,7 @@ func StopSnowflake() {
 	snowflakeRunning = false
 }
 
-// Start the Snowflake proxy.
+// StartSnowflakeProxy - Start the Snowflake proxy.
 //
 // @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
 //
@@ -234,7 +240,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 	go snowflakeproxy.Start(uint(capacity), broker, relay, stun, logFile, unsafeLogging, keepLocalAddresses)
 }
 
-// Stop the Snowflake proxy.
+// StopSnowflakeProxy - Stop the Snowflake proxy.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflakeProxy() {
 	if !snowflakeProxyRunning {
