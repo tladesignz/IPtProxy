@@ -36,7 +36,7 @@ index f19afcf..5ab8ae5 100644
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
 +// Start the Snowflake client.
-+func Start(iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++func Start(port *int, iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
 +	if *max < DefaultSnowflakeCapacity {
 +		*max = DefaultSnowflakeCapacity
 +	}
@@ -65,7 +65,7 @@ index f19afcf..5ab8ae5 100644
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
 -			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
-+			ln, err := pt.ListenSocks("tcp", "127.0.0.1:52610")
++			ln, err := pt.ListenSocks("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(*port)))
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
