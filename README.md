@@ -39,7 +39,9 @@ it, simply add the following line to your `Podfile`:
 pod 'IPtProxy', '~> 0.6'
 ```
 
-## Android Installation
+## Android 
+
+### Installation
 
 IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
@@ -58,6 +60,30 @@ allprojects {
 	}
 }
 ```
+
+### Getting Started
+
+If you are building a new Android application be sure to declare that it uses the `INTERNET` permission in your Android Manifest:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="my.test.app">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application ...
+
+```
+
+Before using IPtProxy you need to specify a place on disk for it to store its state information. We reccomend the path returned by `Context`'s `getCacheDir()`:
+
+```java
+File fileCacheDir = new File(getCacheDir(), "pt");
+if (!fileCacheDir.exists())
+    fileCacheDir.mkdir();
+IPtProxy.setStateLocation(fileCacheDir.getAbsolutePath());
+```
+
 
 ## Build
 
@@ -102,11 +128,26 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
 if you don't want to rely on JitPack.
 
+On certain CPU architectures `gobind` might fail with this error due to setting a flag that is no longer supported by Go 1.16
+
+```
+go tool compile: exit status 1
+unsupported setting GO386=387. Consider using GO386=softfloat instead.
+gomobile: go build -v -buildmode=c-shared -o=/tmp/gomobile-work-855414073/android/src/main/jniLibs/x86/libgojni.so ./gobind failed: exit status 1
+```
+
+If this is the case, you will need to set this flag to build IPtProxy:
+
+```bash
+export GO386=sse2
+``` 
+
+
 ## Authors
 
 - Benjamin Erhart, berhart@netzarchitekten.com
 - Nathan Freitas
-- bitmold
+- Bim
 
 for the Guardian Project https://guardianproject.info
 
