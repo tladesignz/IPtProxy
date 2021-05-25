@@ -82,6 +82,7 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
+
 // StartObfs4Proxy - Start the Obfs4Proxy.
 //
 // This will test, if the default ports are available. If not, it will increment them until there is.
