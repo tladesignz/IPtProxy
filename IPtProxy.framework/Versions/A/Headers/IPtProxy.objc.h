@@ -11,16 +11,9 @@
 #include "Universe.objc.h"
 
 
-FOUNDATION_EXPORT const int64_t IPtProxyMeekSocksPort;
-FOUNDATION_EXPORT const int64_t IPtProxyObfs2SocksPort;
-FOUNDATION_EXPORT const int64_t IPtProxyObfs3SocksPort;
-FOUNDATION_EXPORT const int64_t IPtProxyObfs4SocksPort;
-FOUNDATION_EXPORT const int64_t IPtProxyScramblesuitSocksPort;
-FOUNDATION_EXPORT const int64_t IPtProxySnowflakeSocksPort;
-
 @interface IPtProxy : NSObject
 /**
- * Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
+ * StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
  */
 + (NSString* _Nonnull) stateLocation;
 + (void) setStateLocation:(NSString* _Nonnull)v;
@@ -28,18 +21,60 @@ FOUNDATION_EXPORT const int64_t IPtProxySnowflakeSocksPort;
 @end
 
 /**
- * Start the Obfs4Proxy.
+ * MeekPort - Port where Obfs4proxy will provide its Meek service.
+Only use this after calling StartObfs4Proxy! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyMeekPort(void);
+
+/**
+ * Obfs2Port - Port where Obfs4proxy will provide its Obfs2 service.
+Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyObfs2Port(void);
+
+/**
+ * Obfs3Port - Port where Obfs4proxy will provide its Obfs3 service.
+Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyObfs3Port(void);
+
+/**
+ * Obfs4Port - Port where Obfs4proxy will provide its Obfs4 service.
+Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyObfs4Port(void);
+
+/**
+ * ScramblesuitPort - Port where Obfs4proxy will provide its Scramblesuit service.
+Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyScramblesuitPort(void);
+
+/**
+ * SnowflakePort - Port where Snowflake will provide its service.
+Only use this property after calling StartSnowflake! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxySnowflakePort(void);
+
+/**
+ * StartObfs4Proxy - Start the Obfs4Proxy.
+
+This will test, if the default ports are available. If not, it will increment them until there is.
+Only use the port properties after calling this, they might have been changed!
 
 @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 
 @param enableLogging Log to TOR_PT_STATE_LOCATION/obfs4proxy.log.
 
 @param unsafeLogging Disable the address scrubber.
+
+@return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
+	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
  */
-FOUNDATION_EXPORT void IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging);
+FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging);
 
 /**
- * Start the Snowflake client.
+ * StartSnowflake - Start the Snowflake client.
 
 @param ice Comma-separated list of ICE servers.
 
@@ -56,11 +91,13 @@ FOUNDATION_EXPORT void IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOO
 @param unsafeLogging Prevent logs from being scrubbed.
 
 @param maxPeers Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
+
+@return Port number where Snowflake will listen on, if no error happens during start up.
  */
-FOUNDATION_EXPORT void IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
+FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
- * Start the Snowflake proxy.
+ * StartSnowflakeProxy - Start the Snowflake proxy.
 
 @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
 
@@ -79,17 +116,17 @@ FOUNDATION_EXPORT void IPtProxyStartSnowflake(NSString* _Nullable ice, NSString*
 FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging);
 
 /**
- * Stop the Obfs4Proxy.
+ * StopObfs4Proxy - Stop the Obfs4Proxy.
  */
 FOUNDATION_EXPORT void IPtProxyStopObfs4Proxy(void);
 
 /**
- * Stop the Snowflake client.
+ * StopSnowflake - Stop the Snowflake client.
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);
 
 /**
- * Stop the Snowflake proxy.
+ * StopSnowflakeProxy - Stop the Snowflake proxy.
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflakeProxy(void);
 
