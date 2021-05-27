@@ -1,5 +1,11 @@
 # IPtProxy Changelog
 
+## 1.0.0
+- Updated Snowflake to latest master. Fixes multiple minor issues.
+- Updated Obfs4proxy to latest master. Contains a minor fix for Meek.
+- Added port test mechanism to avoid port collisions when started multiple times.
+- Improved documentation.
+
 ## 0.6.0
 - Updated Obfs4proxy to latest master. Fixes support for unsafe logging.
 - Added `StopSnowflakeProxy` from feature branch.

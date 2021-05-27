@@ -18,26 +18,36 @@ Problems solved in particular are:
   to avoid this.
 - Both PTs are gathered under one roof here, since you cannot have two
   `gomobile` frameworks as dependencies, since there are some common Go
-  runtime functions exported, which will create a name clash.
+  runtime functions exported, which would create a name clash.
 - Environment variable changes during runtime will not be recognized by
   `goptlib` when done from within Swift/Objective-C. Therefore, sensible
   values are hardcoded in the Go wrapper.
-- The ports where the PTs will listen on are hardcoded, since communicating
-  the used ports back to the app would be quite some work (e.g. trying to
-  read it from STDOUT) for very little benefit.
-- Snowflake and Obfs4proxy are patched to accept all configuration parameters 
+- Snowflake and Obfs4proxy are patched to accept all configuration parameters
   directly.
+- Free ports to be used are automatically found by this library and returned to the
+  consuming app. You can use the initial values for premature configuration just
+  fine in situations, where you can be pretty sure, they're going to be available
+  (typically on iOS). When that's not the case (e.g. multiple instances of your app
+  on a multi-user Android), you should first start the transports and then use the 
+  returned ports for configuration of other components (e.g. Tor). 
 
-Both PTs are contained at their latest `master` commit, as per 2021-03-07.
+Both PTs are contained at their latest `master` commit, as per 2021-05-27.
 
-## iOS Installation
+## iOS
+
+### Installation
 
 IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 0.6'
+pod 'IPtProxy', '~> 1.0'
 ```
+
+### Getting Started
+
+[Onion Browser](https://github.com/OnionBrowser/OnionBrowser/blob/2.X/OnionBrowser/OnionManager.swift)
+is a recommended read for better understanding and configuration details.
 
 ## Android 
 
@@ -47,7 +57,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:0.6.0'
+implementation 'com.github.tladesignz:IPtProxy:1.0.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:
@@ -63,7 +73,8 @@ allprojects {
 
 ### Getting Started
 
-If you are building a new Android application be sure to declare that it uses the `INTERNET` permission in your Android Manifest:
+If you are building a new Android application be sure to declare that it uses the
+`INTERNET` permission in your Android Manifest:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -75,12 +86,14 @@ If you are building a new Android application be sure to declare that it uses th
 
 ```
 
-Before using IPtProxy you need to specify a place on disk for it to store its state information. We reccomend the path returned by `Context`'s `getCacheDir()`:
+Before using IPtProxy you need to specify a place on disk for it to store its state
+information. We recommend the path returned by `Context#getCacheDir()`:
 
 ```java
 File fileCacheDir = new File(getCacheDir(), "pt");
-if (!fileCacheDir.exists())
-    fileCacheDir.mkdir();
+
+if (!fileCacheDir.exists()) fileCacheDir.mkdir();
+
 IPtProxy.setStateLocation(fileCacheDir.getAbsolutePath());
 ```
 
@@ -90,7 +103,7 @@ IPtProxy.setStateLocation(fileCacheDir.getAbsolutePath());
 ### Requirements
 
 This repository contains a precompiled iOS and Android version of IPtProxy.
-If you want to compile it yourself, you'll need Go 1.15 as a prerequisite.
+If you want to compile it yourself, you'll need Go 1.16 as a prerequisite.
 
 You will also need Xcode installed when compiling for iOS and an Android NDK
 when compiling for Android.
@@ -128,7 +141,8 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
 if you don't want to rely on JitPack.
 
-On certain CPU architectures `gobind` might fail with this error due to setting a flag that is no longer supported by Go 1.16
+On certain CPU architectures `gobind` might fail with this error due to setting
+a flag that is no longer supported by Go 1.16:
 
 ```
 go tool compile: exit status 1
