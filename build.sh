@@ -32,9 +32,9 @@ if test -e ".git"; then
     cd ..
 else
     # No .git directory - That's a normal install.
-    git clone https://github.com/Yawning/obfs4.git
+    git clone https://gitlab.com/yawning/obfs4.git
     cd obfs4 || exit 1
-    git checkout --force --quiet f638c33f
+    git checkout --force --quiet e330d1b7
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1
