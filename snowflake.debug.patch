@@ -1,0 +1,13 @@
+diff --git a/client/snowflake.go b/client/snowflake.go
+index f0d6755..82d1c4a 100644
+--- a/client/snowflake.go
++++ b/client/snowflake.go
+@@ -111,7 +111,7 @@ func Start(port *int, iceServersCommas, brokerURL, frontDomain, logFilename *str
+ 	// buffer is full.
+ 	// https://bugs.torproject.org/26360
+ 	// https://bugs.torproject.org/25600#comment:14
+-	var logOutput = ioutil.Discard
++	var logOutput = os.Stderr //ioutil.Discard
+ 	if *logFilename != "" {
+ 		if *logToStateDir || *oldLogToStateDir {
+ 			stateDir, err := pt.MakeStateDir()
