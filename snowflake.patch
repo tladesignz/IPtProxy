@@ -86,7 +86,7 @@ index af9c2e4..5701089 100644
 +	sigChan <- syscall.SIGTERM
 +}
 diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
-index e935ad9..303589c 100644
+index 183b1b4..f3c18a4 100644
 --- a/proxy/proxy-go_test.go
 +++ b/proxy/proxy-go_test.go
 @@ -1,4 +1,4 @@
@@ -96,7 +96,7 @@ index e935ad9..303589c 100644
  import (
  	"bytes"
 diff --git a/proxy/snowflake.go b/proxy/snowflake.go
-index 86ae0b2..e9e5e19 100644
+index 12d97d3..ce0cff6 100644
 --- a/proxy/snowflake.go
 +++ b/proxy/snowflake.go
 @@ -1,10 +1,9 @@
@@ -111,29 +111,16 @@ index 86ae0b2..e9e5e19 100644
  	"fmt"
  	"io"
  	"io/ioutil"
-@@ -176,6 +175,12 @@ func getToken() {
- }
- 
- func retToken() {
-+	defer func() {
-+		if r := recover(); r != nil {
-+			// Recover if tokens got closed. That's ok, we're just getting stopped.
-+		}
-+	}()
-+
- 	tokens <- true
- }
- 
-@@ -238,7 +243,7 @@ func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
- 			timeOfNextPoll = now
+@@ -137,7 +136,7 @@ func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
  		}
  
--		body, err := messages.EncodePollRequest(sid, "standalone", currentNATType)
-+		body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType)
+ 		numClients := int((tokens.count() / 8) * 8) // Round down to 8
+-		body, err := messages.EncodePollRequest(sid, "standalone", currentNATType, numClients)
++		body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType, numClients)
  		if err != nil {
  			log.Printf("Error encoding poll message: %s", err.Error())
  			return nil
-@@ -528,22 +533,22 @@ func runSession(sid string) {
+@@ -427,22 +426,22 @@ func runSession(sid string) {
  	}
  }
  
@@ -145,7 +132,7 @@ index 86ae0b2..e9e5e19 100644
 -	var unsafeLogging bool
 -	var keepLocalAddresses bool
 -
--	flag.UintVar(&capacity, "capacity", 10, "maximum concurrent clients")
+-	flag.UintVar(&capacity, "capacity", 0, "maximum concurrent clients")
 -	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
 -	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
 -	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
@@ -155,7 +142,7 @@ index 86ae0b2..e9e5e19 100644
 -	flag.Parse()
 +func Start(capacity uint, rawBrokerURL, relayURL, stunURL, logFilename string, unsafeLogging, keepLocalAddresses bool) {
 +	if capacity < 1 {
-+		capacity = 10
++		capacity = 0
 +	}
 +
 +	if rawBrokerURL == "" {
@@ -172,29 +159,72 @@ index 86ae0b2..e9e5e19 100644
  
  	var logOutput io.Writer = os.Stderr
  	log.SetFlags(log.LstdFlags | log.LUTC)
-@@ -598,13 +603,16 @@ func main() {
+@@ -491,13 +490,16 @@ func main() {
  	checkNATType(config, defaultProbeURL)
  	log.Printf("NAT type: %s", currentNATType)
  
 -	for {
--		getToken()
-+	for range tokens {
+-		tokens.get()
++	for i := int64(0); i < tokens.count(); i++ {
  		sessionID := genSessionID()
  		runSession(sessionID)
  	}
  }
  
 +func Stop() {
-+	close(tokens)
++	close(tokens.ch)
 +}
 +
  func checkNATType(config webrtc.Configuration, probeURL string) {
  
- 	var err error
+ 	probe, err := newSignalingServer(probeURL, false)
+diff --git a/proxy/tokens.go b/proxy/tokens.go
+index fedb8f7..5afc7fe 100644
+--- a/proxy/tokens.go
++++ b/proxy/tokens.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"sync/atomic"
+@@ -32,6 +32,12 @@ func (t *tokens_t) get() {
+ }
+ 
+ func (t *tokens_t) ret() {
++	defer func() {
++		if r := recover(); r != nil {
++			// Recover if tokens got closed. That's ok, we're just getting stopped.
++		}
++	}()
++
+ 	atomic.AddInt64(&t.clients, -1)
+ 
+ 	if t.capacity != 0 {
+diff --git a/proxy/tokens_test.go b/proxy/tokens_test.go
+index 622cc05..fd3e2a6 100644
+--- a/proxy/tokens_test.go
++++ b/proxy/tokens_test.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"testing"
 diff --git a/proxy/util.go b/proxy/util.go
 index d737056..d63d5d0 100644
 --- a/proxy/util.go
 +++ b/proxy/util.go
+@@ -1,4 +1,4 @@
+-package main
++package snowflakeproxy
+ 
+ import (
+ 	"fmt"
+diff --git a/proxy/webrtcconn.go b/proxy/webrtcconn.go
+index 5d95919..c8b0afa 100644
+--- a/proxy/webrtcconn.go
++++ b/proxy/webrtcconn.go
 @@ -1,4 +1,4 @@
 -package main
 +package snowflakeproxy
