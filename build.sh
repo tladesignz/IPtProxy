@@ -1,7 +1,7 @@
 #!/bin/sh
 
 TARGET=ios
-OUTPUT=IPtProxy.framework
+OUTPUT=IPtProxy.xcframework
 
 if test "$1" = "android"; then
   TARGET=android
