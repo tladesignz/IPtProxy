@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index f19afcf..f0d6755 100644
+index af9c2e4..5701089 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -29,7 +29,7 @@ index f19afcf..f0d6755 100644
  // Exchanges bytes between two ReadWriters.
  // (In this case, between a SOCKS connection and a snowflake transport conn)
  func copyLoop(socks, sfconn io.ReadWriter) {
-@@ -92,22 +94,15 @@ func socksAcceptLoop(ln *pt.SocksListener, transport *sf.Transport, shutdown cha
+@@ -90,22 +92,15 @@ func socksAcceptLoop(ln *pt.SocksListener, transport *sf.Transport, shutdown cha
  	}
  }
  
@@ -59,7 +59,7 @@ index f19afcf..f0d6755 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -164,7 +159,7 @@ func main() {
+@@ -162,7 +157,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -68,7 +68,7 @@ index f19afcf..f0d6755 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -179,7 +174,6 @@ func main() {
+@@ -177,7 +172,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -76,7 +76,7 @@ index f19afcf..f0d6755 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -206,3 +200,8 @@ func main() {
+@@ -204,3 +198,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }
@@ -96,7 +96,7 @@ index e935ad9..303589c 100644
  import (
  	"bytes"
 diff --git a/proxy/snowflake.go b/proxy/snowflake.go
-index 86ae0b2..894d035 100644
+index 86ae0b2..e9e5e19 100644
 --- a/proxy/snowflake.go
 +++ b/proxy/snowflake.go
 @@ -1,10 +1,9 @@
@@ -124,6 +124,15 @@ index 86ae0b2..894d035 100644
  	tokens <- true
  }
  
+@@ -238,7 +243,7 @@ func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
+ 			timeOfNextPoll = now
+ 		}
+ 
+-		body, err := messages.EncodePollRequest(sid, "standalone", currentNATType)
++		body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType)
+ 		if err != nil {
+ 			log.Printf("Error encoding poll message: %s", err.Error())
+ 			return nil
 @@ -528,22 +533,22 @@ func runSession(sid string) {
  	}
  }
