@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '1.0.0'
+  s.version          = '1.1.0'
   s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS'
 
   s.description      = <<-DESC
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
     - Snowflake and Obfs4proxy are patched to accept all configuration parameters
       directly.
 
-    Both PTs are contained at their latest `master` commit, as per 2021-03-07.
+    Both PTs are contained at their latest `master` commit, as per 2021-07-14.
                        DESC
 
   s.homepage         = 'https://github.com/tladesignz/IPtProxy'
@@ -49,10 +49,10 @@ Pod::Spec.new do |s|
   # This will only be executed once.
   s.prepare_command = './build.sh'
 
-  # That's why this is also here, albeit it will be to late here.
+  # That's why this is also here, albeit it will be too late here.
   # You will need to re-run `pod update` to make the last line work.
   s.script_phase = {
-    :name => 'Go build of IPtProxy.framework',
+    :name => 'Go build of IPtProxy.xcframework',
     :execution_position => :before_compile,
     :script => 'sh "$PODS_TARGET_SRCROOT/build.sh"',
   }
@@ -60,6 +60,6 @@ Pod::Spec.new do |s|
   # This will only work, if `prepare_command` was successful, or if you
   # called `pod update` a second time after a build which will have triggered
   # the `script_phase`, or if you ran `build.sh` manually.
-  s.vendored_frameworks = "IPtProxy.framework"
+  s.vendored_frameworks = "IPtProxy.xcframework"
 
 end

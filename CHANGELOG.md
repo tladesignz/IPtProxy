@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 1.1.0
+- Updated Snowflake to latest master. Fixes multiple minor issues.
+- Registers Snowflake proxy with type "iptproxy" to improve statistics.
+
 ## 1.0.0
 - Updated Snowflake to latest master. Fixes multiple minor issues.
 - Updated Obfs4proxy to latest master. Contains a minor fix for Meek.

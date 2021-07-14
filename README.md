@@ -31,7 +31,7 @@ Problems solved in particular are:
   on a multi-user Android), you should first start the transports and then use the 
   returned ports for configuration of other components (e.g. Tor). 
 
-Both PTs are contained at their latest `master` commit, as per 2021-05-27.
+Both PTs are contained at their latest `master` commit, as per 2021-07-14.
 
 ## iOS
 
@@ -41,7 +41,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.0'
+pod 'IPtProxy', '~> 1.1'
 ```
 
 ### Getting Started
@@ -57,7 +57,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.0.0'
+implementation 'com.github.tladesignz:IPtProxy:1.1.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:
