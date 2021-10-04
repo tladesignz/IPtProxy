@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	git.torproject.org/pluggable-transports/snowflake.git v0.0.0-00010101000000-000000000000
-	gitlab.com/yawning/obfs4.git v0.0.0-00010101000000-000000000000
-	golang.org/x/mobile v0.0.0-20210710064935-76c259c465ba // indirect
+	git.torproject.org/pluggable-transports/snowflake.git v1.1.0
+	gitlab.com/yawning/obfs4.git v0.0.0-20210511220700-e330d1b7024b
+	golang.org/x/mobile v0.0.0-20210924032853-1c027f395ef7 // indirect
 )
