@@ -68,10 +68,12 @@ Only use the port properties after calling this, they might have been changed!
 
 @param unsafeLogging Disable the address scrubber.
 
+@param proxy Proxy to be used by Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
+
 @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
 	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
  */
-FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging);
+FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable proxy);
 
 /**
  * StartSnowflake - Start the Snowflake client.
