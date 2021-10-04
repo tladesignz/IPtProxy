@@ -41,7 +41,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.1'
+pod 'IPtProxy', '~> 1.2'
 ```
 
 ### Getting Started
@@ -120,10 +120,10 @@ export PATH=$HOME/go/bin/:$PATH`
 Make sure Xcode and Xcode's command line tools are installed. Then run
 
 ```bash
-rm -rf IPtProxy.framework && ./build.sh
+rm -rf IPtProxy.xcframework && ./build.sh
 ```
 
-This will create an `IPtProxy.framework`, which you can directly drop in your app,
+This will create an `IPtProxy.xcframework`, which you can directly drop in your app,
 if you don't want to rely on CocoaPods.
 
 ### Android

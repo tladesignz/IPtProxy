@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 1.2.0
+- Added explicit support for a proxy behind Obfs4proxy.
+
 ## 1.1.0
 - Updated Snowflake to latest master. Fixes multiple minor issues.
 - Registers Snowflake proxy with type "iptproxy" to improve statistics.
