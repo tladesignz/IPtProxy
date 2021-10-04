@@ -82,7 +82,6 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
-
 // StartObfs4Proxy - Start the Obfs4Proxy.
 //
 // This will test, if the default ports are available. If not, it will increment them until there is.
@@ -94,12 +93,14 @@ func init() {
 //
 // @param unsafeLogging Disable the address scrubber.
 //
+// @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
+//
 // @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
 //	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
 //
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
+func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy string) int {
 	if obfs4ProxyRunning {
 		return obfs4Port
 	}
@@ -143,6 +144,12 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool) int {
 	}
 
 	fixEnv()
+
+	if len(proxy) > 0 {
+		_ = os.Setenv("TOR_PT_PROXY", proxy)
+	} else {
+		_ = os.Unsetenv("TOR_PT_PROXY")
+	}
 
 	go obfs4proxy.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &logLevel, &enableLogging, &unsafeLogging)
 
@@ -254,7 +261,7 @@ func StopSnowflakeProxy() {
 }
 
 // Hack: Set some environment variables that are either
-// required, or values that we want. have to do this here, since we can only
+// required, or values that we want. Have to do this here, since we can only
 // launch this in a thread and the manipulation of environment variables
 // from within an iOS app won't end up in goptlib properly.
 //
