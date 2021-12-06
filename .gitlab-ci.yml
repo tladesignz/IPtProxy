@@ -1,0 +1,61 @@
+
+# set up apt for automated use
+.apt-template: &apt-template
+- export LC_ALL=C.UTF-8
+- export DEBIAN_FRONTEND=noninteractive
+- echo Etc/UTC > /etc/timezone
+- echo 'quiet "1";'
+       'APT::Install-Recommends "0";'
+       'APT::Install-Suggests "0";'
+       'APT::Acquire::Retries "20";'
+       'APT::Get::Assume-Yes "true";'
+       'Dpkg::Use-Pty "0";'
+      > /etc/apt/apt.conf.d/99gitlab
+- apt-get update
+- apt-get dist-upgrade
+
+
+# -- jobs ------------------------------------------------------------
+
+android:
+  image: debian:bullseye-backports
+  variables:
+    ANDROID_HOME: /usr/lib/android-sdk
+    GOPATH: "/go"
+    LANG: C.UTF-8
+    PATH: "/go/bin:/usr/lib/go-1.16/bin:/usr/bin:/bin"
+    REPRODUCIBLE_FLAGS: -trimpath -ldflags=-buildid=
+  artifacts:
+    name: "${CI_PROJECT_PATH}_${CI_JOB_STAGE}_${CI_JOB_ID}_${CI_COMMIT_REF_NAME}_${CI_COMMIT_SHA}"
+    paths:
+      - IPtProxy*
+    expire_in: 1 week
+    when: on_success
+  before_script:  # things that need root go here, to support the Vagrant setup
+    - *apt-template
+    - apt-get install
+        android-sdk-platform-23
+        android-sdk-platform-tools
+        build-essential
+        curl
+        default-jdk-headless
+        git
+        gnupg
+        unzip
+        wget
+    - apt-get install -t bullseye-backports golang-1.16
+
+    - ndk=android-ndk-r21e-linux-x86_64.zip
+    - wget --continue --no-verbose https://dl.google.com/android/repository/$ndk
+    - echo "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e  $ndk" > $ndk.sha256
+    - sha256sum -c $ndk.sha256
+    - unzip -q $ndk
+    - rm ${ndk}*
+    - mv android-ndk-* $ANDROID_HOME/ndk-bundle/
+    - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle/
+
+    - chmod -R a+rX $ANDROID_HOME
+
+  script:
+    - find -name '*.[ja]ar' -delete
+    - ./build-android.sh
