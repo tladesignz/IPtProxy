@@ -128,6 +128,11 @@ if you don't want to rely on CocoaPods.
 
 ### Android
 
+Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with 
+```bash
+apt install default-jdk
+````
+
 If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` 
 environment variables are set:
 
