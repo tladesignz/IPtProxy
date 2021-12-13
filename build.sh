@@ -56,6 +56,6 @@ if test "$1" = "android"; then
   gomobile init
 fi
 
-gomobile bind -target=$TARGET -o ../$OUTPUT -v
+gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -v
 
 printf '\n\n--- Done.\n\n'
