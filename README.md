@@ -65,7 +65,7 @@ And this to your root `build.gradle` at the end of repositories:
 ```groovy
 allprojects {
 	repositories {
-		...
+		// ...
 		maven { url 'https://jitpack.io' }
 	}
 }
@@ -77,7 +77,7 @@ For newer Android Studio projects created in <a href="https://developer.android.
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-	// ...
+	  // ...
         maven { url 'https://jitpack.io' }
     }
 }

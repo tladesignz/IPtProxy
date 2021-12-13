@@ -274,7 +274,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 
 	fixEnv()
 
-	go func(snowflakeProxy sfp.SnowflakeProxy) {
+	go func(snowflakeProxy *sfp.SnowflakeProxy) {
 		var logOutput io.Writer = os.Stderr
 		log.SetFlags(log.LstdFlags | log.LUTC)
 
@@ -299,7 +299,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(*snowflakeProxy)
+	}(snowflakeProxy)
 }
 
 // StopSnowflakeProxy - Stop the Snowflake proxy.
