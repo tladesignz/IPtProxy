@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index af9c2e4..5701089 100644
+index d76efbf..dd28681 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -12,15 +12,7 @@ index af9c2e4..5701089 100644
  	"io"
  	"io/ioutil"
  	"log"
-@@ -10,6 +9,7 @@ import (
- 	"os"
- 	"os/signal"
- 	"path/filepath"
-+	"strconv"
- 	"strings"
- 	"sync"
- 	"syscall"
-@@ -23,6 +23,8 @@ const (
+@@ -24,6 +23,8 @@ const (
  	DefaultSnowflakeCapacity = 1
  )
  
@@ -29,7 +21,7 @@ index af9c2e4..5701089 100644
  // Exchanges bytes between two ReadWriters.
  // (In this case, between a SOCKS connection and a snowflake transport conn)
  func copyLoop(socks, sfconn io.ReadWriter) {
-@@ -90,22 +92,15 @@ func socksAcceptLoop(ln *pt.SocksListener, transport *sf.Transport, shutdown cha
+@@ -119,23 +120,13 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
  	}
  }
  
@@ -37,29 +29,29 @@ index af9c2e4..5701089 100644
 -	iceServersCommas := flag.String("ice", "", "comma-separated list of ICE servers")
 -	brokerURL := flag.String("url", "", "URL of signaling broker")
 -	frontDomain := flag.String("front", "", "front domain")
+-	ampCacheURL := flag.String("ampcache", "", "URL of AMP cache to use as a proxy for signaling")
 -	logFilename := flag.String("log", "", "name of log file")
 -	logToStateDir := flag.Bool("log-to-state-dir", false, "resolve the log file relative to tor's pt state dir")
 -	keepLocalAddresses := flag.Bool("keep-local-addresses", false, "keep local LAN address ICE candidates")
 -	unsafeLogging := flag.Bool("unsafe-logging", false, "prevent logs from being scrubbed")
 -	max := flag.Int("max", DefaultSnowflakeCapacity,
 -		"capacity for number of multiplexed WebRTC peers")
-+// Start the Snowflake client.
-+func Start(port *int, iceServersCommas, brokerURL, frontDomain, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
+-
+-	// Deprecated
+-	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
+-	oldKeepLocalAddresses := flag.Bool("keepLocalAddresses", false, "use -keep-local-addresses instead")
++func Start(port *int, iceServersCommas, brokerURL, frontDomain, ampCacheURL, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
 +	if *max < DefaultSnowflakeCapacity {
 +		*max = DefaultSnowflakeCapacity
 +	}
  
- 	// Deprecated
--	oldLogToStateDir := flag.Bool("logToStateDir", false, "use -log-to-state-dir instead")
--	oldKeepLocalAddresses := flag.Bool("keepLocalAddresses", false, "use -keep-local-addresses instead")
--
 -	flag.Parse()
 +	oldLogToStateDir := logToStateDir
 +	oldKeepLocalAddresses := keepLocalAddresses
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -162,7 +157,7 @@ func main() {
+@@ -195,7 +186,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -68,7 +60,7 @@ index af9c2e4..5701089 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -177,7 +172,6 @@ func main() {
+@@ -210,7 +201,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -76,7 +68,7 @@ index af9c2e4..5701089 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -204,3 +198,8 @@ func main() {
+@@ -237,3 +227,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }
@@ -85,149 +77,16 @@ index af9c2e4..5701089 100644
 +	log.Println("synthesizing SIGTERM because of explicit Stop call")
 +	sigChan <- syscall.SIGTERM
 +}
-diff --git a/proxy/proxy-go_test.go b/proxy/proxy-go_test.go
-index 183b1b4..f3c18a4 100644
---- a/proxy/proxy-go_test.go
-+++ b/proxy/proxy-go_test.go
-@@ -1,4 +1,4 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"bytes"
-diff --git a/proxy/snowflake.go b/proxy/snowflake.go
-index 12d97d3..ce0cff6 100644
---- a/proxy/snowflake.go
-+++ b/proxy/snowflake.go
-@@ -1,10 +1,9 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"bytes"
- 	"crypto/rand"
- 	"encoding/base64"
--	"flag"
- 	"fmt"
- 	"io"
- 	"io/ioutil"
-@@ -137,7 +136,7 @@ func (s *SignalingServer) pollOffer(sid string) *webrtc.SessionDescription {
- 		}
- 
- 		numClients := int((tokens.count() / 8) * 8) // Round down to 8
--		body, err := messages.EncodePollRequest(sid, "standalone", currentNATType, numClients)
-+		body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType, numClients)
- 		if err != nil {
- 			log.Printf("Error encoding poll message: %s", err.Error())
+diff --git a/proxy/lib/snowflake.go b/proxy/lib/snowflake.go
+index e39fcfb..118279a 100644
+--- a/proxy/lib/snowflake.go
++++ b/proxy/lib/snowflake.go
+@@ -183,7 +183,7 @@ func (s *SignalingServer) pollOffer(sid string, shutdown chan struct{}) *webrtc.
  			return nil
-@@ -427,22 +426,22 @@ func runSession(sid string) {
- 	}
- }
- 
--func main() {
--	var capacity uint
--	var stunURL string
--	var logFilename string
--	var rawBrokerURL string
--	var unsafeLogging bool
--	var keepLocalAddresses bool
--
--	flag.UintVar(&capacity, "capacity", 0, "maximum concurrent clients")
--	flag.StringVar(&rawBrokerURL, "broker", defaultBrokerURL, "broker URL")
--	flag.StringVar(&relayURL, "relay", defaultRelayURL, "websocket relay URL")
--	flag.StringVar(&stunURL, "stun", defaultSTUNURL, "stun URL")
--	flag.StringVar(&logFilename, "log", "", "log filename")
--	flag.BoolVar(&unsafeLogging, "unsafe-logging", false, "prevent logs from being scrubbed")
--	flag.BoolVar(&keepLocalAddresses, "keep-local-addresses", false, "keep local LAN address ICE candidates")
--	flag.Parse()
-+func Start(capacity uint, rawBrokerURL, relayURL, stunURL, logFilename string, unsafeLogging, keepLocalAddresses bool) {
-+	if capacity < 1 {
-+		capacity = 0
-+	}
-+
-+	if rawBrokerURL == "" {
-+		rawBrokerURL = defaultBrokerURL
-+	}
-+
-+	if relayURL == "" {
-+		relayURL = defaultRelayURL
-+	}
-+
-+	if stunURL == "" {
-+		stunURL = defaultSTUNURL
-+	}
- 
- 	var logOutput io.Writer = os.Stderr
- 	log.SetFlags(log.LstdFlags | log.LUTC)
-@@ -491,13 +490,16 @@ func main() {
- 	checkNATType(config, defaultProbeURL)
- 	log.Printf("NAT type: %s", currentNATType)
- 
--	for {
--		tokens.get()
-+	for i := int64(0); i < tokens.count(); i++ {
- 		sessionID := genSessionID()
- 		runSession(sessionID)
- 	}
- }
- 
-+func Stop() {
-+	close(tokens.ch)
-+}
-+
- func checkNATType(config webrtc.Configuration, probeURL string) {
- 
- 	probe, err := newSignalingServer(probeURL, false)
-diff --git a/proxy/tokens.go b/proxy/tokens.go
-index fedb8f7..5afc7fe 100644
---- a/proxy/tokens.go
-+++ b/proxy/tokens.go
-@@ -1,4 +1,4 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"sync/atomic"
-@@ -32,6 +32,12 @@ func (t *tokens_t) get() {
- }
- 
- func (t *tokens_t) ret() {
-+	defer func() {
-+		if r := recover(); r != nil {
-+			// Recover if tokens got closed. That's ok, we're just getting stopped.
-+		}
-+	}()
-+
- 	atomic.AddInt64(&t.clients, -1)
- 
- 	if t.capacity != 0 {
-diff --git a/proxy/tokens_test.go b/proxy/tokens_test.go
-index 622cc05..fd3e2a6 100644
---- a/proxy/tokens_test.go
-+++ b/proxy/tokens_test.go
-@@ -1,4 +1,4 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"testing"
-diff --git a/proxy/util.go b/proxy/util.go
-index d737056..d63d5d0 100644
---- a/proxy/util.go
-+++ b/proxy/util.go
-@@ -1,4 +1,4 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"fmt"
-diff --git a/proxy/webrtcconn.go b/proxy/webrtcconn.go
-index 5d95919..c8b0afa 100644
---- a/proxy/webrtcconn.go
-+++ b/proxy/webrtcconn.go
-@@ -1,4 +1,4 @@
--package main
-+package snowflakeproxy
- 
- import (
- 	"fmt"
+ 		default:
+ 			numClients := int((tokens.count() / 8) * 8) // Round down to 8
+-			body, err := messages.EncodePollRequest(sid, "standalone", currentNATType, numClients)
++			body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType, numClients)
+ 			if err != nil {
+ 				log.Printf("Error encoding poll message: %s", err.Error())
+ 				return nil

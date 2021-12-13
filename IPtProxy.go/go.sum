@@ -352,6 +352,8 @@ gitlab.com/yawning/bsaes.git v0.0.0-20190805113838-0a714cd429ec h1:FpfFs4EhNehiV
 gitlab.com/yawning/bsaes.git v0.0.0-20190805113838-0a714cd429ec/go.mod h1:BZ1RAoRPbCxum9Grlv5aeksu2H8BiKehBYooU2LFiOQ=
 gitlab.com/yawning/utls.git v0.0.12-1 h1:RL6O0MP2YI0KghuEU/uGN6+8b4183eqNWoYgx7CXD0U=
 gitlab.com/yawning/utls.git v0.0.12-1/go.mod h1:3ONKiSFR9Im/c3t5RKmMJTVdmZN496FNyk3mjrY1dyo=
+gitlab.torproject.org/tpo/anti-censorship/geoip v0.0.0-20210928150955-7ce4b3d98d01 h1:4949mHh9Vj2/okk48yG8nhP6TosFWOUfSfSr502sKGE=
+gitlab.torproject.org/tpo/anti-censorship/geoip v0.0.0-20210928150955-7ce4b3d98d01/go.mod h1:K3LOI4H8fa6j+7E10ViHeGEQV10304FG4j94ypmKLjY=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd v0.0.0-20191023171146-3cf2f69b5738/go.mod h1:dnLIgRNXwCJa5e+c6mIZCrds/GIG4ncV9HhK5PX7jPg=
 go.opencensus.io v0.20.1/go.mod h1:6WKK9ahsWS3RSO+PY9ZHZUfv2irvY6gN279GOPZjmmk=
