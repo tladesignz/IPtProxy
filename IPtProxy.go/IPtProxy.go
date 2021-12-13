@@ -224,7 +224,10 @@ func StopSnowflake() {
 	snowflakeRunning = false
 }
 
-type ClientConnectedDelegate interface {
+// SnowflakeClientConnectedDelegate - Delegate for use when clients connect
+// to the snowflake proxy. For use with StartSnowflakeProxy
+type SnowflakeClientConnectedDelegate interface {
+	// Connected - callback method to handle snowflake proxy client connections
 	Connected()
 }
 
@@ -244,10 +247,10 @@ type ClientConnectedDelegate interface {
 //
 // @param unsafeLogging Prevent logs from being scrubbed.
 //
-// @param clientConnected A delegate which is called when a client successfully connected. Will be called on its own thread!
+// @param onClientConnectedDelegate A delegate which is called when a client successfully connected. Will be called on its own thread! OPTIONAL 
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool, delegate ClientConnectedDelegate) {
+func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool, onClientConnectedDelegate SnowflakeClientConnectedDelegate) {
 	if snowflakeProxy != nil {
 		return
 	}
@@ -263,8 +266,8 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 		KeepLocalAddresses: keepLocalAddresses,
 		RelayURL:           relay,
 		ClientConnectedCallback: func() {
-			if delegate != nil {
-				delegate.Connected()
+			if onClientConnectedDelegate != nil {
+				onClientConnectedDelegate.Connected()
 			}
 		},
 	}
