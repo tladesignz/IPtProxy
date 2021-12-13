@@ -2,8 +2,11 @@ package IPtProxy
 
 import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/client"
-	snowflakeproxy "git.torproject.org/pluggable-transports/snowflake.git/proxy"
+	"git.torproject.org/pluggable-transports/snowflake.git/common/safelog"
+	sfp "git.torproject.org/pluggable-transports/snowflake.git/proxy/lib"
 	"gitlab.com/yawning/obfs4.git/obfs4proxy"
+	"io"
+	"log"
 	"net"
 	"os"
 	"runtime"
@@ -67,7 +70,7 @@ func SnowflakePort() int {
 
 var obfs4ProxyRunning = false
 var snowflakeRunning = false
-var snowflakeProxyRunning = false
+var snowflakeProxy *sfp.SnowflakeProxy
 
 // StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
 var StateLocation string
@@ -176,6 +179,8 @@ func StopObfs4Proxy() {
 //
 // @param front Front domain.
 //
+// @param ampCache URL of AMP cache to use as a proxy for signaling
+//
 // @param logFile Name of log file. OPTIONAL
 //
 // @param logToStateDir Resolve the log file relative to Tor's PT state dir.
@@ -189,7 +194,7 @@ func StopObfs4Proxy() {
 // @return Port number where Snowflake will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
+func StartSnowflake(ice, url, front, ampCache, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
 	if snowflakeRunning {
 		return snowflakePort
 	}
@@ -202,7 +207,7 @@ func StartSnowflake(ice, url, front, logFile string, logToStateDir, keepLocalAdd
 
 	fixEnv()
 
-	go snowflakeclient.Start(&snowflakePort, &ice, &url, &front, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
+	go snowflakeclient.Start(&snowflakePort, &ice, &url, &front, &ampCache, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 
 	return snowflakePort
 }
@@ -237,27 +242,63 @@ func StopSnowflake() {
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool) {
-	if snowflakeProxyRunning {
+	if snowflakeProxy != nil {
 		return
 	}
 
-	snowflakeProxyRunning = true
+	if capacity < 1 {
+		capacity = 0
+	}
+
+	snowflakeProxy = &sfp.SnowflakeProxy{
+		Capacity:           uint(capacity),
+		STUNURL:            stun,
+		BrokerURL:          broker,
+		KeepLocalAddresses: keepLocalAddresses,
+		RelayURL:           relay,
+	}
 
 	fixEnv()
 
-	go snowflakeproxy.Start(uint(capacity), broker, relay, stun, logFile, unsafeLogging, keepLocalAddresses)
+	go func(snowflakeProxy sfp.SnowflakeProxy) {
+		var logOutput io.Writer = os.Stderr
+		log.SetFlags(log.LstdFlags | log.LUTC)
+
+		log.SetFlags(log.LstdFlags | log.LUTC)
+		if logFile != "" {
+			f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer func(f *os.File) {
+				_ = f.Close()
+			}(f)
+			logOutput = io.MultiWriter(os.Stderr, f)
+		}
+		if unsafeLogging {
+			log.SetOutput(logOutput)
+		} else {
+			log.SetOutput(&safelog.LogScrubber{Output: logOutput})
+		}
+
+		err := snowflakeProxy.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(*snowflakeProxy)
 }
 
 // StopSnowflakeProxy - Stop the Snowflake proxy.
 //goland:noinspection GoUnusedExportedFunction
 func StopSnowflakeProxy() {
-	if !snowflakeProxyRunning {
+	if snowflakeProxy == nil {
 		return
 	}
 
-	go snowflakeproxy.Stop()
-
-	snowflakeProxyRunning = false
+	go func() {
+		snowflakeProxy.Stop()
+		snowflakeProxy = nil
+	}()
 }
 
 // Hack: Set some environment variables that are either
@@ -285,7 +326,7 @@ func isAvailable(port int) bool {
 		return true
 	}
 
-	err = conn.Close()
+	_ = conn.Close()
 
 	return false
 }
