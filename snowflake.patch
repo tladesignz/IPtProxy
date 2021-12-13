@@ -78,10 +78,19 @@ index d76efbf..dd28681 100644
 +	sigChan <- syscall.SIGTERM
 +}
 diff --git a/proxy/lib/snowflake.go b/proxy/lib/snowflake.go
-index e39fcfb..118279a 100644
+index e39fcfb..d8b72fa 100644
 --- a/proxy/lib/snowflake.go
 +++ b/proxy/lib/snowflake.go
-@@ -183,7 +183,7 @@ func (s *SignalingServer) pollOffer(sid string, shutdown chan struct{}) *webrtc.
+@@ -102,6 +102,8 @@ type SnowflakeProxy struct {
+ 	// NATProbeURL is the URL of the probe service we use for NAT checks
+ 	NATProbeURL string
+ 	shutdown    chan struct{}
++
++	ClientConnectedCallback func()
+ }
+ 
+ // Checks whether an IP address is a remote address for the client
+@@ -183,7 +185,7 @@ func (s *SignalingServer) pollOffer(sid string, shutdown chan struct{}) *webrtc.
  			return nil
  		default:
  			numClients := int((tokens.count() / 8) * 8) // Round down to 8
@@ -90,3 +99,12 @@ index e39fcfb..118279a 100644
  			if err != nil {
  				log.Printf("Error encoding poll message: %s", err.Error())
  				return nil
+@@ -474,6 +476,8 @@ func (sf *SnowflakeProxy) runSession(sid string) {
+ 	select {
+ 	case <-dataChan:
+ 		log.Println("Connection successful.")
++		go sf.ClientConnectedCallback()
++
+ 	case <-time.After(dataChannelTimeout):
+ 		log.Println("Timed out waiting for client to open data channel.")
+ 		if err := pc.Close(); err != nil {
