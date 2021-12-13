@@ -71,6 +71,20 @@ allprojects {
 }
 ```
 
+For newer Android Studio projects created in <a href="https://developer.android.com/studio/preview/features?hl=hu#settings-gradle">Android Studio Bumblebee | 2021.1.1 or newer</a>, the jitpack repository needs to be added into the root level file `settings.gradle` instead of `build.gradle`:
+
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+	// ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+
+
 ### Getting Started
 
 If you are building a new Android application be sure to declare that it uses the
@@ -130,7 +144,7 @@ if you don't want to rely on CocoaPods.
 
 Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with 
 ```bash
-apt install default-jdk
+apt install default-jdk 
 ````
 
 If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` 
