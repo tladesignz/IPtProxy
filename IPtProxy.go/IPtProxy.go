@@ -224,6 +224,10 @@ func StopSnowflake() {
 	snowflakeRunning = false
 }
 
+type ClientConnectedDelegate interface {
+	Connected()
+}
+
 // StartSnowflakeProxy - Start the Snowflake proxy.
 //
 // @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
@@ -240,8 +244,10 @@ func StopSnowflake() {
 //
 // @param unsafeLogging Prevent logs from being scrubbed.
 //
+// @param clientConnected A delegate which is called when a client successfully connected. Will be called on its own thread!
+//
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool) {
+func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool, delegate ClientConnectedDelegate) {
 	if snowflakeProxy != nil {
 		return
 	}
@@ -256,6 +262,11 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 		BrokerURL:          broker,
 		KeepLocalAddresses: keepLocalAddresses,
 		RelayURL:           relay,
+		ClientConnectedCallback: func() {
+			if delegate != nil {
+				delegate.Connected()
+			}
+		},
 	}
 
 	fixEnv()
