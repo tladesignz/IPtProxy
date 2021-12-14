@@ -1,5 +1,12 @@
 # IPtProxy Changelog
 
+## 1.3.0
+- Updated Snowflake to version 2.0.1.
+- Added Snowflake AMP support.
+- Switched to newer DTLS library, which improves fingerprinting resistance for Snowflake.
+- Added callback to `StartSnowflakeProxy`, to allow counting of connected clients.
+- Fixed iOS warnings about wrong iOS SDK.
+
 ## 1.2.0
 - Added explicit support for a proxy behind Obfs4proxy.
 

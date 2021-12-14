@@ -11,6 +11,13 @@
 #include "Universe.objc.h"
 
 
+@protocol IPtProxySnowflakeClientConnected;
+@class IPtProxySnowflakeClientConnected;
+
+@protocol IPtProxySnowflakeClientConnected <NSObject>
+- (void)connected;
+@end
+
 @interface IPtProxy : NSObject
 /**
  * StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
@@ -68,7 +75,7 @@ Only use the port properties after calling this, they might have been changed!
 
 @param unsafeLogging Disable the address scrubber.
 
-@param proxy Proxy to be used by Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
+@param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
 
 @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
 	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
@@ -84,6 +91,8 @@ FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOO
 
 @param front Front domain.
 
+@param ampCache URL of AMP cache to use as a proxy for signaling
+
 @param logFile Name of log file. OPTIONAL
 
 @param logToStateDir Resolve the log file relative to Tor's PT state dir.
@@ -96,26 +105,32 @@ FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOO
 
 @return Port number where Snowflake will listen on, if no error happens during start up.
  */
-FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
+FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable ampCache, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
  * StartSnowflakeProxy - Start the Snowflake proxy.
 
 @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
 
-@param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.bamsoftware.com/, if empty.
+@param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
 
 @param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
 
 @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
 
-@param logFile Name of log file. OPTIONAL
+@param natProbe. OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
+
+@param logFile Name of log file. OPTIONAL. Defaults to STDERR.
 
 @param keepLocalAddresses Keep local LAN address ICE candidates.
 
 @param unsafeLogging Prevent logs from being scrubbed.
+
+@param clientConnected A delegate which is called when a client successfully connected.
+      Will be called on its own thread! You will need to switch to your own UI thread,
+      if you want to do UI stuff!! OPTIONAL
  */
-FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging);
+FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable natProbe, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging, id<IPtProxySnowflakeClientConnected> _Nullable clientConnected);
 
 /**
  * StopObfs4Proxy - Stop the Obfs4Proxy.
@@ -131,5 +146,22 @@ FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);
  * StopSnowflakeProxy - Stop the Snowflake proxy.
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflakeProxy(void);
+
+@class IPtProxySnowflakeClientConnected;
+
+/**
+ * SnowflakeClientConnected - Interface to use when clients connect
+to the snowflake proxy. For use with StartSnowflakeProxy
+ */
+@interface IPtProxySnowflakeClientConnected : NSObject <goSeqRefInterface, IPtProxySnowflakeClientConnected> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * Connected - callback method to handle snowflake proxy client connections.
+ */
+- (void)connected;
+@end
 
 #endif
