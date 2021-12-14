@@ -46,8 +46,10 @@ pod 'IPtProxy', '~> 1.2'
 
 ### Getting Started
 
-[Onion Browser](https://github.com/OnionBrowser/OnionBrowser/blob/2.X/OnionBrowser/OnionManager.swift)
-is a recommended read for better understanding and configuration details.
+There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI)
+which explains the use of IPtProxy and provides all the necessary UI and additional 
+information to use this library completely in a Tor context.
+
 
 ## Android 
 
@@ -71,7 +73,10 @@ allprojects {
 }
 ```
 
-For newer Android Studio projects created in <a href="https://developer.android.com/studio/preview/features?hl=hu#settings-gradle">Android Studio Bumblebee | 2021.1.1 or newer</a>, the jitpack repository needs to be added into the root level file `settings.gradle` instead of `build.gradle`:
+For newer Android Studio projects created in 
+[Android Studio Bumblebee | 2021.1.1](https://developer.android.com/studio/preview/features?hl=hu#settings-gradle) 
+or newer</a>, the JitPack repository needs to be added into the root level file `settings.gradle` 
+instead of `build.gradle`:
 
 ```groovy
 dependencyResolutionManagement {
@@ -82,8 +87,6 @@ dependencyResolutionManagement {
     }
 }
 ```
-
-
 
 ### Getting Started
 
@@ -142,7 +145,8 @@ if you don't want to rely on CocoaPods.
 
 ### Android
 
-Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with 
+Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with: 
+
 ```bash
 apt install default-jdk 
 ````
