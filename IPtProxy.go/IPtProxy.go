@@ -224,10 +224,10 @@ func StopSnowflake() {
 	snowflakeRunning = false
 }
 
-// SnowflakeClientConnectedDelegate - Delegate for use when clients connect
+// SnowflakeClientConnected - Interface to use when clients connect
 // to the snowflake proxy. For use with StartSnowflakeProxy
-type SnowflakeClientConnectedDelegate interface {
-	// Connected - callback method to handle snowflake proxy client connections
+type SnowflakeClientConnected interface {
+	// Connected - callback method to handle snowflake proxy client connections.
 	Connected()
 }
 
@@ -235,22 +235,26 @@ type SnowflakeClientConnectedDelegate interface {
 //
 // @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
 //
-// @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.bamsoftware.com/, if empty.
+// @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
 //
 // @param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
 //
 // @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
 //
-// @param logFile Name of log file. OPTIONAL
+// @param natProbe. OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
+//
+// @param logFile Name of log file. OPTIONAL. Defaults to STDERR.
 //
 // @param keepLocalAddresses Keep local LAN address ICE candidates.
 //
 // @param unsafeLogging Prevent logs from being scrubbed.
 //
-// @param onClientConnectedDelegate A delegate which is called when a client successfully connected. Will be called on its own thread! OPTIONAL 
+// @param clientConnected A delegate which is called when a client successfully connected.
+//       Will be called on its own thread! You will need to switch to your own UI thread,
+//       if you want to do UI stuff!! OPTIONAL
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keepLocalAddresses, unsafeLogging bool, onClientConnectedDelegate SnowflakeClientConnectedDelegate) {
+func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile string, keepLocalAddresses, unsafeLogging bool, clientConnected SnowflakeClientConnected) {
 	if snowflakeProxy != nil {
 		return
 	}
@@ -265,9 +269,10 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, logFile string, keep
 		BrokerURL:          broker,
 		KeepLocalAddresses: keepLocalAddresses,
 		RelayURL:           relay,
+		NATProbeURL:        natProbe,
 		ClientConnectedCallback: func() {
-			if onClientConnectedDelegate != nil {
-				onClientConnectedDelegate.Connected()
+			if clientConnected != nil {
+				clientConnected.Connected()
 			}
 		},
 	}
