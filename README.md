@@ -65,11 +65,25 @@ And this to your root `build.gradle` at the end of repositories:
 ```groovy
 allprojects {
 	repositories {
-		...
+		// ...
 		maven { url 'https://jitpack.io' }
 	}
 }
 ```
+
+For newer Android Studio projects created in <a href="https://developer.android.com/studio/preview/features?hl=hu#settings-gradle">Android Studio Bumblebee | 2021.1.1 or newer</a>, the jitpack repository needs to be added into the root level file `settings.gradle` instead of `build.gradle`:
+
+```groovy
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+	  // ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+
 
 ### Getting Started
 
@@ -127,6 +141,11 @@ This will create an `IPtProxy.xcframework`, which you can directly drop in your 
 if you don't want to rely on CocoaPods.
 
 ### Android
+
+Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with 
+```bash
+apt install default-jdk 
+````
 
 If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` 
 environment variables are set:
