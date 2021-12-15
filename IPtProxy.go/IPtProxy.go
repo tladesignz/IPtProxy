@@ -179,9 +179,10 @@ func StopObfs4Proxy() {
 //
 // @param front Front domain.
 //
-// @param ampCache URL of AMP cache to use as a proxy for signaling
+// @param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
+//        Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
 //
-// @param logFile Name of log file. OPTIONAL
+// @param logFile Name of log file. OPTIONAL. Defaults to no log.
 //
 // @param logToStateDir Resolve the log file relative to Tor's PT state dir.
 //
