@@ -242,7 +242,7 @@ type SnowflakeClientConnected interface {
 //
 // @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
 //
-// @param natProbe. OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
+// @param natProbe OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 //
 // @param logFile Name of log file. OPTIONAL. Defaults to STDERR.
 //
