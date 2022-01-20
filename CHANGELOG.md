@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 1.4.0
+- Updated Obfs4proxy to latest 0.0.13-dev which fixes a bug which made prior 
+  versions distinguishable.
+- Fixed minor documentation issues.
+
 ## 1.3.0
 - Updated Snowflake to version 2.0.1.
 - Added Snowflake AMP support.

@@ -41,7 +41,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.3'
+pod 'IPtProxy', '~> 1.4'
 ```
 
 ### Getting Started
@@ -59,7 +59,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.3.0'
+implementation 'com.github.tladesignz:IPtProxy:1.4.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:
@@ -125,8 +125,11 @@ If you want to compile it yourself, you'll need Go 1.16 as a prerequisite.
 You will also need Xcode installed when compiling for iOS and an Android NDK
 when compiling for Android.
 
-If it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
-for `$GOPATH` is `$HOME/go` 
+The build script needs the gomobile binary and will install it, if not available, yet.
+However, you'll still need to make it accessible in your `$PATH`.
+
+So, if it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
+for `$GOPATH` is `$HOME/go`: 
 
 ```bash
 export PATH=$HOME/go/bin/:$PATH` 
