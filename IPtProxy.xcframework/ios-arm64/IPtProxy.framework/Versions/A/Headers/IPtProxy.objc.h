@@ -91,9 +91,10 @@ FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOO
 
 @param front Front domain.
 
-@param ampCache URL of AMP cache to use as a proxy for signaling
+@param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
+       Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
 
-@param logFile Name of log file. OPTIONAL
+@param logFile Name of log file. OPTIONAL. Defaults to no log.
 
 @param logToStateDir Resolve the log file relative to Tor's PT state dir.
 
@@ -118,7 +119,7 @@ FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString*
 
 @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
 
-@param natProbe. OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
+@param natProbe OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 
 @param logFile Name of log file. OPTIONAL. Defaults to STDERR.
 
