@@ -34,7 +34,7 @@ else
     # No .git directory - That's a normal install.
     git clone https://gitlab.com/yawning/obfs4.git
     cd obfs4 || exit 1
-    git checkout --force --quiet e330d1b7
+    git checkout --force --quiet cbf3f3cf
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1
@@ -52,9 +52,7 @@ printf '\n\n--- Compile %s...\n' "$OUTPUT"
 export PATH=~/go/bin:$PATH
 cd IPtProxy.go || exit 1
 
-if test "$1" = "android"; then
-  gomobile init
-fi
+gomobile init
 
 gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -v
 
