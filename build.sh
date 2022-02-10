@@ -38,7 +38,7 @@ else
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1
-    git checkout --force --quiet ead5a960
+    git checkout --force --quiet e6e5e20a
     cd ..
 fi
 
