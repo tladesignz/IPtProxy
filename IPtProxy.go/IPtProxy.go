@@ -264,7 +264,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		capacity = 0
 	}
 
-	snowflakeProxy = &sfp.SnowflakeProxy{
+	snowflakeProxy = &sfp.SnowflakeProxy {
 		Capacity:           uint(capacity),
 		STUNURL:            stun,
 		BrokerURL:          broker,
@@ -315,10 +315,11 @@ func StopSnowflakeProxy() {
 		return
 	}
 
-	go func() {
+	go func(snowflakeProxy *sfp.SnowflakeProxy) {
 		snowflakeProxy.Stop()
-		snowflakeProxy = nil
-	}()
+	}(snowflakeProxy)
+
+    snowflakeProxy = nil
 }
 
 // Hack: Set some environment variables that are either
