@@ -7,6 +7,11 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS and Android
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 
+| Transport  | Version |
+|------------|--------:|
+| Obfs4proxy |  0.0.13 |
+| Snowflake  |   2.1.0 |
+
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
 This project encapsulates all the machinations to make it work and provides an
@@ -41,7 +46,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.4'
+pod 'IPtProxy', '~> 1.5'
 ```
 
 ### Getting Started
@@ -59,7 +64,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.4.0'
+implementation 'com.github.tladesignz:IPtProxy:1.5.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:

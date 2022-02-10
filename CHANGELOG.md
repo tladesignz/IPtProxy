@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 1.5.0
+- Updated Obfs4proxy to latest version 0.0.13.
+- Updated Snowflake to latest version 2.1.0.
+- Fixed bug when stopping Snowflake proxy. (Thanks bitmold!)
+
 ## 1.4.0
 - Updated Obfs4proxy to latest 0.0.13-dev which fixes a bug which made prior 
   versions distinguishable.
