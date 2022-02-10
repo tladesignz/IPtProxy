@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index d76efbf..dd28681 100644
+index 5a00206..290a121 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,8 +1,7 @@
@@ -21,7 +21,7 @@ index d76efbf..dd28681 100644
  // Exchanges bytes between two ReadWriters.
  // (In this case, between a SOCKS connection and a snowflake transport conn)
  func copyLoop(socks, sfconn io.ReadWriter) {
-@@ -119,23 +120,13 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
+@@ -120,23 +121,13 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
  	}
  }
  
@@ -51,7 +51,7 @@ index d76efbf..dd28681 100644
  
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
-@@ -195,7 +186,7 @@ func main() {
+@@ -196,7 +187,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -60,7 +60,7 @@ index d76efbf..dd28681 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -210,7 +201,6 @@ func main() {
+@@ -211,7 +202,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -68,7 +68,7 @@ index d76efbf..dd28681 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -237,3 +227,8 @@ func main() {
+@@ -238,3 +228,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }
@@ -78,28 +78,28 @@ index d76efbf..dd28681 100644
 +	sigChan <- syscall.SIGTERM
 +}
 diff --git a/proxy/lib/snowflake.go b/proxy/lib/snowflake.go
-index e39fcfb..d8b72fa 100644
+index 8747f66..735c433 100644
 --- a/proxy/lib/snowflake.go
 +++ b/proxy/lib/snowflake.go
-@@ -102,6 +102,8 @@ type SnowflakeProxy struct {
- 	// NATProbeURL is the URL of the probe service we use for NAT checks
- 	NATProbeURL string
- 	shutdown    chan struct{}
+@@ -117,6 +117,8 @@ type SnowflakeProxy struct {
+ 	NATTypeMeasurementInterval time.Duration
+ 	EventDispatcher            event.SnowflakeEventDispatcher
+ 	shutdown                   chan struct{}
 +
 +	ClientConnectedCallback func()
  }
  
  // Checks whether an IP address is a remote address for the client
-@@ -183,7 +185,7 @@ func (s *SignalingServer) pollOffer(sid string, shutdown chan struct{}) *webrtc.
- 			return nil
+@@ -199,7 +201,7 @@ func (s *SignalingServer) pollOffer(sid string, shutdown chan struct{}) *webrtc.
  		default:
  			numClients := int((tokens.count() / 8) * 8) // Round down to 8
--			body, err := messages.EncodePollRequest(sid, "standalone", currentNATType, numClients)
-+			body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATType, numClients)
+ 			currentNATTypeLoaded := getCurrentNATType()
+-			body, err := messages.EncodePollRequest(sid, "standalone", currentNATTypeLoaded, numClients)
++			body, err := messages.EncodePollRequest(sid, "iptproxy", currentNATTypeLoaded, numClients)
  			if err != nil {
  				log.Printf("Error encoding poll message: %s", err.Error())
  				return nil
-@@ -474,6 +476,8 @@ func (sf *SnowflakeProxy) runSession(sid string) {
+@@ -495,6 +497,8 @@ func (sf *SnowflakeProxy) runSession(sid string) {
  	select {
  	case <-dataChan:
  		log.Println("Connection successful.")
