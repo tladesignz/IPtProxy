@@ -315,10 +315,11 @@ func StopSnowflakeProxy() {
 		return
 	}
 
-	go func() {
+	go func(snowflakeProxy *sfp.SnowflakeProxy) {
 		snowflakeProxy.Stop()
-		snowflakeProxy = nil
-	}()
+	}(snowflakeProxy)
+	
+	snowflakeProxy = nil
 }
 
 // Hack: Set some environment variables that are either
