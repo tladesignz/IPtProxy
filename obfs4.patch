@@ -1,5 +1,5 @@
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index 628f56b..be2cc55 100644
+index d92f5f5..df2584e 100644
 --- a/obfs4proxy/obfs4proxy.go
 +++ b/obfs4proxy/obfs4proxy.go
 @@ -27,10 +27,9 @@
