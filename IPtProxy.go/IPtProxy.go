@@ -110,7 +110,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 
 	obfs4ProxyRunning = true
 
-	for !isAvailable(meekPort) {
+	for !IsPortAvailable(meekPort) {
 		meekPort++
 	}
 
@@ -118,7 +118,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 		obfs2Port = meekPort + 1
 	}
 
-	for !isAvailable(obfs2Port) {
+	for !IsPortAvailable(obfs2Port) {
 		obfs2Port++
 	}
 
@@ -126,7 +126,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 		obfs3Port = obfs2Port + 1
 	}
 
-	for !isAvailable(obfs3Port) {
+	for !IsPortAvailable(obfs3Port) {
 		obfs3Port++
 	}
 
@@ -134,7 +134,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 		obfs4Port = obfs3Port + 1
 	}
 
-	for !isAvailable(obfs4Port) {
+	for !IsPortAvailable(obfs4Port) {
 		obfs4Port++
 	}
 
@@ -142,7 +142,7 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 		scramblesuitPort = obfs4Port + 1
 	}
 
-	for !isAvailable(scramblesuitPort) {
+	for !IsPortAvailable(scramblesuitPort) {
 		scramblesuitPort++
 	}
 
@@ -202,7 +202,7 @@ func StartSnowflake(ice, url, front, ampCache, logFile string, logToStateDir, ke
 
 	snowflakeRunning = true
 
-	for !isAvailable(snowflakePort) {
+	for !IsPortAvailable(snowflakePort) {
 		snowflakePort++
 	}
 
@@ -338,7 +338,10 @@ func fixEnv() {
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
 }
 
-func isAvailable(port int) bool {
+// IsPortAvailable - checks to see if a given port is not in use 
+//
+// @param port the port to check 
+func IsPortAvailable(port int) bool {
 	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 
 	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
