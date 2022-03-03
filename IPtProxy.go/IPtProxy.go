@@ -361,3 +361,8 @@ func IsPortAvailable(port int) bool {
 
 	return false
 }
+
+// IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app
+func IsSnowflakeProxyRunning() bool {
+	return snowflakeProxy != nil
+}
