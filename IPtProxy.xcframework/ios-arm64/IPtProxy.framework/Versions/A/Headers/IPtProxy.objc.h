@@ -28,6 +28,18 @@
 @end
 
 /**
+ * IsPortAvailable - Checks to see if a given port is not in use.
+
+@param port The port to check.
+ */
+FOUNDATION_EXPORT BOOL IPtProxyIsPortAvailable(long port);
+
+/**
+ * IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
+ */
+FOUNDATION_EXPORT BOOL IPtProxyIsSnowflakeProxyRunning(void);
+
+/**
  * MeekPort - Port where Obfs4proxy will provide its Meek service.
 Only use this after calling StartObfs4Proxy! It might have changed after that!
  */

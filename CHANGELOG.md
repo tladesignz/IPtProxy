@@ -1,5 +1,12 @@
 # IPtProxy Changelog
 
+## 1.5.1
+- Update Snowflake to latest main. Contains a crash fix.
+- Added `IsSnowflakeProxyRunning` method to easily check,
+  if the Snowflake Proxy is running.
+- Exposed `IsPortAvailable` so consumers don't need to 
+  implement this themselves, if they happen to do something similar.
+
 ## 1.5.0
 - Updated Obfs4proxy to latest version 0.0.13.
 - Updated Snowflake to latest version 2.1.0.
