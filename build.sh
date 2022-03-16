@@ -29,6 +29,8 @@ if test -e ".git"; then
     git reset --hard
     cd ../snowflake || exit 1
     git reset --hard
+    cd ../dnstt ||exit 1
+    git reset --hard
     cd ..
 else
     # No .git directory - That's a normal install.
@@ -40,12 +42,17 @@ else
     cd snowflake || exit 1
     git checkout --force --quiet e6e5e20a
     cd ..
+    git clone https://www.bamsoftware.com/git/dnstt.git
+    cd dnstt || exit 1
+    git checkout --force --quiet 04f04590
+    cd ..
 fi
 
 # Apply patches.
 printf '\n\n--- Apply patches to Obfs4proxy and Snowflake...\n'
 patch --directory=obfs4 --strip=1 < obfs4.patch
 patch --directory=snowflake --strip=1 < snowflake.patch
+patch --directory=dnstt --strip=1 < dnstt.patch
 
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"

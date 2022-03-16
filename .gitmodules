@@ -4,3 +4,6 @@
 [submodule "snowflake"]
 	path = snowflake
 	url = https://git.torproject.org/pluggable-transports/snowflake.git
+[submodule "dnstt"]
+	path = dnstt
+	url = https://www.bamsoftware.com/git/dnstt.git

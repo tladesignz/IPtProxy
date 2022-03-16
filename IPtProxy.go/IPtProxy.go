@@ -5,6 +5,8 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
 	"gitlab.com/yawning/obfs4.git/obfs4proxy"
+	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -74,9 +76,20 @@ func SnowflakePort() int {
 	return snowflakePort
 }
 
+var dnsttPort = 57000
+
+// DnsttPort - Port where Dnstt will provide its service.
+// Only use this property after calling StartDnstt! It might have changed after that!
+//
+//goland:noinspection GoUnusedExportedFunction
+func DnsttPort() int {
+    return dnsttPort
+}
+
 var obfs4ProxyRunning = false
 var snowflakeRunning = false
 var snowflakeProxy *sfp.SnowflakeProxy
+var dnsttRunning = false
 
 // StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
 var StateLocation string
@@ -331,6 +344,50 @@ func StopSnowflakeProxy() {
 	}(snowflakeProxy)
 
     snowflakeProxy = nil
+}
+
+// StartDnstt - Start the Dnstt client.
+//
+// @param dohURL OPTIONAL. URL of a DoH resolver. Use either this or `dotAddr`.
+//
+// @param dotAddr OPTIONAL. Address of a DoT resolver. Use either this or `dohURL`.
+//
+// @param pubkey The DNSTT's server public key (as hex digits).
+//
+// @param server The DNSTT destination server domain.
+//
+// @return Port number where Snowflake will listen on, if no error happens during start up.
+//
+//goland:noinspection GoUnusedExportedFunction
+func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
+    if dnsttRunning {
+        return dnsttPort
+    }
+
+	dnsttRunning = true
+
+	for !IsPortAvailable(dnsttPort) {
+		dnsttPort++
+	}
+
+	listenAddr := fmt.Sprintf("localhost:%d", dnsttPort)
+
+	go dnsttclient.Start(&dohURL, &dotAddr, &pubkey, &server, &listenAddr)
+
+    return dnsttPort
+}
+
+// StopDnstt - Stop the Dnstt client.
+//
+//goland:noinspection GoUnusedExportedFunction
+func StopDnstt() {
+    if !dnsttRunning {
+        return
+    }
+
+    go dnsttclient.Stop()
+
+    dnsttRunning = false
 }
 
 // IsPortAvailable - Checks to see if a given port is not in use.
