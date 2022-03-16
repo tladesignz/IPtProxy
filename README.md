@@ -36,8 +36,6 @@ Problems solved in particular are:
   on a multi-user Android), you should first start the transports and then use the 
   returned ports for configuration of other components (e.g. Tor). 
 
-Both PTs are contained at their latest `master` commit, as per 2021-07-14.
-
 ## iOS
 
 ### Installation
