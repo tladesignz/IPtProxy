@@ -314,6 +314,10 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 	}(snowflakeProxy)
 }
 
+// IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
+func IsSnowflakeProxyRunning() bool {
+	return snowflakeProxy != nil
+}
 // StopSnowflakeProxy - Stop the Snowflake proxy.
 //
 //goland:noinspection GoUnusedExportedFunction
@@ -327,22 +331,6 @@ func StopSnowflakeProxy() {
 	}(snowflakeProxy)
 
     snowflakeProxy = nil
-}
-
-// Hack: Set some environment variables that are either
-// required, or values that we want. Have to do this here, since we can only
-// launch this in a thread and the manipulation of environment variables
-// from within an iOS app won't end up in goptlib properly.
-//
-// Note: This might be called multiple times when using different functions here,
-// but that doesn't necessarily mean, that the values set are independent each
-// time this is called. It's still the ENVIRONMENT, we're changing here, so there might
-// be race conditions.
-func fixEnv() {
-	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
-	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
-
-	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
 }
 
 // IsPortAvailable - Checks to see if a given port is not in use.
@@ -362,7 +350,18 @@ func IsPortAvailable(port int) bool {
 	return false
 }
 
-// IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
-func IsSnowflakeProxyRunning() bool {
-	return snowflakeProxy != nil
+// Hack: Set some environment variables that are either
+// required, or values that we want. Have to do this here, since we can only
+// launch this in a thread and the manipulation of environment variables
+// from within an iOS app won't end up in goptlib properly.
+//
+// Note: This might be called multiple times when using different functions here,
+// but that doesn't necessarily mean, that the values set are independent each
+// time this is called. It's still the ENVIRONMENT, we're changing here, so there might
+// be race conditions.
+func fixEnv() {
+	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
+	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
+
+	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
 }
