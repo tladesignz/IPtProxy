@@ -91,6 +91,9 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
+// Obfs4ProxyVersion - the version of obfs4Proxy bundled with IPtProxy
+const Obfs4ProxyVersion = obfs4proxy.obfs4proxyVersion
+
 // StartObfs4Proxy - Start the Obfs4Proxy.
 //
 // This will test, if the default ports are available. If not, it will increment them until there is.
