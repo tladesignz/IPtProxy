@@ -91,8 +91,12 @@ func init() {
 	StateLocation += "/pt_state"
 }
 
-// Obfs4ProxyVersion - the version of obfs4Proxy bundled with IPtProxy
-const Obfs4ProxyVersion = obfs4proxy.obfs4proxyVersion
+// Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
+//
+//goland:noinspection GoUnusedExportedFunction
+func Obfs4ProxyVersion() string {
+    return obfs4proxy.Obfs4proxyVersion
+}
 
 // StartObfs4Proxy - Start the Obfs4Proxy.
 //
