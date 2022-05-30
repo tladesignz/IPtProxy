@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '1.5.1'
-  s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS'
+  s.version          = '1.6.0'
+  s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
     Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
@@ -33,7 +33,13 @@ Pod::Spec.new do |s|
     - Snowflake and Obfs4proxy are patched to accept all configuration parameters
       directly.
 
-    Both PTs are contained at their latest `master` commit, as per 2021-07-14.
+    Contained transport versions:
+
+    | Transport  | Version |
+    |------------|--------:|
+    | Obfs4proxy |  0.0.13 |
+    | Snowflake  |   2.2.0 |
+
                        DESC
 
   s.homepage         = 'https://github.com/tladesignz/IPtProxy'
@@ -43,6 +49,7 @@ Pod::Spec.new do |s|
   s.social_media_url = 'https://twitter.com/tladesignz'
 
   s.ios.deployment_target = '11.0'
+  s.osx.deployment_target = '12'
 
   s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*'
 

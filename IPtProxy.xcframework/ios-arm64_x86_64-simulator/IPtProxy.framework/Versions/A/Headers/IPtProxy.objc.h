@@ -15,6 +15,9 @@
 @class IPtProxySnowflakeClientConnected;
 
 @protocol IPtProxySnowflakeClientConnected <NSObject>
+/**
+ * Connected - callback method to handle snowflake proxy client connections.
+ */
 - (void)connected;
 @end
 
@@ -62,6 +65,11 @@ FOUNDATION_EXPORT long IPtProxyObfs3Port(void);
 Only use this property after calling StartObfs4Proxy! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyObfs4Port(void);
+
+/**
+ * Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull IPtProxyObfs4ProxyVersion(void);
 
 /**
  * ScramblesuitPort - Port where Obfs4proxy will provide its Scramblesuit service.
