@@ -1,6 +1,6 @@
 # IPtProxy
 
-Obfs4proxy and Snowflake Pluggable Transports for iOS and Android
+Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 
 [![JitPack](https://jitpack.io/v/tladesignz/IPtProxy.svg)](https://jitpack.io/#tladesignz/IPtProxy)
 [![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
@@ -10,7 +10,7 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS and Android
 | Transport  | Version |
 |------------|--------:|
 | Obfs4proxy |  0.0.13 |
-| Snowflake  |   2.1.0 |
+| Snowflake  |   2.2.0 |
 
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -36,7 +36,7 @@ Problems solved in particular are:
   on a multi-user Android), you should first start the transports and then use the 
   returned ports for configuration of other components (e.g. Tor). 
 
-## iOS
+## iOS/macOS
 
 ### Installation
 
@@ -44,7 +44,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.5'
+pod 'IPtProxy', '~> 1.6'
 ```
 
 ### Getting Started
@@ -62,7 +62,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.5.1'
+implementation 'com.github.tladesignz:IPtProxy:1.6.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:
@@ -196,4 +196,4 @@ for the Guardian Project https://guardianproject.info
 
 ## License
 
-IPtProxy is available under the MIT license. See the LICENSE file for more info.
+IPtProxy is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
