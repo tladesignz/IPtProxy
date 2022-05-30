@@ -285,6 +285,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		KeepLocalAddresses: keepLocalAddresses,
 		RelayURL:           relay,
 		NATProbeURL:        natProbe,
+		ProxyType:          "iptproxy",
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
