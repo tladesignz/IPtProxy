@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TARGET=ios
+TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
 
 if test "$1" = "android"; then
@@ -54,6 +54,6 @@ cd IPtProxy.go || exit 1
 
 gomobile init
 
-gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -v
+gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -androidapi 19 -v
 
 printf '\n\n--- Done.\n\n'
