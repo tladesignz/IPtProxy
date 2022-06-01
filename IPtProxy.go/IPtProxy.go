@@ -12,6 +12,7 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+	"runtime/debug"
 )
 
 var meekPort = 47000
@@ -96,6 +97,25 @@ func init() {
 //goland:noinspection GoUnusedExportedFunction
 func Obfs4ProxyVersion() string {
     return obfs4proxy.Obfs4proxyVersion
+}
+
+// SnowflakeProxyVersion  - The version of Snowflake bundled with IPtProxy
+//
+//goland:noinspection GoUnusedExportedFunction
+func SnowflakeProxyVersion() string {
+    bi, ok := debug.ReadBuildInfo()
+    if !ok {
+        log.Printf("Failed to read build info")
+        return ""
+    }
+
+
+    for _, dep := range bi.Deps {
+    	if (dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2") {
+    		return dep.Version
+    	}
+    }
+    return ""
 }
 
 // StartObfs4Proxy - Start the Obfs4Proxy.
