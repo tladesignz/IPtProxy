@@ -99,22 +99,26 @@ func Obfs4ProxyVersion() string {
     return obfs4proxy.Obfs4proxyVersion
 }
 
-// SnowflakeProxyVersion  - The version of Snowflake bundled with IPtProxy
+// SnowflakeVersion  - The version of Snowflake bundled with IPtProxy.
 //
 //goland:noinspection GoUnusedExportedFunction
-func SnowflakeProxyVersion() string {
+func SnowflakeVersion() string {
     bi, ok := debug.ReadBuildInfo()
     if !ok {
         log.Printf("Failed to read build info")
         return ""
     }
 
-
     for _, dep := range bi.Deps {
-    	if (dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2") {
-    		return dep.Version
+    	if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
+    	    if dep.Version[0:1] == "v" {
+        		return dep.Version[1:len(dep.Version)]
+    	    } else {
+    	        return dep.Version
+    	    }
     	}
     }
+
     return ""
 }
 
