@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TARGET=ios
+TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
 
 if test "$1" = "android"; then
@@ -40,7 +40,7 @@ else
     cd ..
     git clone https://git.torproject.org/pluggable-transports/snowflake.git
     cd snowflake || exit 1
-    git checkout --force --quiet e6e5e20a
+    git checkout --force --quiet 4e7f8975
     cd ..
     git clone https://www.bamsoftware.com/git/dnstt.git
     cd dnstt || exit 1
@@ -61,6 +61,6 @@ cd IPtProxy.go || exit 1
 
 gomobile init
 
-gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -v
+gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -androidapi 19 -v
 
 printf '\n\n--- Done.\n\n'

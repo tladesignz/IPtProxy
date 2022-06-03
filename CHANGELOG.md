@@ -1,5 +1,11 @@
 # IPtProxy Changelog
 
+## 1.6.0
+- Update Snowflake to latest version 2.2.0.
+- Added `IPtProxyObfs4ProxyVersion` returning the version of the used Obfs4proxy.
+- Use latest Android NDK v24.0 which raises the minimally supported Android API level to 19.
+- Added support for MacOS.
+
 ## 1.5.1
 - Update Snowflake to latest main. Contains a crash fix.
 - Added `IsSnowflakeProxyRunning` method to easily check,
