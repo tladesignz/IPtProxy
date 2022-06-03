@@ -1,20 +1,19 @@
 package IPtProxy
 
 import (
+	"fmt"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
-	"gitlab.com/yawning/obfs4.git/obfs4proxy"
-	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client"
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"strconv"
 	"time"
-	"runtime/debug"
+	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client"
 )
 
 var meekPort = 47000
@@ -84,7 +83,7 @@ var dnsttPort = 57000
 //
 //goland:noinspection GoUnusedExportedFunction
 func DnsttPort() int {
-    return dnsttPort
+	return dnsttPort
 }
 
 var obfs4ProxyRunning = false
@@ -96,7 +95,8 @@ var dnsttRunning = false
 var StateLocation string
 
 func init() {
-	if runtime.GOOS == "android" {
+	if //goland:noinspection GoBoolExpressions
+	runtime.GOOS == "android" {
 		StateLocation = "/data/local/tmp"
 	} else {
 		StateLocation = os.Getenv("TMPDIR")
@@ -109,30 +109,30 @@ func init() {
 //
 //goland:noinspection GoUnusedExportedFunction
 func Obfs4ProxyVersion() string {
-    return obfs4proxy.Obfs4proxyVersion
+	return obfs4proxy.Obfs4proxyVersion
 }
 
 // SnowflakeVersion  - The version of Snowflake bundled with IPtProxy.
 //
 //goland:noinspection GoUnusedExportedFunction
 func SnowflakeVersion() string {
-    bi, ok := debug.ReadBuildInfo()
-    if !ok {
-        log.Printf("Failed to read build info")
-        return ""
-    }
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		log.Printf("Failed to read build info")
+		return ""
+	}
 
-    for _, dep := range bi.Deps {
-    	if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
-    	    if dep.Version[0:1] == "v" {
-        		return dep.Version[1:len(dep.Version)]
-    	    } else {
-    	        return dep.Version
-    	    }
-    	}
-    }
+	for _, dep := range bi.Deps {
+		if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
+			if dep.Version[0:1] == "v" {
+				return dep.Version[1:len(dep.Version)]
+			} else {
+				return dep.Version
+			}
+		}
+	}
 
-    return ""
+	return ""
 }
 
 // StartObfs4Proxy - Start the Obfs4Proxy.
@@ -315,7 +315,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		capacity = 0
 	}
 
-	snowflakeProxy = &sfp.SnowflakeProxy {
+	snowflakeProxy = &sfp.SnowflakeProxy{
 		Capacity:           uint(capacity),
 		STUNURL:            stun,
 		BrokerURL:          broker,
@@ -337,7 +337,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		log.SetFlags(log.LstdFlags | log.LUTC)
 
 		if logFile != "" {
-			f, err := os.OpenFile(logFile, os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0600)
+			f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -360,9 +360,12 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 }
 
 // IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
+//
+//goland:noinspection GoUnusedExportedFunction
 func IsSnowflakeProxyRunning() bool {
 	return snowflakeProxy != nil
 }
+
 // StopSnowflakeProxy - Stop the Snowflake proxy.
 //
 //goland:noinspection GoUnusedExportedFunction
@@ -375,7 +378,7 @@ func StopSnowflakeProxy() {
 		snowflakeProxy.Stop()
 	}(snowflakeProxy)
 
-    snowflakeProxy = nil
+	snowflakeProxy = nil
 }
 
 // StartDnstt - Start the Dnstt client.
@@ -392,9 +395,9 @@ func StopSnowflakeProxy() {
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
-    if dnsttRunning {
-        return dnsttPort
-    }
+	if dnsttRunning {
+		return dnsttPort
+	}
 
 	dnsttRunning = true
 
@@ -404,22 +407,24 @@ func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
 
 	listenAddr := fmt.Sprintf("localhost:%d", dnsttPort)
 
+	fixEnv()
+
 	go dnsttclient.Start(&dohURL, &dotAddr, &pubkey, &server, &listenAddr)
 
-    return dnsttPort
+	return dnsttPort
 }
 
 // StopDnstt - Stop the Dnstt client.
 //
 //goland:noinspection GoUnusedExportedFunction
 func StopDnstt() {
-    if !dnsttRunning {
-        return
-    }
+	if !dnsttRunning {
+		return
+	}
 
-    go dnsttclient.Stop()
+	go dnsttclient.Stop()
 
-    dnsttRunning = false
+	dnsttRunning = false
 }
 
 // IsPortAvailable - Checks to see if a given port is not in use.
@@ -428,7 +433,7 @@ func StopDnstt() {
 func IsPortAvailable(port int) bool {
 	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 
-	conn, err := net.DialTimeout("tcp", address, 500 * time.Millisecond)
+	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
 
 	if err != nil {
 		return true
@@ -449,7 +454,7 @@ func IsPortAvailable(port int) bool {
 // time this is called. It's still the ENVIRONMENT, we're changing here, so there might
 // be race conditions.
 func fixEnv() {
-	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
+	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake,dnstt")
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
 
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
