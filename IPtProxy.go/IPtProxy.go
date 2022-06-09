@@ -5,6 +5,7 @@ import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
 	"log"
 	"net"
@@ -391,7 +392,7 @@ func StopSnowflakeProxy() {
 //
 // @param server The DNSTT destination server domain.
 //
-// @return Port number where Snowflake will listen on, if no error happens during start up.
+// @return Port number where Dnstt will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
