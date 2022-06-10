@@ -14,7 +14,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"time"
-	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client"
+	dnstt_client "www.bamsoftware.com/git/dnstt.git/dnstt-client/lib"
 )
 
 var meekPort = 47000
@@ -388,14 +388,12 @@ func StopSnowflakeProxy() {
 //
 // @param dotAddr OPTIONAL. Address of a DoT resolver. Use either this or `dohURL`.
 //
-// @param pubkey The DNSTT's server public key (as hex digits).
-//
-// @param server The DNSTT destination server domain.
+// @param udpAddr OPTIONAL. Address of UDP DNS resolver. DISCOURAGED. Rather use `dohURL` or `dotAddr`.
 //
 // @return Port number where Dnstt will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
+func StartDnstt(dohURL, dotAddr, udpAddr string) int {
 	if dnsttRunning {
 		return dnsttPort
 	}
@@ -410,7 +408,9 @@ func StartDnstt(dohURL, dotAddr, pubkey, server string) int {
 
 	fixEnv()
 
-	go dnsttclient.Start(&dohURL, &dotAddr, &pubkey, &server, &listenAddr)
+	utlsClientHelloID, _ := dnstt_client.SampleUTLSDistribution("3*Firefox_65,1*Firefox_63,1*iOS_12_1")
+
+	go dnstt_client.Start(dohURL, dotAddr, udpAddr, listenAddr, utlsClientHelloID)
 
 	return dnsttPort
 }
@@ -423,7 +423,7 @@ func StopDnstt() {
 		return
 	}
 
-	go dnsttclient.Stop()
+	go dnstt_client.Stop()
 
 	dnsttRunning = false
 }

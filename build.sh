@@ -21,7 +21,7 @@ printf '\n--- Installing gomobile...\n'
 go install golang.org/x/mobile/cmd/gomobile@latest
 
 # Fetch submodules obfs4 and snowflake.
-printf '\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n'
+printf '\n\n--- Fetching transport dependencies...\n'
 if test -e ".git"; then
     # There's a .git directory - we must be in the development pod.
     git submodule update --init --recursive
@@ -42,9 +42,9 @@ else
     cd snowflake || exit 1
     git checkout --force --quiet 4e7f8975
     cd ..
-    git clone https://www.bamsoftware.com/git/dnstt.git
+    git clone https://github.com/tladesignz/dnstt.git
     cd dnstt || exit 1
-    git checkout --force --quiet 04f04590
+    git checkout --force --quiet df4186f6
     cd ..
 fi
 
@@ -52,7 +52,6 @@ fi
 printf '\n\n--- Apply patches to Obfs4proxy and Snowflake...\n'
 patch --directory=obfs4 --strip=1 < obfs4.patch
 patch --directory=snowflake --strip=1 < snowflake.patch
-patch --directory=dnstt --strip=1 < dnstt.patch
 
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
