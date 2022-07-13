@@ -44,7 +44,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.6'
+pod 'IPtProxy', '~> 1.7'
 ```
 
 ### Getting Started
@@ -62,7 +62,7 @@ IPtProxy is available through [JitPack](https://jitpack.io). To install
 it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.6.0'
+implementation 'com.github.tladesignz:IPtProxy:1.7.0'
 ```
 
 And this to your root `build.gradle` at the end of repositories:

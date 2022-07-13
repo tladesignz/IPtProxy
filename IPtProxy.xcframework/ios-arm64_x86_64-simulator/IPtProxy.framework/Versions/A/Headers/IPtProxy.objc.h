@@ -84,6 +84,11 @@ Only use this property after calling StartSnowflake! It might have changed after
 FOUNDATION_EXPORT long IPtProxySnowflakePort(void);
 
 /**
+ * SnowflakeVersion  - The version of Snowflake bundled with IPtProxy.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull IPtProxySnowflakeVersion(void);
+
+/**
  * StartObfs4Proxy - Start the Obfs4Proxy.
 
 This will test, if the default ports are available. If not, it will increment them until there is.
