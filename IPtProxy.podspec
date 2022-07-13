@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '1.6.0'
+  s.version          = '1.7.0'
   s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
@@ -38,7 +38,7 @@ Pod::Spec.new do |s|
     | Transport  | Version |
     |------------|--------:|
     | Obfs4proxy |  0.0.13 |
-    | Snowflake  |   2.2.0 |
+    | Snowflake  |   2.3.0 |
 
                        DESC
 
