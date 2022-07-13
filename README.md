@@ -10,7 +10,7 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 | Transport  | Version |
 |------------|--------:|
 | Obfs4proxy |  0.0.13 |
-| Snowflake  |   2.2.0 |
+| Snowflake  |   2.3.0 |
 
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
