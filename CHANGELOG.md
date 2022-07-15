@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 1.7.0
+- Update Snowflake to latest version 2.3.0.
+- Added `IPtProxySnowflakeVersion` returning the version of the used Snowflake.
+
 ## 1.6.0
 - Update Snowflake to latest version 2.2.0.
 - Added `IPtProxyObfs4ProxyVersion` returning the version of the used Obfs4proxy.
