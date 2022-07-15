@@ -384,16 +384,10 @@ func StopSnowflakeProxy() {
 
 // StartDnstt - Start the Dnstt client.
 //
-// @param dohURL OPTIONAL. URL of a DoH resolver. Use either this or `dotAddr`.
-//
-// @param dotAddr OPTIONAL. Address of a DoT resolver. Use either this or `dohURL`.
-//
-// @param udpAddr OPTIONAL. Address of UDP DNS resolver. DISCOURAGED. Rather use `dohURL` or `dotAddr`.
-//
 // @return Port number where Dnstt will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartDnstt(dohURL, dotAddr, udpAddr string) int {
+func StartDnstt() int {
 	if dnsttRunning {
 		return dnsttPort
 	}
@@ -410,7 +404,7 @@ func StartDnstt(dohURL, dotAddr, udpAddr string) int {
 
 	utlsClientHelloID, _ := dnstt_client.SampleUTLSDistribution("3*Firefox_65,1*Firefox_63,1*iOS_12_1")
 
-	go dnstt_client.Start(dohURL, dotAddr, udpAddr, listenAddr, utlsClientHelloID)
+	go dnstt_client.Start(listenAddr, utlsClientHelloID)
 
 	return dnsttPort
 }

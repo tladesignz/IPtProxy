@@ -44,7 +44,7 @@ else
     cd ..
     git clone https://github.com/tladesignz/dnstt.git
     cd dnstt || exit 1
-    git checkout --force --quiet df4186f6
+    git checkout --force --quiet c9c02b82
     cd ..
 fi
 
