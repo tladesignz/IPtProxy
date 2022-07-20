@@ -310,6 +310,8 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		RelayURL:           relay,
 		NATProbeURL:        natProbe,
 		ProxyType:          "iptproxy",
+		RelayDomainNamePattern: "snowflake.torproject.net$",
+		AllowNonTLSRelay: false,
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
