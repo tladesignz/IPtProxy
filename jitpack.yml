@@ -1,3 +1,3 @@
 install:
   - FILE="-Dfile=IPtProxy.aar"
-  - mvn install:install-file $FILE -DgroupId=com.github.tladesignz -DartifactId=IPtProxy -Dversion=1.7.0 -Dpackaging=aar -DgeneratePom=true -Dsources=IPtProxy-sources.jar
+  - mvn install:install-file $FILE -DgroupId=com.github.tladesignz -DartifactId=IPtProxy -Dversion=1.7.1 -Dpackaging=aar -DgeneratePom=true -Dsources=IPtProxy-sources.jar

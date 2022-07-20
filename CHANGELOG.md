@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 1.7.1
+- Fixed Snowflake Proxy support.
+
 ## 1.7.0
 - Update Snowflake to latest version 2.3.0.
 - Added `IPtProxySnowflakeVersion` returning the version of the used Snowflake.
