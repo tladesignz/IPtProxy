@@ -1,5 +1,11 @@
 # IPtProxy Changelog
 
+## 1.8.0
+- Updated Obfs4proxy to latest version 0.0.14.
+- Updated Snowflake to latest version 2.3.1.
+- Added support for macOS 11.
+- Fixed warning in Xcode 14.
+
 ## 1.7.1
 - Fixed Snowflake Proxy support.
 

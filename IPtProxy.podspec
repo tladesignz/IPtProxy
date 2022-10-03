@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '1.7.1'
+  s.version          = '1.8.0'
   s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
@@ -37,8 +37,8 @@ Pod::Spec.new do |s|
 
     | Transport  | Version |
     |------------|--------:|
-    | Obfs4proxy |  0.0.13 |
-    | Snowflake  |   2.3.0 |
+    | Obfs4proxy |  0.0.14 |
+    | Snowflake  |   2.3.1 |
 
                        DESC
 
@@ -49,7 +49,7 @@ Pod::Spec.new do |s|
   s.social_media_url = 'https://twitter.com/tladesignz'
 
   s.ios.deployment_target = '11.0'
-  s.osx.deployment_target = '12'
+  s.osx.deployment_target = '11'
 
   s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*'
 
@@ -62,6 +62,7 @@ Pod::Spec.new do |s|
     :name => 'Go build of IPtProxy.xcframework',
     :execution_position => :before_compile,
     :script => 'sh "$PODS_TARGET_SRCROOT/build.sh"',
+    :output_files => ['$(DERIVED_FILE_DIR)/IPtProxy.xcframework'],
   }
 
   # This will only work, if `prepare_command` was successful, or if you
