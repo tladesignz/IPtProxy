@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 1.8.1
+- Added `Obfs4proxyLogFile` which returns the static log file name of Obfs4proxy.
+
 ## 1.8.0
 - Updated Obfs4proxy to latest version 0.0.14.
 - Updated Snowflake to latest version 2.3.1.

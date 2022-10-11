@@ -49,6 +49,18 @@ pod 'IPtProxy', '~> 1.8'
 
 ### Getting Started
 
+Before using IPtProxy it is recommended to specify a place on disk for the transports 
+to store their state information and log files.
+
+By default, a temporary directory is created, but often times, that is not sufficient.
+
+```swift
+let ptDir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.example.app")?
+  .appendingPathComponent("pt_state")
+
+IPtProxy.setStateLocation(ptDir?.path)
+```
+
 There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI)
 which explains the use of IPtProxy and provides all the necessary UI and additional 
 information to use this library completely in a Tor context.
