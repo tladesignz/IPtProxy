@@ -9,10 +9,11 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strconv"
 	"time"
-	"runtime/debug"
 )
 
 var meekPort = 47000
@@ -89,37 +90,46 @@ func init() {
 		StateLocation = os.Getenv("TMPDIR")
 	}
 
-	StateLocation += "/pt_state"
+	StateLocation = filepath.Join(StateLocation, "pt_state")
 }
 
 // Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
 //
 //goland:noinspection GoUnusedExportedFunction
 func Obfs4ProxyVersion() string {
-    return obfs4proxy.Obfs4proxyVersion
+	return obfs4proxy.Obfs4proxyVersion
 }
 
-// SnowflakeVersion  - The version of Snowflake bundled with IPtProxy.
+// SnowflakeVersion - The version of Snowflake bundled with IPtProxy.
 //
 //goland:noinspection GoUnusedExportedFunction
 func SnowflakeVersion() string {
-    bi, ok := debug.ReadBuildInfo()
-    if !ok {
-        log.Printf("Failed to read build info")
-        return ""
-    }
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		log.Printf("Failed to read build info")
+		return ""
+	}
 
-    for _, dep := range bi.Deps {
-    	if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
-    	    if dep.Version[0:1] == "v" {
-        		return dep.Version[1:len(dep.Version)]
-    	    } else {
-    	        return dep.Version
-    	    }
-    	}
-    }
+	for _, dep := range bi.Deps {
+		if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
+			if dep.Version[0:1] == "v" {
+				return dep.Version[1:len(dep.Version)]
+			} else {
+				return dep.Version
+			}
+		}
+	}
 
-    return ""
+	return ""
+}
+
+// Obfs4proxyLogFile - The log file name used by Obfs4proxy.
+//
+// The Obfs4proxy log file can be found at `filepath.Join(StateLocation, Obfs4proxyLogFile())`.
+//
+//goland:noinspection GoUnusedExportedFunction
+func Obfs4proxyLogFile() string {
+	return obfs4proxy.Obfs4proxyLogFile
 }
 
 // StartObfs4Proxy - Start the Obfs4Proxy.
@@ -136,6 +146,7 @@ func SnowflakeVersion() string {
 // @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
 //
 // @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
+//
 //	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
 //
 //goland:noinspection GoUnusedExportedFunction
@@ -217,7 +228,8 @@ func StopObfs4Proxy() {
 // @param front Front domain.
 //
 // @param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
-//        Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
+//
+//	Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
 //
 // @param logFile Name of log file. OPTIONAL. Defaults to no log.
 //
@@ -289,8 +301,9 @@ type SnowflakeClientConnected interface {
 // @param unsafeLogging Prevent logs from being scrubbed.
 //
 // @param clientConnected A delegate which is called when a client successfully connected.
-//       Will be called on its own thread! You will need to switch to your own UI thread,
-//       if you want to do UI stuff!! OPTIONAL
+//
+//	Will be called on its own thread! You will need to switch to your own UI thread,
+//	if you want to do UI stuff!! OPTIONAL
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile string, keepLocalAddresses, unsafeLogging bool, clientConnected SnowflakeClientConnected) {
@@ -302,16 +315,16 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		capacity = 0
 	}
 
-	snowflakeProxy = &sfp.SnowflakeProxy {
-		Capacity:           uint(capacity),
-		STUNURL:            stun,
-		BrokerURL:          broker,
-		KeepLocalAddresses: keepLocalAddresses,
-		RelayURL:           relay,
-		NATProbeURL:        natProbe,
-		ProxyType:          "iptproxy",
+	snowflakeProxy = &sfp.SnowflakeProxy{
+		Capacity:               uint(capacity),
+		STUNURL:                stun,
+		BrokerURL:              broker,
+		KeepLocalAddresses:     keepLocalAddresses,
+		RelayURL:               relay,
+		NATProbeURL:            natProbe,
+		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
-		AllowNonTLSRelay: false,
+		AllowNonTLSRelay:       false,
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
@@ -326,7 +339,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		log.SetFlags(log.LstdFlags | log.LUTC)
 
 		if logFile != "" {
-			f, err := os.OpenFile(logFile, os.O_CREATE | os.O_WRONLY | os.O_APPEND, 0600)
+			f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -352,6 +365,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 func IsSnowflakeProxyRunning() bool {
 	return snowflakeProxy != nil
 }
+
 // StopSnowflakeProxy - Stop the Snowflake proxy.
 //
 //goland:noinspection GoUnusedExportedFunction
@@ -364,7 +378,7 @@ func StopSnowflakeProxy() {
 		snowflakeProxy.Stop()
 	}(snowflakeProxy)
 
-    snowflakeProxy = nil
+	snowflakeProxy = nil
 }
 
 // IsPortAvailable - Checks to see if a given port is not in use.
@@ -373,7 +387,7 @@ func StopSnowflakeProxy() {
 func IsPortAvailable(port int) bool {
 	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 
-	conn, err := net.DialTimeout("tcp", address, 500 * time.Millisecond)
+	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
 
 	if err != nil {
 		return true

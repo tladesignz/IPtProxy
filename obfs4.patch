@@ -1,5 +1,5 @@
 diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index f295926..5a2ce99 100644
+index f295926..df9627e 100644
 --- a/obfs4proxy/obfs4proxy.go
 +++ b/obfs4proxy/obfs4proxy.go
 @@ -27,10 +27,9 @@
@@ -22,15 +22,14 @@ index f295926..5a2ce99 100644
  	"sync"
  	"syscall"
  
-@@ -51,6 +51,7 @@ import (
- 
- const (
+@@ -53,12 +53,14 @@ const (
  	obfs4proxyVersion = "0.0.14"
-+ 	Obfs4proxyVersion = obfs4proxyVersion
  	obfs4proxyLogFile = "obfs4proxy.log"
  	socksAddr         = "127.0.0.1:0"
++	Obfs4proxyVersion = obfs4proxyVersion
++	Obfs4proxyLogFile = obfs4proxyLogFile
  )
-@@ -58,7 +59,7 @@ const (
+ 
  var stateDir string
  var termMon *termMonitor
  
@@ -39,7 +38,7 @@ index f295926..5a2ce99 100644
  	ptClientInfo, err := pt.ClientSetup(transports.Transports())
  	if err != nil {
  		golog.Fatal(err)
-@@ -85,7 +86,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+@@ -85,7 +87,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
@@ -61,7 +60,7 @@ index f295926..5a2ce99 100644
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -304,22 +318,16 @@ func getVersion() string {
+@@ -304,22 +319,16 @@ func getVersion() string {
  	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
  }
  
@@ -90,7 +89,7 @@ index f295926..5a2ce99 100644
  	if err := log.SetLogLevel(*logLevelStr); err != nil {
  		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
  	}
-@@ -338,8 +346,7 @@ func main() {
+@@ -338,8 +347,7 @@ func main() {
  		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
  	}
  	if err = transports.Init(); err != nil {
@@ -100,7 +99,7 @@ index f295926..5a2ce99 100644
  	}
  
  	log.Noticef("%s - launched", getVersion())
-@@ -347,7 +354,7 @@ func main() {
+@@ -347,7 +355,7 @@ func main() {
  	// Do the managed pluggable transport protocol configuration.
  	if isClient {
  		log.Infof("%s - initializing client transport listeners", execName)
@@ -109,7 +108,7 @@ index f295926..5a2ce99 100644
  	} else {
  		log.Infof("%s - initializing server transport listeners", execName)
  		launched, ptListeners = serverSetup()
-@@ -379,3 +386,11 @@ func main() {
+@@ -379,3 +387,11 @@ func main() {
  	}
  	termMon.wait(true)
  }
