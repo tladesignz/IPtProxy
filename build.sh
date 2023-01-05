@@ -54,6 +54,6 @@ cd IPtProxy.go || exit 1
 
 gomobile init
 
-MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -androidapi 19 -v
+MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -o ../$OUTPUT -iosversion 11.0 -androidapi 19 -v -tags netcgo
 
 printf '\n\n--- Done.\n\n'
