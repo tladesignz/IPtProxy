@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 1.9.0
+- Updated Snowflake to latest version 2.4.1.
+- Force netcgo to ensure DNS caching.
+
 ## 1.8.1
 - Added `Obfs4proxyLogFile` which returns the static log file name of Obfs4proxy.
 
