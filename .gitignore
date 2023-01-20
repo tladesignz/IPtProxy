@@ -149,3 +149,7 @@ iOSInjectionProject/
 
 # Vagrant
 .vagrant
+
+# Maven Repo bundle tool.
+bundle
+bundle-IPtProxy-*.jar

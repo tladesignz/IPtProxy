@@ -197,6 +197,28 @@ If this is the case, you will need to set this flag to build IPtProxy:
 export GO386=sse2
 ``` 
 
+### Prepare Maven Central Publication
+
+- Run `bundle.sh` like this:
+
+```shell
+./bundle.sh <version> [<GPG signing key ID>] 
+```
+
+If you don't define your signing key, the first available will be used.
+If no keys, no signing will be done. Maven Central will reject unsigned artifacts.
+
+To see your available keys, run this:
+
+```shell
+gpg --list-secret-keys
+```
+
+- Go to https://s01.oss.sonatype.org/#staging-upload.
+- Select upload mode "Artifact Bundle".
+- Upload bundle and release.
+
+See also: https://gitlab.com/-/snippets/2482490
 
 ## Authors
 
