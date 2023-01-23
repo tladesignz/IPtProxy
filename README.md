@@ -70,38 +70,66 @@ information to use this library completely in a Tor context.
 
 ### Installation
 
-IPtProxy is available through [JitPack](https://jitpack.io). To install
-it, simply add the following line to your `build.gradle` file:
+From version 1.9.0 onward, IPtProxy is available through 
+[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/1.9.0). 
+To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.8.0'
+implementation 'com.netzarchitekten:IPtProxy:1.9.0'
 ```
 
-And this to your root `build.gradle` at the end of repositories:
+It is also available through [JitPack](https://jitpack.io). To install
+it from there, add the following line to your `build.gradle` file:
+
+```groovy
+implementation 'com.github.tladesignz:IPtProxy:1.9.0'
+```
+
+And add this to your root `build.gradle` at the end of repositories:
 
 ```groovy
 allprojects {
-	repositories {
-		// ...
-		maven { url 'https://jitpack.io' }
-	}
+  repositories {
+    // ...
+    maven {
+      url 'https://jitpack.io'
+      content {
+        includeModule('com.github.tladesignz', 'IPtProxy')
+      }
+    }
+  }
 }
 ```
 
 For newer Android Studio projects created in 
 [Android Studio Bumblebee | 2021.1.1](https://developer.android.com/studio/preview/features?hl=hu#settings-gradle) 
-or newer</a>, the JitPack repository needs to be added into the root level file `settings.gradle` 
+or newer, the JitPack repository needs to be added into the root level file `settings.gradle` 
 instead of `build.gradle`:
 
 ```groovy
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-	  // ...
-        maven { url 'https://jitpack.io' }
+  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    // ...
+    maven {
+      url 'https://jitpack.io'
+      content {
+        includeModule('com.github.tladesignz', 'IPtProxy')
+      }
     }
+  }
 }
 ```
+
+#### Security Concerns:
+
+Since it is relatively easy in the Java/Android ecosystem to inject malicious packages into projects by leveraging the 
+order of repositories and release malicious versions of packages on repositories which come *before* the original one in 
+the search order, the only way to keep yourself safe is to explicitly define, which packages should be loaded from which
+repository, when you use multiple repositories:
+
+https://docs.gradle.org/5.1/userguide/declaring_repositories.html#sec::matching_repositories_to_dependencies
+
 
 ### Getting Started
 
@@ -180,7 +208,7 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 ```
 
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
-if you don't want to rely on JitPack.
+if you don't want to rely on Maven Central or JitPack.
 
 On certain CPU architectures `gobind` might fail with this error due to setting
 a flag that is no longer supported by Go 1.16:
