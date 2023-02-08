@@ -3,6 +3,7 @@ package IPtProxy
 import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
+	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
 	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
@@ -11,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"runtime/debug"
 	"strconv"
 	"time"
 )
@@ -104,23 +104,7 @@ func Obfs4ProxyVersion() string {
 //
 //goland:noinspection GoUnusedExportedFunction
 func SnowflakeVersion() string {
-	bi, ok := debug.ReadBuildInfo()
-	if !ok {
-		log.Printf("Failed to read build info")
-		return ""
-	}
-
-	for _, dep := range bi.Deps {
-		if dep.Path == "git.torproject.org/pluggable-transports/snowflake.git/v2" {
-			if dep.Version[0:1] == "v" {
-				return dep.Version[1:len(dep.Version)]
-			} else {
-				return dep.Version
-			}
-		}
-	}
-
-	return ""
+	return version.GetVersion()
 }
 
 // Obfs4proxyLogFile - The log file name used by Obfs4proxy.
