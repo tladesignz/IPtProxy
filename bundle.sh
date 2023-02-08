@@ -99,7 +99,7 @@ bundle()
 
   cd bundle || exit 1
 
-  jar --create --verbose --file=../$file ${artifact}-${version}*.*
+  jar cvf ../$file ${artifact}-${version}*.*
 
   cd ..
 

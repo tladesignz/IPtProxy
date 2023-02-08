@@ -10,7 +10,7 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 | Transport  | Version |
 |------------|--------:|
 | Obfs4proxy |  0.0.14 |
-| Snowflake  |   2.4.1 |
+| Snowflake  |   2.5.1 |
 
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -44,7 +44,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.8'
+pod 'IPtProxy', '~> 1.10'
 ```
 
 ### Getting Started
@@ -75,14 +75,14 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:1.9.0'
+implementation 'com.netzarchitekten:IPtProxy:1.10.0'
 ```
 
 It is also available through [JitPack](https://jitpack.io). To install
 it from there, add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.9.0'
+implementation 'com.github.tladesignz:IPtProxy:1.10.0'
 ```
 
 And add this to your root `build.gradle` at the end of repositories:
@@ -174,7 +174,7 @@ However, you'll still need to make it accessible in your `$PATH`.
 So, if it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
 for `$GOPATH` is `$HOME/go`: 
 
-```bash
+```shell
 export PATH=$HOME/go/bin/:$PATH` 
 ```
 
@@ -182,7 +182,7 @@ export PATH=$HOME/go/bin/:$PATH`
 
 Make sure Xcode and Xcode's command line tools are installed. Then run
 
-```bash
+```shell
 rm -rf IPtProxy.xcframework && ./build.sh
 ```
 
@@ -193,14 +193,14 @@ if you don't want to rely on CocoaPods.
 
 Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with: 
 
-```bash
+```shell
 apt install default-jdk 
 ````
 
 If they aren't already, make sure the `$ANDROID_HOME` and `$ANDROID_NDK_HOME` 
 environment variables are set:
 
-```bash
+```shell
 export ANDROID_HOME=~/Android/Sdk
 export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$NDK_VERSION
 
@@ -221,11 +221,47 @@ gomobile: go build -v -buildmode=c-shared -o=/tmp/gomobile-work-855414073/androi
 
 If this is the case, you will need to set this flag to build IPtProxy:
 
-```bash
+```shell
 export GO386=sse2
-``` 
+```
 
-### Prepare Maven Central Publication
+## Release
+
+A release commit needs the following:
+
+### Append [CHANGELOG](CHANGELOG.md).
+
+### Update IPtProxy and dependencies' version numbers in 
+
+  - [Podspec](IPtProxy.podspec)
+  - [README](README.md)
+  - [JitPack](jitpack.yml)
+  - [pom](pom.xml)
+
+### Do fresh builds
+
+```shell
+rm -rf IPtProxy.xcframework && ./build.sh
+rm -f IPtProxy.aar IPtProxy-sources.jar && ./build-android.sh
+```
+
+### Tag and push changes 
+
+```shell
+git add .
+git commit -m Release version <tag>.
+git tag <tag>
+git push
+git push --tags
+```
+
+### CocoaPods
+
+```shell
+pod trunk push
+```
+
+### Maven Central
 
 - Run `bundle.sh` like this:
 

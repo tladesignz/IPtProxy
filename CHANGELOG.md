@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 1.10.0
+- Updated Snowflake to latest version 2.5.1.
+
 ## 1.9.0
 - Updated Snowflake to latest version 2.4.1.
 - Force netcgo to ensure DNS caching.
