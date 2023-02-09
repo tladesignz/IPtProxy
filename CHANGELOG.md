@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 1.10.1
+- Fixed Snowflake version number.
+
 ## 1.10.0
 - Updated Snowflake to latest version 2.5.1.
 
