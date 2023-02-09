@@ -346,6 +346,8 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 }
 
 // IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
+//
+//goland:noinspection GoUnusedExportedFunction
 func IsSnowflakeProxyRunning() bool {
 	return snowflakeProxy != nil
 }
