@@ -5,6 +5,7 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
 	"log"
@@ -309,6 +310,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
 		AllowNonTLSRelay:       false,
+		EventDispatcher: event.NewSnowflakeEventDispatcher(),
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
@@ -337,7 +339,6 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		} else {
 			log.SetOutput(&safelog.LogScrubber{Output: logOutput})
 		}
-
 		err := snowflakeProxy.Start()
 		if err != nil {
 			log.Fatal(err)
