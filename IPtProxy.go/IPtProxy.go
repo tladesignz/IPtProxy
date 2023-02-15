@@ -275,7 +275,7 @@ type SnowflakeClientConnected interface {
 //
 // @param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
 //
-// @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
+// @param stun STUN URL. OPTIONAL. Defaults to stun:stun.l.google.com:19302, if empty.
 //
 // @param natProbe OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 //
