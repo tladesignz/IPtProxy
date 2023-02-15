@@ -2,10 +2,10 @@ package IPtProxy
 
 import (
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
+	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"io"
 	"log"
 	"net"
@@ -309,7 +309,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
 		AllowNonTLSRelay:       false,
-		EventDispatcher: event.NewSnowflakeEventDispatcher(),
+		EventDispatcher:        event.NewSnowflakeEventDispatcher(),
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
