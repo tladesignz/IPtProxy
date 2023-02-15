@@ -5,6 +5,7 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"io"
 	"log"
 	"net"
@@ -267,13 +268,13 @@ type SnowflakeClientConnected interface {
 
 // StartSnowflakeProxy - Start the Snowflake proxy.
 //
-// @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
+// @param capacity the maximum number of clients a Snowflake will serve. If set to 0, the proxy will accept an unlimited number of clients.
 //
 // @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
 //
 // @param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
 //
-// @param stun STUN URL. OPTIONAL. Defaults to stun:stun.stunprotocol.org:3478, if empty.
+// @param stun STUN URL. OPTIONAL. Defaults to stun:stun.l.google.com:19302, if empty.
 //
 // @param natProbe OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 //
@@ -308,6 +309,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
 		AllowNonTLSRelay:       false,
+		EventDispatcher: event.NewSnowflakeEventDispatcher(),
 		ClientConnectedCallback: func() {
 			if clientConnected != nil {
 				clientConnected.Connected()
@@ -336,7 +338,6 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 		} else {
 			log.SetOutput(&safelog.LogScrubber{Output: logOutput})
 		}
-
 		err := snowflakeProxy.Start()
 		if err != nil {
 			log.Fatal(err)
