@@ -269,7 +269,7 @@ type SnowflakeClientConnected interface {
 
 // StartSnowflakeProxy - Start the Snowflake proxy.
 //
-// @param capacity Maximum concurrent clients. OPTIONAL. Defaults to 10, if 0.
+// @param capacity the maximum number of clients a Snowflake will serve. If set to 0, the proxy will accept an unlimited number of clients.
 //
 // @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
 //
