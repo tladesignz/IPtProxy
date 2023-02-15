@@ -5,7 +5,6 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
-	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
 	"log"
 	"net"
@@ -319,7 +318,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 	fixEnv()
 
 	go func(snowflakeProxy *sfp.SnowflakeProxy) {
-		var logOutput io.Writer = os.Stderr
+		var logOutput io.Writer = os.Stdout
 		log.SetFlags(log.LstdFlags | log.LUTC)
 
 		if logFile != "" {
@@ -330,7 +329,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 			defer func(f *os.File) {
 				_ = f.Close()
 			}(f)
-			logOutput = io.MultiWriter(os.Stderr, f)
+			logOutput = io.MultiWriter(os.Stdout, f)
 		}
 		if unsafeLogging {
 			log.SetOutput(logOutput)
