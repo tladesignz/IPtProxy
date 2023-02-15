@@ -1,12 +1,12 @@
 package IPtProxy
 
 import (
+	"git.torproject.org/pluggable-transports/obfs4.git/obfs4proxy"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
-	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
 	"log"
 	"net"
