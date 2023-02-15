@@ -84,13 +84,13 @@ var snowflakeProxy *sfp.SnowflakeProxy
 var StateLocation string
 
 func init() {
-	if runtime.GOOS == "android" {
-		StateLocation = "/data/local/tmp"
-	} else {
-		StateLocation = os.Getenv("TMPDIR")
+	tempDir, err := os.MkdirTemp("", "pt_state-*")
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	StateLocation = filepath.Join(StateLocation, "pt_state")
+	StateLocation = tempDir
 }
 
 // Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
