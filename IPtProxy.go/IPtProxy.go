@@ -6,6 +6,7 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
 	"log"
 	"net"
