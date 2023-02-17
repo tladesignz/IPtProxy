@@ -39,7 +39,7 @@ pom()
     </license>
     <license>
       <name>GPL3</name>
-      <url>https://gitlab.com/yawning/obfs4/-/blob/master/LICENSE-GPL3.txt</url>
+      <url>https://gitweb.torproject.org/pluggable-transports/obfs4.git/tree/LICENSE-GPL3.txt</url>
       <distribution>repo</distribution>
     </license>
     <license>

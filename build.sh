@@ -43,7 +43,7 @@ if test -e ".git"; then
     cd ..
 else
     # No .git directory - That's a normal install.
-    git clone https://gitlab.com/yawning/obfs4.git "$TEMPDIR/obfs4"
+    git clone https://git.torproject.org/pluggable-transports/obfs4.git "$TEMPDIR/obfs4"
     cd "$TEMPDIR/obfs4" || exit 1
     git checkout --force --quiet 336a71d
     git clone https://git.torproject.org/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
