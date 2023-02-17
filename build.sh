@@ -45,7 +45,7 @@ else
     # No .git directory - That's a normal install.
     git clone https://git.torproject.org/pluggable-transports/obfs4.git "$TEMPDIR/obfs4"
     cd "$TEMPDIR/obfs4" || exit 1
-    git checkout --force --quiet 336a71d
+    git checkout --force --quiet b9e04fd
     git clone https://git.torproject.org/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
     cd "$TEMPDIR/snowflake" || exit 1
     git checkout --force --quiet 7b77001
