@@ -1,5 +1,13 @@
 # IPtProxy Changelog
 
+## 2.0.0
+- Improved build by stripping paths in output binary, which leak build environment info.
+- Log Snowflake Proxy to STDOUT instead of STDERR.
+- Fixed event dispatcher crash in recent versions of Snowflake Proxy.
+- Switched Obfs4proxy to new fork by Tor Project which has hardened TLS negotiation.
+- Fixed security issue with default `StateLocation`. Consumers are now forced to
+  define it themselves before first use. Breaking change!
+
 ## 1.10.1
 - Fixed Snowflake version number.
 

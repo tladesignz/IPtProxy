@@ -8,10 +8,10 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 
-| Transport  | Version |
-|------------|--------:|
-| Obfs4proxy |  0.0.14 |
-| Snowflake  |   2.5.1 |
+| Transport  | Version     |
+|------------|-------------|
+| Obfs4proxy | 0.0.14-tor2 |
+| Snowflake  | 2.5.1       |
 
 Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -31,11 +31,12 @@ Problems solved in particular are:
 - Snowflake and Obfs4proxy are patched to accept all configuration parameters
   directly.
 - Free ports to be used are automatically found by this library and returned to the
-  consuming app. You can use the initial values for premature configuration just
-  fine in situations, where you can be pretty sure, they're going to be available
-  (typically on iOS). When that's not the case (e.g. multiple instances of your app
-  on a multi-user Android), you should first start the transports and then use the 
-  returned ports for configuration of other components (e.g. Tor). 
+  consuming app. You can use the initial values for premature configuration, which
+  is just fine in situations, where you can be pretty sure, they're going to be 
+  available (typically on iOS). 
+  When that's not the case (e.g. multiple instances of your app on a multi-user
+  Android), you should first start the transports and then use the returned ports
+  for configuration of other components (e.g. Tor). 
 
 ## iOS/macOS
 
@@ -45,26 +46,46 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 1.10'
+pod 'IPtProxy', '~> 2.0'
 ```
 
 ### Getting Started
 
-Before using IPtProxy it is recommended to specify a place on disk for the transports 
+Before using IPtProxy you need to specify a place on disk for the transports 
 to store their state information and log files.
 
-By default, a temporary directory is created, but often times, that is not sufficient.
+**From version 2.0.0 onwards, there's no default anymore!**
+This is out of security concerns, esp. on Android.
+
+You will need to provide `StateLocation` *before* use of any transport:
 
 ```swift
-let ptDir = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.example.app")?
-  .appendingPathComponent("pt_state")
+let fm = FileManager.default
 
-IPtProxy.setStateLocation(ptDir?.path)
+// Good choice for apps where IPtProxy runs inside an extension:
+
+if let ptDir = fm
+    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.example.app")? 
+    .appendingPathComponent("pt_state")?
+    .path
+{
+    IPtProxy.setStateLocation(ptDir)
+}
+
+// For normal apps which run IPtProxy inline:
+
+if let ptDir = fm.urls(for: .documentDirectory, in: .userDomainMask)
+    .first?
+    .appendingPathComponent("pt_state")
+    .path 
+{
+    IPtProxy.setStateLocation(ptDir)
+}
 ```
 
 There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI)
 which explains the use of IPtProxy and provides all the necessary UI and additional 
-information to use this library completely in a Tor context.
+information to use this library in a Tor context.
 
 
 ## Android 
@@ -72,18 +93,18 @@ information to use this library completely in a Tor context.
 ### Installation
 
 From version 1.9.0 onward, IPtProxy is available through 
-[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/1.9.0). 
+[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/2.0.0). 
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:1.10.0'
+implementation 'com.netzarchitekten:IPtProxy:2.0.0'
 ```
 
 It is also available through [JitPack](https://jitpack.io). To install
 it from there, add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:1.10.0'
+implementation 'com.github.tladesignz:IPtProxy:2.0.0'
 ```
 
 And add this to your root `build.gradle` at the end of repositories:
@@ -124,10 +145,11 @@ dependencyResolutionManagement {
 
 #### Security Concerns:
 
-Since it is relatively easy in the Java/Android ecosystem to inject malicious packages into projects by leveraging the 
-order of repositories and release malicious versions of packages on repositories which come *before* the original one in 
-the search order, the only way to keep yourself safe is to explicitly define, which packages should be loaded from which
-repository, when you use multiple repositories:
+Since it is relatively easy in the Java/Android ecosystem to inject malicious
+packages into projects by leveraging the order of repositories and release malicious
+versions of packages on repositories which come *before* the original one in the
+search order, the only way to keep yourself safe is to explicitly define, which 
+packages should be loaded from which repository, when you use multiple repositories:
 
 https://docs.gradle.org/5.1/userguide/declaring_repositories.html#sec::matching_repositories_to_dependencies
 
@@ -147,15 +169,23 @@ If you are building a new Android application be sure to declare that it uses th
 
 ```
 
-Before using IPtProxy you need to specify a place on disk for it to store its state
-information. We recommend the path returned by `Context#getCacheDir()`:
+Before using IPtProxy you need to specify a place on disk for the transports
+to store their state information and log files.
+
+**From version 2.0.0 onwards, there's no default anymore!**
+This is out of security concerns, esp. on Android.
+
+You will need to provide `StateLocation` *before* use of any transport.
+
+`Context#getCacheDir()`, `Context#getFilesDir()` or `Context#getNoBackupFilesDir()` 
+are good choices for this.
+
+**Do not use a directory outside the app's private storage!**
 
 ```java
-File fileCacheDir = new File(getCacheDir(), "pt");
+File ptDir = new File(getCacheDir(), "pt_state");
 
-if (!fileCacheDir.exists()) fileCacheDir.mkdir();
-
-IPtProxy.setStateLocation(fileCacheDir.getAbsolutePath());
+IPtProxy.setStateLocation(ptDir.getAbsolutePath());
 ```
 
 
