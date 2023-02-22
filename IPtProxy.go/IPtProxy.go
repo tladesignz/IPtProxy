@@ -1,18 +1,18 @@
 package IPtProxy
 
 import (
-	"git.torproject.org/pluggable-transports/obfs4.git/obfs4proxy"
+	"errors"
 	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
+	"gitlab.com/yawning/obfs4.git/obfs4proxy"
 	"io"
+	"io/fs"
 	"log"
 	"net"
 	"os"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"time"
 )
@@ -81,18 +81,8 @@ var obfs4ProxyRunning = false
 var snowflakeRunning = false
 var snowflakeProxy *sfp.SnowflakeProxy
 
-// StateLocation - Override TOR_PT_STATE_LOCATION, which defaults to "$TMPDIR/pt_state".
+// StateLocation - Sets TOR_PT_STATE_LOCATION
 var StateLocation string
-
-func init() {
-	if runtime.GOOS == "android" {
-		StateLocation = "/data/local/tmp"
-	} else {
-		StateLocation = os.Getenv("TMPDIR")
-	}
-
-	StateLocation = filepath.Join(StateLocation, "pt_state")
-}
 
 // Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
 //
@@ -395,8 +385,45 @@ func IsPortAvailable(port int) bool {
 // time this is called. It's still the ENVIRONMENT, we're changing here, so there might
 // be race conditions.
 func fixEnv() {
+	info, err := os.Stat(StateLocation)
+
+	// If dir does not exist, try to create it.
+	if errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(StateLocation, 0700)
+
+		if err == nil {
+			info, err = os.Stat(StateLocation)
+		}
+	}
+
+	// If it is not a dir, panic.
+	if err == nil && !info.IsDir() {
+		err = fs.ErrInvalid
+	}
+
+	// Create a file within dir to test writability.
+	if err == nil {
+		tempFile := StateLocation + "/.iptproxy-writetest"
+		var file *os.File
+		file, err = os.Create(tempFile)
+
+		// Remove the test file again.
+		if err == nil {
+			file.Close()
+
+			err = os.Remove(tempFile)
+		}
+	}
+
+	if err != nil {
+		panic("Error with StateLocation directory \"" + StateLocation + "\":\n" +
+			"  " + err.Error() + "\n" +
+			"  StateLocation needs to be set to a writable directory.\n" +
+			"  Use an app-private directory to avoid information leaks.\n" +
+			"  Use a non-temporary directory to allow reuse of potentially stored state.")
+	}
+
 	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
-
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
 }
