@@ -1,13 +1,13 @@
-diff --git a/obfs4proxy/obfs4proxy.go b/obfs4proxy/obfs4proxy.go
-index f295926..df9627e 100644
---- a/obfs4proxy/obfs4proxy.go
-+++ b/obfs4proxy/obfs4proxy.go
+diff --git a/cmd/lyrebird/lyrebird.go b/cmd/lyrebird/lyrebird.go
+index ee50b14..3b0eb32 100644
+--- a/cmd/lyrebird/lyrebird.go
++++ b/cmd/lyrebird/lyrebird.go
 @@ -27,10 +27,9 @@
  
  // Go language Tor Pluggable Transport suite.  Works only as a managed
  // client/server.
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
 -	"flag"
@@ -26,8 +26,8 @@ index f295926..df9627e 100644
  	obfs4proxyVersion = "0.0.14"
  	obfs4proxyLogFile = "obfs4proxy.log"
  	socksAddr         = "127.0.0.1:0"
-+	Obfs4proxyVersion = obfs4proxyVersion
-+	Obfs4proxyLogFile = obfs4proxyLogFile
++	LyrebirdVersion   = obfs4proxyVersion
++	LyrebirdLogFile   = obfs4proxyLogFile
  )
  
  var stateDir string
@@ -84,7 +84,7 @@ index f295926..df9627e 100644
 +		*logLevelStr = "ERROR"
  	}
 +
-+	execName := "obfs4"
++	execName := "lyrebird"
 +
  	if err := log.SetLogLevel(*logLevelStr); err != nil {
  		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
@@ -120,68 +120,68 @@ index f295926..df9627e 100644
 +
 +	termMon.sigChan <- syscall.SIGTERM
 +}
-diff --git a/obfs4proxy/proxy_http.go b/obfs4proxy/proxy_http.go
-index 1adadf8..7ff608d 100644
---- a/obfs4proxy/proxy_http.go
-+++ b/obfs4proxy/proxy_http.go
+diff --git a/cmd/lyrebird/proxy_http.go b/cmd/lyrebird/proxy_http.go
+index 1adadf8..3bd6952 100644
+--- a/cmd/lyrebird/proxy_http.go
++++ b/cmd/lyrebird/proxy_http.go
 @@ -25,7 +25,7 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
  
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
  	"bufio"
-diff --git a/obfs4proxy/proxy_socks4.go b/obfs4proxy/proxy_socks4.go
-index ac8be9e..8922e15 100644
---- a/obfs4proxy/proxy_socks4.go
-+++ b/obfs4proxy/proxy_socks4.go
+diff --git a/cmd/lyrebird/proxy_socks4.go b/cmd/lyrebird/proxy_socks4.go
+index ac8be9e..cda8d94 100644
+--- a/cmd/lyrebird/proxy_socks4.go
++++ b/cmd/lyrebird/proxy_socks4.go
 @@ -31,7 +31,7 @@
   * license that can be found in the LICENSE file.
   */
  
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
  	"errors"
-diff --git a/obfs4proxy/pt_extras.go b/obfs4proxy/pt_extras.go
-index 18bc2df..766811e 100644
---- a/obfs4proxy/pt_extras.go
-+++ b/obfs4proxy/pt_extras.go
+diff --git a/cmd/lyrebird/pt_extras.go b/cmd/lyrebird/pt_extras.go
+index 6c2cca5..e3c5c90 100644
+--- a/cmd/lyrebird/pt_extras.go
++++ b/cmd/lyrebird/pt_extras.go
 @@ -25,7 +25,7 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
  
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
  	"errors"
-diff --git a/obfs4proxy/termmon.go b/obfs4proxy/termmon.go
-index 59304c9..53ba1e2 100644
---- a/obfs4proxy/termmon.go
-+++ b/obfs4proxy/termmon.go
+diff --git a/cmd/lyrebird/termmon.go b/cmd/lyrebird/termmon.go
+index 42c2f84..93794bb 100644
+--- a/cmd/lyrebird/termmon.go
++++ b/cmd/lyrebird/termmon.go
 @@ -25,7 +25,7 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
  
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
  	"io"
-diff --git a/obfs4proxy/termmon_linux.go b/obfs4proxy/termmon_linux.go
-index 926e630..abbadde 100644
---- a/obfs4proxy/termmon_linux.go
-+++ b/obfs4proxy/termmon_linux.go
+diff --git a/cmd/lyrebird/termmon_linux.go b/cmd/lyrebird/termmon_linux.go
+index 926e630..0c872cb 100644
+--- a/cmd/lyrebird/termmon_linux.go
++++ b/cmd/lyrebird/termmon_linux.go
 @@ -25,7 +25,7 @@
   * POSSIBILITY OF SUCH DAMAGE.
   */
  
 -package main
-+package obfs4proxy
++package lyrebird
  
  import (
  	"fmt"

@@ -1,6 +1,6 @@
 # IPtProxy
 
-Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
+Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 
 [![JitPack](https://jitpack.io/v/tladesignz/IPtProxy.svg)](https://jitpack.io/#tladesignz/IPtProxy)
 [![Maven Central](https://img.shields.io/maven-central/v/com.netzarchitekten/IPtProxy.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.netzarchitekten%22%20AND%20a:%22IPtProxy%22)
@@ -8,12 +8,12 @@ Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 
-| Transport  | Version     |
-|------------|-------------|
-| Obfs4proxy | 0.0.14-tor2 |
-| Snowflake  | 2.5.1       |
+| Transport | Version |
+|-----------|---------|
+| Lyrebird  | 0.1.0   |
+| Snowflake | 2.5.1   |
 
-Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
+Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
 This project encapsulates all the machinations to make it work and provides an
 easy to install binary including a wrapper around both.
@@ -28,7 +28,7 @@ Problems solved in particular are:
 - Environment variable changes during runtime will not be recognized by
   `goptlib` when done from within Swift/Objective-C. Therefore, sensible
   values are hardcoded in the Go wrapper.
-- Snowflake and Obfs4proxy are patched to accept all configuration parameters
+- Snowflake and Lyrebird/Obfs4proxy are patched to accept all configuration parameters
   directly.
 - Free ports to be used are automatically found by this library and returned to the
   consuming app. You can use the initial values for premature configuration, which

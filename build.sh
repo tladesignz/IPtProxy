@@ -29,23 +29,23 @@ mkdir -p "$TEMPDIR"
 cp -a IPtProxy.go "$TEMPDIR/"
 
 
-# Fetch submodules obfs4 and snowflake.
+# Fetch submodules lyrebird and snowflake.
 printf '\n\n--- Fetching Obfs4proxy and Snowflake dependencies...\n'
 if test -e ".git"; then
     # There's a .git directory - we must be in the development pod.
     git submodule update --init --recursive
-    cd obfs4 || exit 1
+    cd lyrebird || exit 1
     git reset --hard
-    cp -a . "$TEMPDIR/obfs4"
+    cp -a . "$TEMPDIR/lyrebird"
     cd ../snowflake || exit 1
     git reset --hard
     cp -a . "$TEMPDIR/snowflake"
     cd ..
 else
     # No .git directory - That's a normal install.
-    git clone https://git.torproject.org/pluggable-transports/obfs4.git "$TEMPDIR/obfs4"
-    cd "$TEMPDIR/obfs4" || exit 1
-    git checkout --force --quiet b9e04fd
+    git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git "$TEMPDIR/lyrebird"
+    cd "$TEMPDIR/lyrebird" || exit 1
+    git checkout --force --quiet 3915dcd
     git clone https://git.torproject.org/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
     cd "$TEMPDIR/snowflake" || exit 1
     git checkout --force --quiet 7b77001
@@ -54,7 +54,7 @@ fi
 
 # Apply patches.
 printf '\n\n--- Apply patches to Obfs4proxy and Snowflake...\n'
-patch --directory="$TEMPDIR/obfs4" --strip=1 < obfs4.patch
+patch --directory="$TEMPDIR/lyrebird" --strip=1 < lyrebird.patch
 patch --directory="$TEMPDIR/snowflake" --strip=1 < snowflake.patch
 
 # Compile framework.

@@ -1,6 +1,6 @@
 [submodule "snowflake"]
 	path = snowflake
 	url = https://git.torproject.org/pluggable-transports/snowflake.git
-[submodule "obfs4"]
-	path = obfs4
-	url = https://git.torproject.org/pluggable-transports/obfs4.git
+[submodule "lyrebird"]
+	path = lyrebird
+	url = https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git

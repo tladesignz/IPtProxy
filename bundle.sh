@@ -28,7 +28,7 @@ pom()
   <artifactId>${artifact}</artifactId>
   <version>${version}</version>
   <name>IPtProxy</name>
-  <description>Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android</description>
+  <description>Obfs4proxy/Lyrebird and Snowflake Pluggable Transports for iOS, MacOS and Android</description>
   <url>https://github.com/tladesignz/IPtProxy</url>
   <inceptionYear>2020</inceptionYear>
   <licenses>
@@ -39,7 +39,7 @@ pom()
     </license>
     <license>
       <name>GPL3</name>
-      <url>https://gitweb.torproject.org/pluggable-transports/obfs4.git/tree/LICENSE-GPL3.txt</url>
+      <url>https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/-/raw/main/LICENSE-GPL3.txt</url>
       <distribution>repo</distribution>
     </license>
     <license>

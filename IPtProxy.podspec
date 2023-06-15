@@ -9,10 +9,10 @@
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
   s.version          = '2.0.0'
-  s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
+  s.summary          = 'Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
-    Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
+    Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
     is a little annoying to use on iOS and Android.
     This project encapsulates all the machinations to make it work and provides an
     easy to install binary including a wrapper around both.
@@ -30,15 +30,15 @@ Pod::Spec.new do |s|
     - The ports where the PTs will listen on are hardcoded, since communicating
       the used ports back to the app would be quite some work (e.g. trying to
       read it from STDOUT) for very little benefit.
-    - Snowflake and Obfs4proxy are patched to accept all configuration parameters
+    - Snowflake and Lyrebird/Obfs4proxy are patched to accept all configuration parameters
       directly.
 
     Contained transport versions:
 
-    | Transport  |      Version |
-    |------------|-------------:|
-    | Obfs4proxy |  0.0.14-tor2 |
-    | Snowflake  |        2.5.1 |
+    | Transport | Version |
+    |-----------|--------:|
+    | Lyrebird  |   0.1.0 |
+    | Snowflake |   2.5.1 |
 
                        DESC
 

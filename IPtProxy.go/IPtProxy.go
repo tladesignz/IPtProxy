@@ -7,7 +7,7 @@ import (
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
 	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
 	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
-	"gitlab.com/yawning/obfs4.git/obfs4proxy"
+	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/cmd/lyrebird"
 	"io"
 	"io/fs"
 	"log"
@@ -19,8 +19,8 @@ import (
 
 var meekPort = 47000
 
-// MeekPort - Port where Obfs4proxy will provide its Meek service.
-// Only use this after calling StartObfs4Proxy! It might have changed after that!
+// MeekPort - Port where Lyrebird will provide its Meek service.
+// Only use this after calling StartLyrebird! It might have changed after that!
 //
 //goland:noinspection GoUnusedExportedFunction
 func MeekPort() int {
@@ -29,8 +29,8 @@ func MeekPort() int {
 
 var obfs2Port = 47100
 
-// Obfs2Port - Port where Obfs4proxy will provide its Obfs2 service.
-// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+// Obfs2Port - Port where Lyrebird will provide its Obfs2 service.
+// Only use this property after calling StartLyrebird! It might have changed after that!
 //
 //goland:noinspection GoUnusedExportedFunction
 func Obfs2Port() int {
@@ -39,8 +39,8 @@ func Obfs2Port() int {
 
 var obfs3Port = 47200
 
-// Obfs3Port - Port where Obfs4proxy will provide its Obfs3 service.
-// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+// Obfs3Port - Port where Lyrebird will provide its Obfs3 service.
+// Only use this property after calling StartLyrebird! It might have changed after that!
 //
 //goland:noinspection GoUnusedExportedFunction
 func Obfs3Port() int {
@@ -49,8 +49,8 @@ func Obfs3Port() int {
 
 var obfs4Port = 47300
 
-// Obfs4Port - Port where Obfs4proxy will provide its Obfs4 service.
-// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+// Obfs4Port - Port where Lyrebird will provide its Obfs4 service.
+// Only use this property after calling StartLyrebird! It might have changed after that!
 //
 //goland:noinspection GoUnusedExportedFunction
 func Obfs4Port() int {
@@ -59,8 +59,8 @@ func Obfs4Port() int {
 
 var scramblesuitPort = 47400
 
-// ScramblesuitPort - Port where Obfs4proxy will provide its Scramblesuit service.
-// Only use this property after calling StartObfs4Proxy! It might have changed after that!
+// ScramblesuitPort - Port where Lyrebird will provide its Scramblesuit service.
+// Only use this property after calling StartLyrebird! It might have changed after that!
 //
 //goland:noinspection GoUnusedExportedFunction
 func ScramblesuitPort() int {
@@ -77,18 +77,18 @@ func SnowflakePort() int {
 	return snowflakePort
 }
 
-var obfs4ProxyRunning = false
+var lyrebirdRunning = false
 var snowflakeRunning = false
 var snowflakeProxy *sfp.SnowflakeProxy
 
 // StateLocation - Sets TOR_PT_STATE_LOCATION
 var StateLocation string
 
-// Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
+// LyrebirdVersion - The version of Lyrebird bundled with IPtProxy.
 //
 //goland:noinspection GoUnusedExportedFunction
-func Obfs4ProxyVersion() string {
-	return obfs4proxy.Obfs4proxyVersion
+func LyrebirdVersion() string {
+	return lyrebird.LyrebirdVersion
 }
 
 // SnowflakeVersion - The version of Snowflake bundled with IPtProxy.
@@ -98,16 +98,16 @@ func SnowflakeVersion() string {
 	return version.GetVersion()
 }
 
-// Obfs4proxyLogFile - The log file name used by Obfs4proxy.
+// LyrebirdLogFile - The log file name used by Lyrebird.
 //
-// The Obfs4proxy log file can be found at `filepath.Join(StateLocation, Obfs4proxyLogFile())`.
+// The Lyrebird log file can be found at `filepath.Join(StateLocation, LyrebirdLogFile())`.
 //
 //goland:noinspection GoUnusedExportedFunction
-func Obfs4proxyLogFile() string {
-	return obfs4proxy.Obfs4proxyLogFile
+func LyrebirdLogFile() string {
+	return lyrebird.LyrebirdLogFile
 }
 
-// StartObfs4Proxy - Start the Obfs4Proxy.
+// StartLyrebird - Start Lyrebird.
 //
 // This will test, if the default ports are available. If not, it will increment them until there is.
 // Only use the port properties after calling this, they might have been changed!
@@ -118,19 +118,19 @@ func Obfs4proxyLogFile() string {
 //
 // @param unsafeLogging Disable the address scrubber.
 //
-// @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
+// @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 //
-// @return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
+// @return Port number where Lyrebird will listen on for Obfs4(!), if no error happens during start up.
 //
 //	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy string) int {
-	if obfs4ProxyRunning {
+func StartLyrebird(logLevel string, enableLogging, unsafeLogging bool, proxy string) int {
+	if lyrebirdRunning {
 		return obfs4Port
 	}
 
-	obfs4ProxyRunning = true
+	lyrebirdRunning = true
 
 	for !IsPortAvailable(meekPort) {
 		meekPort++
@@ -176,22 +176,22 @@ func StartObfs4Proxy(logLevel string, enableLogging, unsafeLogging bool, proxy s
 		_ = os.Unsetenv("TOR_PT_PROXY")
 	}
 
-	go obfs4proxy.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &logLevel, &enableLogging, &unsafeLogging)
+	go lyrebird.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &logLevel, &enableLogging, &unsafeLogging)
 
 	return obfs4Port
 }
 
-// StopObfs4Proxy - Stop the Obfs4Proxy.
+// StopLyrebird - Stop Lyrebird.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StopObfs4Proxy() {
-	if !obfs4ProxyRunning {
+func StopLyrebird() {
+	if !lyrebirdRunning {
 		return
 	}
 
-	go obfs4proxy.Stop()
+	go lyrebird.Stop()
 
-	obfs4ProxyRunning = false
+	lyrebirdRunning = false
 }
 
 // StartSnowflake - Start the Snowflake client.
