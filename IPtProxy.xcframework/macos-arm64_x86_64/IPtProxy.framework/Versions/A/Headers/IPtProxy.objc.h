@@ -43,44 +43,44 @@ FOUNDATION_EXPORT BOOL IPtProxyIsPortAvailable(long port);
 FOUNDATION_EXPORT BOOL IPtProxyIsSnowflakeProxyRunning(void);
 
 /**
- * MeekPort - Port where Obfs4proxy will provide its Meek service.
-Only use this after calling StartObfs4Proxy! It might have changed after that!
+ * LyrebirdLogFile - The log file name used by Lyrebird.
+
+The Lyrebird log file can be found at `filepath.Join(StateLocation, LyrebirdLogFile())`.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdLogFile(void);
+
+/**
+ * LyrebirdVersion - The version of Lyrebird bundled with IPtProxy.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdVersion(void);
+
+/**
+ * MeekPort - Port where Lyrebird will provide its Meek service.
+Only use this after calling StartLyrebird! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyMeekPort(void);
 
 /**
- * Obfs2Port - Port where Obfs4proxy will provide its Obfs2 service.
-Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ * Obfs2Port - Port where Lyrebird will provide its Obfs2 service.
+Only use this property after calling StartLyrebird! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyObfs2Port(void);
 
 /**
- * Obfs3Port - Port where Obfs4proxy will provide its Obfs3 service.
-Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ * Obfs3Port - Port where Lyrebird will provide its Obfs3 service.
+Only use this property after calling StartLyrebird! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyObfs3Port(void);
 
 /**
- * Obfs4Port - Port where Obfs4proxy will provide its Obfs4 service.
-Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ * Obfs4Port - Port where Lyrebird will provide its Obfs4 service.
+Only use this property after calling StartLyrebird! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyObfs4Port(void);
 
 /**
- * Obfs4ProxyVersion - The version of Obfs4Proxy bundled with IPtProxy.
- */
-FOUNDATION_EXPORT NSString* _Nonnull IPtProxyObfs4ProxyVersion(void);
-
-/**
- * Obfs4proxyLogFile - The log file name used by Obfs4proxy.
-
-The Obfs4proxy log file can be found at `filepath.Join(StateLocation, Obfs4proxyLogFile())`.
- */
-FOUNDATION_EXPORT NSString* _Nonnull IPtProxyObfs4proxyLogFile(void);
-
-/**
- * ScramblesuitPort - Port where Obfs4proxy will provide its Scramblesuit service.
-Only use this property after calling StartObfs4Proxy! It might have changed after that!
+ * ScramblesuitPort - Port where Lyrebird will provide its Scramblesuit service.
+Only use this property after calling StartLyrebird! It might have changed after that!
  */
 FOUNDATION_EXPORT long IPtProxyScramblesuitPort(void);
 
@@ -96,7 +96,7 @@ FOUNDATION_EXPORT long IPtProxySnowflakePort(void);
 FOUNDATION_EXPORT NSString* _Nonnull IPtProxySnowflakeVersion(void);
 
 /**
- * StartObfs4Proxy - Start the Obfs4Proxy.
+ * StartLyrebird - Start Lyrebird.
 
 This will test, if the default ports are available. If not, it will increment them until there is.
 Only use the port properties after calling this, they might have been changed!
@@ -107,13 +107,13 @@ Only use the port properties after calling this, they might have been changed!
 
 @param unsafeLogging Disable the address scrubber.
 
-@param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Obfs4proxy. E.g. "socks5://127.0.0.1:12345"
+@param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 
-@return Port number where Obfs4Proxy will listen on for Obfs4(!), if no error happens during start up.
+@return Port number where Lyrebird will listen on for Obfs4(!), if no error happens during start up.
 
 	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
  */
-FOUNDATION_EXPORT long IPtProxyStartObfs4Proxy(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable proxy);
+FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable proxy);
 
 /**
  * StartSnowflake - Start the Snowflake client.
@@ -169,9 +169,9 @@ FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString*
 FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable natProbe, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging, id<IPtProxySnowflakeClientConnected> _Nullable clientConnected);
 
 /**
- * StopObfs4Proxy - Stop the Obfs4Proxy.
+ * StopLyrebird - Stop Lyrebird.
  */
-FOUNDATION_EXPORT void IPtProxyStopObfs4Proxy(void);
+FOUNDATION_EXPORT void IPtProxyStopLyrebird(void);
 
 /**
  * StopSnowflake - Stop the Snowflake client.

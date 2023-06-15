@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 3.0.0
+- Follow Tor's renaming of the Obfs4proxy fork to Lyrebird. Breaks APIs, hence the 
+  huge version jump.
+
 ## 2.0.0
 - Improved build by stripping paths in output binary, which leak build environment info.
 - Log Snowflake Proxy to STDOUT instead of STDERR.
