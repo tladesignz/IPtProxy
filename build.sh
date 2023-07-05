@@ -46,7 +46,7 @@ else
     git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git "$TEMPDIR/lyrebird"
     cd "$TEMPDIR/lyrebird" || exit 1
     git checkout --force --quiet 3915dcd
-    git clone https://git.torproject.org/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
+    git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
     cd "$TEMPDIR/snowflake" || exit 1
     git checkout --force --quiet 7b77001
     cd "$CURRENT" || exit 1
