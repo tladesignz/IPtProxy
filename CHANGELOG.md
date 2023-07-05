@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.1.0
+- Update Snowflake to v2.6.0.
+
 ## 3.0.0
 - Follow Tor's renaming of the Obfs4proxy fork to Lyrebird. Breaks APIs, hence the 
   huge version jump.

@@ -44,7 +44,7 @@ pom()
     </license>
     <license>
       <name>BSD-3-clause</name>
-      <url>https://gitweb.torproject.org/pluggable-transports/snowflake.git/tree/LICENSE</url>
+      <url>https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/raw/main/LICENSE</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
