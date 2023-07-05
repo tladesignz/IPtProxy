@@ -2,12 +2,12 @@ package IPtProxy
 
 import (
 	"errors"
-	snowflakeclient "git.torproject.org/pluggable-transports/snowflake.git/v2/client"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/event"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/safelog"
-	"git.torproject.org/pluggable-transports/snowflake.git/v2/common/version"
-	sfp "git.torproject.org/pluggable-transports/snowflake.git/v2/proxy/lib"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/cmd/lyrebird"
+	snowflakeclient "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/client"
+	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
+	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/safelog"
+	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
+	sfp "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/proxy/lib"
 	"io"
 	"io/fs"
 	"log"
