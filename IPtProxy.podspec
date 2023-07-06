@@ -68,6 +68,8 @@ Pod::Spec.new do |s|
   # This will only work, if `prepare_command` was successful, or if you
   # called `pod update` a second time after a build which will have triggered
   # the `script_phase`, or if you ran `build.sh` manually.
-  s.vendored_frameworks = "IPtProxy.xcframework"
+  s.vendored_frameworks = 'IPtProxy.xcframework'
+
+  s.libraries = 'resolv'
 
 end
