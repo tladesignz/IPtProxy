@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.1.1
+- Fixed broken compilation on Apple platforms due to missing library.
+
 ## 3.1.0
 - Update Snowflake to v2.6.0.
 
