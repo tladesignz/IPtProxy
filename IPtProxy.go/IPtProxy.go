@@ -202,6 +202,8 @@ func StopLyrebird() {
 //
 // @param front Front domain.
 //
+// @param fronts OPTIONAL. Comma-separated list of front domains.
+//
 // @param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
 //
 //	Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
@@ -219,7 +221,7 @@ func StopLyrebird() {
 // @return Port number where Snowflake will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, front, ampCache, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
+func StartSnowflake(ice, url, front, fronts, ampCache, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
 	if snowflakeRunning {
 		return snowflakePort
 	}
@@ -232,7 +234,7 @@ func StartSnowflake(ice, url, front, ampCache, logFile string, logToStateDir, ke
 
 	fixEnv()
 
-	go snowflakeclient.Start(&snowflakePort, &ice, &url, &front, &ampCache, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
+	go snowflakeclient.Start(&snowflakePort, &ice, &url, &front, &fronts, &ampCache, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 
 	return snowflakePort
 }

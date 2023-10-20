@@ -48,7 +48,7 @@ else
     git checkout --force --quiet 3915dcd
     git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
     cd "$TEMPDIR/snowflake" || exit 1
-    git checkout --force --quiet 7b77001
+    git checkout --force --quiet bd7391d
     cd "$CURRENT" || exit 1
 fi
 
