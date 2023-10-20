@@ -93,18 +93,18 @@ information to use this library in a Tor context.
 ### Installation
 
 From version 1.9.0 onward, IPtProxy is available through 
-[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/3.2.0). 
+[Maven Central](https://central.sonatype.com/artifact/com.netzarchitekten/IPtProxy). 
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:3.2.0'
+implementation 'com.netzarchitekten:IPtProxy:3.2.1'
 ```
 
 It is also available through [JitPack](https://jitpack.io). To install
 it from there, add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:3.2.0'
+implementation 'com.github.tladesignz:IPtProxy:3.2.1'
 ```
 
 And add this to your root `build.gradle` at the end of repositories:

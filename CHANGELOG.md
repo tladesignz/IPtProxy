@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.2.1
+- Removed doubled "front" argument, therefore fixed backwards compatibility with IPtProxy 3.
+
 ## 3.2.0
 - Update Snowflake to v2.7.0.
 - Raised minimum needed iOS to 12, since Xcode 15 dropped support for 11.

@@ -122,9 +122,7 @@ FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL 
 
 @param url URL of signaling broker.
 
-@param front Front domain.
-
-@param fronts OPTIONAL. Comma-separated list of front domains.
+@param fronts Comma-separated list of front domains.
 
 @param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
 
@@ -142,7 +140,7 @@ FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL 
 
 @return Port number where Snowflake will listen on, if no error happens during start up.
  */
-FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable front, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
+FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
  * StartSnowflakeProxy - Start the Snowflake proxy.
