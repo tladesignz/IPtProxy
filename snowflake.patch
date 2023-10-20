@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index f4d9c5f..42716ab 100644
+index f4d9c5f..968dcbf 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,9 +1,7 @@
@@ -49,7 +49,7 @@ index f4d9c5f..42716ab 100644
 -	if *versionFlag {
 -		fmt.Fprintf(os.Stderr, "snowflake-client %s", version.ConstructResult())
 -		os.Exit(0)
-+func Start(port *int, iceServersCommas, brokerURL, frontDomain, frontDomainsCommas, ampCacheURL, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++func Start(port *int, iceServersCommas, brokerURL, frontDomainsCommas, ampCacheURL, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
 +	if *max < DefaultSnowflakeCapacity {
 +		*max = DefaultSnowflakeCapacity
  	}
@@ -60,7 +60,19 @@ index f4d9c5f..42716ab 100644
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
  	// Don't write to stderr; versions of tor earlier than about 0.3.5.6 do
-@@ -241,7 +224,7 @@ func main() {
+@@ -211,11 +194,6 @@ func main() {
+ 	iceAddresses := strings.Split(strings.TrimSpace(*iceServersCommas), ",")
+ 	frontDomains := strings.Split(strings.TrimSpace(*frontDomainsCommas), ",")
+ 
+-	// Maintain backwards compatability with legacy commandline option
+-	if (len(frontDomains) == 0) && (*frontDomain != "") {
+-		frontDomains = []string{*frontDomain}
+-	}
+-
+ 	config := sf.ClientConfig{
+ 		BrokerURL:          *brokerURL,
+ 		AmpCacheURL:        *ampCacheURL,
+@@ -241,7 +219,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -69,7 +81,7 @@ index f4d9c5f..42716ab 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -256,7 +239,6 @@ func main() {
+@@ -256,7 +234,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -77,7 +89,7 @@ index f4d9c5f..42716ab 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -283,3 +265,8 @@ func main() {
+@@ -283,3 +260,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }
