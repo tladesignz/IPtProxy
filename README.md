@@ -46,7 +46,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 3.1'
+pod 'IPtProxy', '~> 3.2'
 ```
 
 ### Getting Started
@@ -93,18 +93,18 @@ information to use this library in a Tor context.
 ### Installation
 
 From version 1.9.0 onward, IPtProxy is available through 
-[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/3.0.0). 
+[Maven Central](https://central.sonatype.dev/artifact/com.netzarchitekten/IPtProxy/3.2.0). 
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:3.1.0'
+implementation 'com.netzarchitekten:IPtProxy:3.2.0'
 ```
 
 It is also available through [JitPack](https://jitpack.io). To install
 it from there, add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.github.tladesignz:IPtProxy:3.1.0'
+implementation 'com.github.tladesignz:IPtProxy:3.2.0'
 ```
 
 And add this to your root `build.gradle` at the end of repositories:
@@ -194,7 +194,7 @@ IPtProxy.setStateLocation(ptDir.getAbsolutePath());
 ### Requirements
 
 This repository contains a precompiled iOS and Android version of IPtProxy.
-If you want to compile it yourself, you'll need Go 1.16 as a prerequisite.
+If you want to compile it yourself, you'll need Go 1.21 as a prerequisite.
 
 You will also need Xcode installed when compiling for iOS and an Android NDK
 when compiling for Android.
@@ -242,7 +242,7 @@ This will create an `IPtProxy.aar` file, which you can directly drop in your app
 if you don't want to rely on Maven Central or JitPack.
 
 On certain CPU architectures `gobind` might fail with this error due to setting
-a flag that is no longer supported by Go 1.16:
+a flag that is no longer supported by Go since version 1.16:
 
 ```
 go tool compile: exit status 1

@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 3.2.0
+- Update Snowflake to v2.7.0.
+- Raised minimum needed iOS to 12, since Xcode 15 dropped support for 11.
+- Raised minimum needed Android API to 21, since NDK 26.1. dropped support for 19 and 20.
+
 ## 3.1.1
 - Fixed broken compilation on Apple platforms due to missing library.
 
