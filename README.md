@@ -289,7 +289,7 @@ git push --tags
 ### CocoaPods
 
 ```shell
-pod trunk push
+pod trunk push --skip-import-validation
 ```
 
 ### Maven Central
