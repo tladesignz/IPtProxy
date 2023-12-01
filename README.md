@@ -83,7 +83,7 @@ if let ptDir = fm.urls(for: .documentDirectory, in: .userDomainMask)
 }
 ```
 
-There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI)
+There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI-ios)
 which explains the use of IPtProxy and provides all the necessary UI and additional 
 information to use this library in a Tor context.
 
