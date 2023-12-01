@@ -315,6 +315,12 @@ gpg --list-secret-keys
 
 See also: https://gitlab.com/-/snippets/2482490
 
+
+## Further reading
+
+https://tordev.guardianproject.info
+
+
 ## Authors
 
 - Benjamin Erhart, berhart@netzarchitekten.com
@@ -322,6 +328,7 @@ See also: https://gitlab.com/-/snippets/2482490
 - Bim
 
 for the Guardian Project https://guardianproject.info
+
 
 ## License
 
