@@ -11,7 +11,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 | Transport | Version |
 |-----------|---------|
 | Lyrebird  | 0.1.0   |
-| Snowflake | 2.7.0   |
+| Snowflake | 2.8.0   |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -257,6 +257,19 @@ export GO386=sse2
 ```
 
 ## Release
+
+### Update go.mod
+
+If `Lyrebird` or `Snowflake` was updated, you might need to update the dependencies:
+
+- Check, that `go.mod` mentions the right versions of `Lyrebird` and `Snowflake`.
+- Then, do the following:
+
+```shell
+cd IPtProxy.go
+go mod tidy
+go get golang.org/x/mobile/cmd/gomobile@latest
+```
 
 A release commit needs the following:
 

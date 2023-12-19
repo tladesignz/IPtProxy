@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index f4d9c5f..968dcbf 100644
+index 3b619f7..d34a965 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,9 +1,7 @@
@@ -10,10 +10,10 @@ index f4d9c5f..968dcbf 100644
  import (
 -	"flag"
 -	"fmt"
+ 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/proxy"
  	"io"
  	"io/ioutil"
- 	"log"
-@@ -38,6 +36,8 @@ func (p ptEventLogger) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
+@@ -39,6 +37,8 @@ func (p ptEventLogger) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
  	pt.Log(pt.LogSeverityNotice, e.String())
  }
  
@@ -22,7 +22,7 @@ index f4d9c5f..968dcbf 100644
  // Exchanges bytes between two ReadWriters.
  // (In this case, between a SOCKS connection and a snowflake transport conn)
  func copyLoop(socks, sfconn io.ReadWriter) {
-@@ -150,31 +150,14 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
+@@ -153,31 +153,14 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
  	}
  }
  
@@ -60,9 +60,9 @@ index f4d9c5f..968dcbf 100644
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
  	// Don't write to stderr; versions of tor earlier than about 0.3.5.6 do
-@@ -211,11 +194,6 @@ func main() {
- 	iceAddresses := strings.Split(strings.TrimSpace(*iceServersCommas), ",")
- 	frontDomains := strings.Split(strings.TrimSpace(*frontDomainsCommas), ",")
+@@ -218,11 +201,6 @@ func main() {
+ 		frontDomains = strings.Split(strings.TrimSpace(*frontDomainsCommas), ",")
+ 	}
  
 -	// Maintain backwards compatability with legacy commandline option
 -	if (len(frontDomains) == 0) && (*frontDomain != "") {
@@ -72,7 +72,7 @@ index f4d9c5f..968dcbf 100644
  	config := sf.ClientConfig{
  		BrokerURL:          *brokerURL,
  		AmpCacheURL:        *ampCacheURL,
-@@ -241,7 +219,7 @@ func main() {
+@@ -260,7 +238,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -81,7 +81,7 @@ index f4d9c5f..968dcbf 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -256,7 +234,6 @@ func main() {
+@@ -275,7 +253,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -89,7 +89,7 @@ index f4d9c5f..968dcbf 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -283,3 +260,8 @@ func main() {
+@@ -302,3 +279,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }
@@ -99,18 +99,19 @@ index f4d9c5f..968dcbf 100644
 +	sigChan <- syscall.SIGTERM
 +}
 diff --git a/proxy/lib/snowflake.go b/proxy/lib/snowflake.go
-index 243b49d..ff57b39 100644
+index 82a1780..af078f9 100644
 --- a/proxy/lib/snowflake.go
 +++ b/proxy/lib/snowflake.go
-@@ -139,6 +139,7 @@ type SnowflakeProxy struct {
- 	ProxyType       string
- 	EventDispatcher event.SnowflakeEventDispatcher
- 	shutdown        chan struct{}
-+	ClientConnectedCallback    func()
+@@ -145,6 +145,8 @@ type SnowflakeProxy struct {
+ 
+ 	periodicProxyStats *periodicProxyStats
+ 	bytesLogger        bytesLogger
++
++	ClientConnectedCallback	func()
  }
  
  // Checks whether an IP address is a remote address for the client
-@@ -618,6 +619,8 @@ func (sf *SnowflakeProxy) runSession(sid string) {
+@@ -619,6 +621,8 @@ func (sf *SnowflakeProxy) runSession(sid string) {
  	select {
  	case <-dataChan:
  		log.Println("Connection successful")
