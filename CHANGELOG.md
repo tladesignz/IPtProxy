@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.3.0
+- Update Snowflake to v2.8.0.
+
 ## 3.2.1
 - Removed doubled "front" argument, therefore fixed backwards compatibility with IPtProxy 3.
 
