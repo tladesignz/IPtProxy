@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.4.0
+- Update Snowflake to v2.8.1.
+
 ## 3.3.0
 - Update Snowflake to v2.8.0.
 
