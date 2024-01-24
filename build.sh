@@ -64,7 +64,15 @@ cd "$TEMPDIR/IPtProxy.go" || exit 1
 
 gomobile init
 
-MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -o "$CURRENT/$OUTPUT" -iosversion=12.0 -androidapi=21 -v -tags=netcgo -trimpath
+MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w" -o "$CURRENT/$OUTPUT" -iosversion=12.0 -androidapi=21 -v -tags=netcgo -trimpath
+
+### Note:
+# $ go tool link -h
+#  -s	disable symbol table
+#  -w	disable DWARF generation
+#
+# -> Saves > 50% of file size on all targets!
+# See https://github.com/guardianproject/orbot/pull/1061
 
 rm -rf "$TEMPDIR"
 
