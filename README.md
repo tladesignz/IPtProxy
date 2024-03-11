@@ -87,6 +87,9 @@ There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyU
 which explains the use of IPtProxy and provides all the necessary UI and additional 
 information to use this library in a Tor context.
 
+For a headache-free start into the world of Tor on iOS and macOS, check out
+the new [`TorManager` project](https://github.com/tladesignz/TorManager).
+
 
 ## Android 
 
