@@ -146,7 +146,7 @@ FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL 
 
 @return Port number where Snowflake will listen on, if no error happens during start up.
  */
-FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable logFile, NSString* _Nullable sqsQueueURL, NSString* _Nullable sqsAccessKeyId, NSString* _Nullable sqsSecretKey, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
+FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable sqsQueueURL, NSString* _Nullable sqsAccessKeyId, NSString* _Nullable sqsSecretKey, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
  * StartSnowflakeProxy - Start the Snowflake proxy.
