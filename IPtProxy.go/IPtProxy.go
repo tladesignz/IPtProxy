@@ -206,6 +206,12 @@ func StopLyrebird() {
 //
 //	Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
 //
+// @param sqsQueueURL OPTIONAL. URL of SQS Queue to use as a proxy for signaling.
+//
+// @param sqsAccessKeyId OPTIONAL. Access Key ID for credentials to access SQS Queue.
+//
+// @param sqsSecretKey OPTIONAL. Secret Key for credentials to access SQS Queue.
+//
 // @param logFile Name of log file. OPTIONAL. Defaults to no log.
 //
 // @param logToStateDir Resolve the log file relative to Tor's PT state dir.
@@ -219,7 +225,10 @@ func StopLyrebird() {
 // @return Port number where Snowflake will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, fronts, ampCache, logFile string, logToStateDir, keepLocalAddresses, unsafeLogging bool, maxPeers int) int {
+func StartSnowflake(ice, url, fronts, ampCache, logFile, sqsQueueURL, sqsAccessKeyId, sqsSecretKey string,
+	logToStateDir, keepLocalAddresses, unsafeLogging bool,
+	maxPeers int) int {
+
 	if snowflakeRunning {
 		return snowflakePort
 	}
@@ -232,7 +241,8 @@ func StartSnowflake(ice, url, fronts, ampCache, logFile string, logToStateDir, k
 
 	fixEnv()
 
-	go snowflakeclient.Start(&snowflakePort, &ice, &url, &fronts, &ampCache, &logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
+	go snowflakeclient.Start(&snowflakePort, &ice, &url, &fronts, &ampCache, &sqsQueueURL, &sqsAccessKeyId, &sqsSecretKey,
+		&logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 
 	return snowflakePort
 }
