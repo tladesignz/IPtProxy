@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.5.0
+- Update Snowflake to v2.9.1. Contains SQS support, hence new arguments.
+
 ## 3.4.0
 - Update Snowflake to v2.8.1.
 
