@@ -225,7 +225,7 @@ func StopLyrebird() {
 // @return Port number where Snowflake will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, fronts, ampCache, logFile, sqsQueueURL, sqsAccessKeyId, sqsSecretKey string,
+func StartSnowflake(ice, url, fronts, ampCache, sqsQueueURL, sqsAccessKeyId, sqsSecretKey, logFile string,
 	logToStateDir, keepLocalAddresses, unsafeLogging bool,
 	maxPeers int) int {
 
