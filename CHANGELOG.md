@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.7.0
+- Update Snowflake to v2.9.2. SQS arguments changed!
+
 ## 3.6.0
 - Fixed `StartSnowflake` argument order.
 

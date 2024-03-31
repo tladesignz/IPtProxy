@@ -130,9 +130,7 @@ FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL 
 
 @param sqsQueueURL OPTIONAL. URL of SQS Queue to use as a proxy for signaling.
 
-@param sqsAccessKeyId OPTIONAL. Access Key ID for credentials to access SQS Queue.
-
-@param sqsSecretKey OPTIONAL. Secret Key for credentials to access SQS Queue.
+@param sqsCredsStr OPTIONAL. Credentials to access SQS Queue
 
 @param logFile Name of log file. OPTIONAL. Defaults to no log.
 
@@ -146,7 +144,7 @@ FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL 
 
 @return Port number where Snowflake will listen on, if no error happens during start up.
  */
-FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable sqsQueueURL, NSString* _Nullable sqsAccessKeyId, NSString* _Nullable sqsSecretKey, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
+FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable sqsQueueURL, NSString* _Nullable sqsCredsStr, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
 
 /**
  * StartSnowflakeProxy - Start the Snowflake proxy.
