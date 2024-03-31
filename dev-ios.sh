@@ -1,3 +1,5 @@
+#!/bin/sh
+
 cd "$(dirname "$0")" || exit 1
 
 cd lyrebird || exit 1

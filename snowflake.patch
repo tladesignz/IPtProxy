@@ -1,5 +1,5 @@
 diff --git a/client/snowflake.go b/client/snowflake.go
-index 7ff0a35..e17d280 100644
+index 4ebbaf5..749955b 100644
 --- a/client/snowflake.go
 +++ b/client/snowflake.go
 @@ -1,9 +1,7 @@
@@ -22,7 +22,7 @@ index 7ff0a35..e17d280 100644
  // Exchanges bytes between two ReadWriters.
  // (In this case, between a SOCKS connection and a snowflake transport conn)
  func copyLoop(socks, sfconn io.ReadWriter) {
-@@ -162,34 +162,14 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
+@@ -159,33 +159,14 @@ func socksAcceptLoop(ln *pt.SocksListener, config sf.ClientConfig, shutdown chan
  	}
  }
  
@@ -33,8 +33,7 @@ index 7ff0a35..e17d280 100644
 -	frontDomainsCommas := flag.String("fronts", "", "comma-separated list of front domains")
 -	ampCacheURL := flag.String("ampcache", "", "URL of AMP cache to use as a proxy for signaling")
 -	sqsQueueURL := flag.String("sqsqueue", "", "URL of SQS Queue to use as a proxy for signaling")
--	sqsAccessKeyId := flag.String("sqsakid", "", "Access Key ID for credentials to access SQS Queue ")
--	sqsSecretKey := flag.String("sqsskey", "", "Secret Key for credentials to access SQS Queue")
+-	sqsCredsStr := flag.String("sqscreds", "", "credentials to access SQS Queue")
 -	logFilename := flag.String("log", "", "name of log file")
 -	logToStateDir := flag.Bool("log-to-state-dir", false, "resolve the log file relative to tor's pt state dir")
 -	keepLocalAddresses := flag.Bool("keep-local-addresses", false, "keep local LAN address ICE candidates")
@@ -52,7 +51,7 @@ index 7ff0a35..e17d280 100644
 -	if *versionFlag {
 -		fmt.Fprintf(os.Stderr, "snowflake-client %s", version.ConstructResult())
 -		os.Exit(0)
-+func Start(port *int, iceServersCommas, brokerURL, frontDomainsCommas, ampCacheURL, sqsQueueURL, sqsAccessKeyId, sqsSecretKey, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
++func Start(port *int, iceServersCommas, brokerURL, frontDomainsCommas, ampCacheURL, sqsQueueURL, sqsCredsStr, logFilename *string, logToStateDir, keepLocalAddresses, unsafeLogging *bool, max *int) {
 +	if *max < DefaultSnowflakeCapacity {
 +		*max = DefaultSnowflakeCapacity
  	}
@@ -63,7 +62,7 @@ index 7ff0a35..e17d280 100644
  	log.SetFlags(log.LstdFlags | log.LUTC)
  
  	// Don't write to stderr; versions of tor earlier than about 0.3.5.6 do
-@@ -230,11 +210,6 @@ func main() {
+@@ -226,11 +207,6 @@ func main() {
  		frontDomains = strings.Split(strings.TrimSpace(*frontDomainsCommas), ",")
  	}
  
@@ -75,7 +74,7 @@ index 7ff0a35..e17d280 100644
  	config := sf.ClientConfig{
  		BrokerURL:          *brokerURL,
  		AmpCacheURL:        *ampCacheURL,
-@@ -275,7 +250,7 @@ func main() {
+@@ -270,7 +246,7 @@ func main() {
  		switch methodName {
  		case "snowflake":
  			// TODO: Be able to recover when SOCKS dies.
@@ -84,7 +83,7 @@ index 7ff0a35..e17d280 100644
  			if err != nil {
  				pt.CmethodError(methodName, err.Error())
  				break
-@@ -290,7 +265,6 @@ func main() {
+@@ -285,7 +261,6 @@ func main() {
  	}
  	pt.CmethodsDone()
  
@@ -92,7 +91,7 @@ index 7ff0a35..e17d280 100644
  	signal.Notify(sigChan, syscall.SIGTERM)
  
  	if os.Getenv("TOR_PT_EXIT_ON_STDIN_CLOSE") == "1" {
-@@ -317,3 +291,8 @@ func main() {
+@@ -312,3 +287,8 @@ func main() {
  	wg.Wait()
  	log.Println("snowflake is done.")
  }

@@ -208,9 +208,7 @@ func StopLyrebird() {
 //
 // @param sqsQueueURL OPTIONAL. URL of SQS Queue to use as a proxy for signaling.
 //
-// @param sqsAccessKeyId OPTIONAL. Access Key ID for credentials to access SQS Queue.
-//
-// @param sqsSecretKey OPTIONAL. Secret Key for credentials to access SQS Queue.
+// @param sqsCredsStr OPTIONAL. Credentials to access SQS Queue
 //
 // @param logFile Name of log file. OPTIONAL. Defaults to no log.
 //
@@ -225,7 +223,7 @@ func StopLyrebird() {
 // @return Port number where Snowflake will listen on, if no error happens during start up.
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflake(ice, url, fronts, ampCache, sqsQueueURL, sqsAccessKeyId, sqsSecretKey, logFile string,
+func StartSnowflake(ice, url, fronts, ampCache, sqsQueueURL, sqsCredsStr, logFile string,
 	logToStateDir, keepLocalAddresses, unsafeLogging bool,
 	maxPeers int) int {
 
@@ -241,7 +239,7 @@ func StartSnowflake(ice, url, fronts, ampCache, sqsQueueURL, sqsAccessKeyId, sqs
 
 	fixEnv()
 
-	go snowflakeclient.Start(&snowflakePort, &ice, &url, &fronts, &ampCache, &sqsQueueURL, &sqsAccessKeyId, &sqsSecretKey,
+	go snowflakeclient.Start(&snowflakePort, &ice, &url, &fronts, &ampCache, &sqsQueueURL, &sqsCredsStr,
 		&logFile, &logToStateDir, &keepLocalAddresses, &unsafeLogging, &maxPeers)
 
 	return snowflakePort
