@@ -1,5 +1,5 @@
 diff --git a/cmd/lyrebird/lyrebird.go b/cmd/lyrebird/lyrebird.go
-index 29c51a3..872d082 100644
+index 29c51a3..1555ef6 100644
 --- a/cmd/lyrebird/lyrebird.go
 +++ b/cmd/lyrebird/lyrebird.go
 @@ -27,17 +27,16 @@
@@ -35,11 +35,11 @@ index 29c51a3..872d082 100644
  var termMon *termMonitor
  
 -func clientSetup() (launched bool, listeners []net.Listener) {
-+func clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort *int) (launched bool, listeners []net.Listener) {
++func clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort, webtunnelPort *int) (launched bool, listeners []net.Listener) {
  	ptClientInfo, err := pt.ClientSetup(transports.Transports())
  	if err != nil {
  		golog.Fatal(err)
-@@ -85,7 +85,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+@@ -85,7 +85,22 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
@@ -55,18 +55,20 @@ index 29c51a3..872d082 100644
 +			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*obfs3Port))
 +		} else if name == "scramblesuit" {
 +			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*scramblesuitPort))
++		} else if name == "webtunnel" {
++			realSocksAddr = net.JoinHostPort("127.0.0.1", strconv.Itoa(*webtunnelPort))
 +		}
 +
 +		ln, err := net.Listen("tcp", realSocksAddr)
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -300,22 +313,16 @@ func copyLoop(a net.Conn, b net.Conn) error {
+@@ -300,22 +315,16 @@ func copyLoop(a net.Conn, b net.Conn) error {
  	return nil
  }
  
 -func main() {
-+func Start(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort *int, logLevelStr *string, enableLogging *bool, unsafeLogging *bool) {
++func Start(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort, webtunnelPort *int, logLevelStr *string, enableLogging *bool, unsafeLogging *bool) {
  	// Initialize the termination state monitor as soon as possible.
  	termMon = newTermMonitor()
  
@@ -90,7 +92,7 @@ index 29c51a3..872d082 100644
  	if err := log.SetLogLevel(*logLevelStr); err != nil {
  		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
  	}
-@@ -334,16 +341,15 @@ func main() {
+@@ -334,16 +343,15 @@ func main() {
  		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
  	}
  	if err = transports.Init(); err != nil {
@@ -106,11 +108,11 @@ index 29c51a3..872d082 100644
  	if isClient {
  		log.Infof("%s - initializing client transport listeners", execName)
 -		launched, ptListeners = clientSetup()
-+		launched, ptListeners = clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort)
++		launched, ptListeners = clientSetup(meekPort, obfs2Port, obfs3Port, obfs4Port, scramblesuitPort, webtunnelPort)
  	} else {
  		log.Infof("%s - initializing server transport listeners", execName)
  		launched, ptListeners = serverSetup()
-@@ -375,3 +381,11 @@ func main() {
+@@ -375,3 +383,11 @@ func main() {
  	}
  	termMon.wait(true)
  }

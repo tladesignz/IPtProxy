@@ -67,6 +67,16 @@ func ScramblesuitPort() int {
 	return scramblesuitPort
 }
 
+var webtunnelPort = 47500
+
+// WebtunnelPort - Port where Lyrebird will provide its Webtunnel service.
+// Only use this property after calling StartLyrebird! It might have changed after that!
+//
+//goland:noinspection GoUnusedExportedFunction
+func WebtunnelPort() int {
+	return webtunnelPort
+}
+
 var snowflakePort = 52000
 
 // SnowflakePort - Port where Snowflake will provide its service.
@@ -122,7 +132,7 @@ func LyrebirdLogFile() string {
 //
 // @return Port number where Lyrebird will listen on for Obfs4(!), if no error happens during start up.
 //
-//	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
+//	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port, ScramblesuitPort and WebtunnelPort properties!
 //
 //goland:noinspection GoUnusedExportedFunction
 func StartLyrebird(logLevel string, enableLogging, unsafeLogging bool, proxy string) int {
@@ -168,6 +178,14 @@ func StartLyrebird(logLevel string, enableLogging, unsafeLogging bool, proxy str
 		scramblesuitPort++
 	}
 
+	if scramblesuitPort >= webtunnelPort {
+		webtunnelPort = scramblesuitPort + 1
+	}
+
+	for !IsPortAvailable(webtunnelPort) {
+		webtunnelPort++
+	}
+
 	fixEnv()
 
 	if len(proxy) > 0 {
@@ -176,7 +194,7 @@ func StartLyrebird(logLevel string, enableLogging, unsafeLogging bool, proxy str
 		_ = os.Unsetenv("TOR_PT_PROXY")
 	}
 
-	go lyrebird.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &logLevel, &enableLogging, &unsafeLogging)
+	go lyrebird.Start(&meekPort, &obfs2Port, &obfs3Port, &obfs4Port, &scramblesuitPort, &webtunnelPort, &logLevel, &enableLogging, &unsafeLogging)
 
 	return obfs4Port
 }
