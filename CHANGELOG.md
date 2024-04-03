@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.8.1
+- Fixed webtunnel support.
+
 ## 3.8.0
 - Update Lyrebird to v0.2.0. Added Webtunnel support.
 
