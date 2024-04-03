@@ -449,7 +449,7 @@ func fixEnv() {
 			"  Use a non-temporary directory to allow reuse of potentially stored state.")
 	}
 
-	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,snowflake")
+	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "meek_lite,obfs2,obfs3,obfs4,scramblesuit,webtunnel,snowflake")
 	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
 	_ = os.Setenv("TOR_PT_STATE_LOCATION", StateLocation)
 }
