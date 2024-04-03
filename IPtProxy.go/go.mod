@@ -10,12 +10,12 @@ replace (
 )
 
 require (
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-00010101000000-000000000000
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.2.0
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.9.2
 )
 
 require (
-	filippo.io/edwards25519 v1.0.0 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.25.3 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.27.7 // indirect
@@ -77,10 +77,11 @@ require (
 	github.com/txthinking/socks5 v0.0.0-20230325130024-4230056ae301 // indirect
 	github.com/xtaci/kcp-go/v5 v5.6.8 // indirect
 	github.com/xtaci/smux v1.5.24 // indirect
-	gitlab.com/yawning/edwards25519-extra.git v0.0.0-20220726154925-def713fd18e4 // indirect
+	gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266 // indirect
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0 // indirect
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240220175603-399c24557a18 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/mobile v0.0.0-20240329164231-365c35338770 // indirect
+	golang.org/x/mobile v0.0.0-20240401224555-755f4ef71bbd // indirect
 	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect

@@ -1,8 +1,8 @@
 diff --git a/cmd/lyrebird/lyrebird.go b/cmd/lyrebird/lyrebird.go
-index ee50b14..3b0eb32 100644
+index 29c51a3..872d082 100644
 --- a/cmd/lyrebird/lyrebird.go
 +++ b/cmd/lyrebird/lyrebird.go
-@@ -27,10 +27,9 @@
+@@ -27,17 +27,16 @@
  
  // Go language Tor Pluggable Transport suite.  Works only as a managed
  // client/server.
@@ -11,10 +11,10 @@ index ee50b14..3b0eb32 100644
  
  import (
 -	"flag"
- 	"fmt"
+-	"fmt"
  	"io"
  	golog "log"
-@@ -38,6 +37,7 @@ import (
+ 	"net"
  	"net/url"
  	"os"
  	"path"
@@ -22,14 +22,15 @@ index ee50b14..3b0eb32 100644
  	"sync"
  	"syscall"
  
-@@ -53,12 +53,14 @@ const (
- 	obfs4proxyVersion = "0.0.14"
- 	obfs4proxyLogFile = "obfs4proxy.log"
- 	socksAddr         = "127.0.0.1:0"
-+	LyrebirdVersion   = obfs4proxyVersion
-+	LyrebirdLogFile   = obfs4proxyLogFile
+@@ -52,13 +51,14 @@ import (
+ const (
+ 	lyrebirdLogFile = "lyrebird.log"
+ 	socksAddr       = "127.0.0.1:0"
++	LyrebirdVersion   = "0.2.0"
++	LyrebirdLogFile = lyrebirdLogFile
  )
  
+-var lyrebirdVersion = "devel"
  var stateDir string
  var termMon *termMonitor
  
@@ -38,7 +39,7 @@ index ee50b14..3b0eb32 100644
  	ptClientInfo, err := pt.ClientSetup(transports.Transports())
  	if err != nil {
  		golog.Fatal(err)
-@@ -85,7 +87,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
+@@ -85,7 +85,20 @@ func clientSetup() (launched bool, listeners []net.Listener) {
  			continue
  		}
  
@@ -60,8 +61,8 @@ index ee50b14..3b0eb32 100644
  		if err != nil {
  			_ = pt.CmethodError(name, err.Error())
  			continue
-@@ -304,22 +319,16 @@ func getVersion() string {
- 	return fmt.Sprintf("obfs4proxy-%s", obfs4proxyVersion)
+@@ -300,22 +313,16 @@ func copyLoop(a net.Conn, b net.Conn) error {
+ 	return nil
  }
  
 -func main() {
@@ -73,12 +74,12 @@ index ee50b14..3b0eb32 100644
 -	_, execName := path.Split(os.Args[0])
 -	showVer := flag.Bool("version", false, "Print version and exit")
 -	logLevelStr := flag.String("logLevel", "ERROR", "Log level (ERROR/WARN/INFO/DEBUG)")
--	enableLogging := flag.Bool("enableLogging", false, "Log to TOR_PT_STATE_LOCATION/"+obfs4proxyLogFile)
+-	enableLogging := flag.Bool("enableLogging", false, "Log to TOR_PT_STATE_LOCATION/"+lyrebirdLogFile)
 -	unsafeLogging := flag.Bool("unsafeLogging", false, "Disable the address scrubber")
 -	flag.Parse()
 -
 -	if *showVer {
--		fmt.Printf("%s\n", getVersion())
+-		fmt.Printf("%s\n", lyrebirdVersion)
 -		os.Exit(0)
 +	if *logLevelStr == "" {
 +		*logLevelStr = "ERROR"
@@ -89,7 +90,7 @@ index ee50b14..3b0eb32 100644
  	if err := log.SetLogLevel(*logLevelStr); err != nil {
  		golog.Fatalf("[ERROR]: %s - failed to set log level: %s", execName, err)
  	}
-@@ -338,8 +347,7 @@ func main() {
+@@ -334,16 +341,15 @@ func main() {
  		golog.Fatalf("[ERROR]: %s - failed to initialize logging", execName)
  	}
  	if err = transports.Init(); err != nil {
@@ -98,8 +99,9 @@ index ee50b14..3b0eb32 100644
 +		log.Noticef("%s - failed to initialize transports: %s", execName, err)
  	}
  
- 	log.Noticef("%s - launched", getVersion())
-@@ -347,7 +355,7 @@ func main() {
+-	log.Noticef("%s - launched", lyrebirdVersion)
++	log.Noticef("%s - launched", LyrebirdVersion)
+ 
  	// Do the managed pluggable transport protocol configuration.
  	if isClient {
  		log.Infof("%s - initializing client transport listeners", execName)
@@ -108,7 +110,7 @@ index ee50b14..3b0eb32 100644
  	} else {
  		log.Infof("%s - initializing server transport listeners", execName)
  		launched, ptListeners = serverSetup()
-@@ -379,3 +387,11 @@ func main() {
+@@ -375,3 +381,11 @@ func main() {
  	}
  	termMon.wait(true)
  }
@@ -121,7 +123,7 @@ index ee50b14..3b0eb32 100644
 +	termMon.sigChan <- syscall.SIGTERM
 +}
 diff --git a/cmd/lyrebird/proxy_http.go b/cmd/lyrebird/proxy_http.go
-index 1adadf8..3bd6952 100644
+index f1eae42..529ed12 100644
 --- a/cmd/lyrebird/proxy_http.go
 +++ b/cmd/lyrebird/proxy_http.go
 @@ -25,7 +25,7 @@
@@ -134,7 +136,7 @@ index 1adadf8..3bd6952 100644
  import (
  	"bufio"
 diff --git a/cmd/lyrebird/proxy_socks4.go b/cmd/lyrebird/proxy_socks4.go
-index ac8be9e..cda8d94 100644
+index d416f27..c5e1a05 100644
 --- a/cmd/lyrebird/proxy_socks4.go
 +++ b/cmd/lyrebird/proxy_socks4.go
 @@ -31,7 +31,7 @@

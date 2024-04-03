@@ -114,7 +114,7 @@ func LyrebirdLogFile() string {
 //
 // @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 //
-// @param enableLogging Log to TOR_PT_STATE_LOCATION/obfs4proxy.log.
+// @param enableLogging Log to TOR_PT_STATE_LOCATION/lyrebird.log.
 //
 // @param unsafeLogging Disable the address scrubber.
 //

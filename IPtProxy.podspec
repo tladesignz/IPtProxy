@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
 
     | Transport | Version |
     |-----------|--------:|
-    | Lyrebird  |   0.1.0 |
+    | Lyrebird  |   0.2.0 |
     | Snowflake |   2.9.2 |
 
                        DESC

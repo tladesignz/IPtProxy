@@ -45,7 +45,7 @@ else
     # No .git directory - That's a normal install.
     git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git "$TEMPDIR/lyrebird"
     cd "$TEMPDIR/lyrebird" || exit 1
-    git checkout --force --quiet 3915dcd
+    git checkout --force --quiet aab4891
     git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
     cd "$TEMPDIR/snowflake" || exit 1
     git checkout --force --quiet b130151

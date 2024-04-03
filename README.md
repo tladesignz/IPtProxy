@@ -10,7 +10,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version |
 |-----------|---------|
-| Lyrebird  | 0.1.0   |
+| Lyrebird  | 0.2.0   |
 | Snowflake | 2.9.2   |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
