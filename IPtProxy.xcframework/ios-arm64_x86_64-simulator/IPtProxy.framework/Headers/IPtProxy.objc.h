@@ -103,7 +103,7 @@ Only use the port properties after calling this, they might have been changed!
 
 @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 
-@param enableLogging Log to TOR_PT_STATE_LOCATION/obfs4proxy.log.
+@param enableLogging Log to TOR_PT_STATE_LOCATION/lyrebird.log.
 
 @param unsafeLogging Disable the address scrubber.
 
@@ -111,7 +111,7 @@ Only use the port properties after calling this, they might have been changed!
 
 @return Port number where Lyrebird will listen on for Obfs4(!), if no error happens during start up.
 
-	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port and ScramblesuitPort properties!
+	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port, ScramblesuitPort and WebtunnelPort properties!
  */
 FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable proxy);
 
@@ -186,6 +186,12 @@ FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);
  * StopSnowflakeProxy - Stop the Snowflake proxy.
  */
 FOUNDATION_EXPORT void IPtProxyStopSnowflakeProxy(void);
+
+/**
+ * WebtunnelPort - Port where Lyrebird will provide its Webtunnel service.
+Only use this property after calling StartLyrebird! It might have changed after that!
+ */
+FOUNDATION_EXPORT long IPtProxyWebtunnelPort(void);
 
 @class IPtProxySnowflakeClientConnected;
 

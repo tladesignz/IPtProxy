@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.8.0
+- Update Lyrebird to v0.2.0. Added Webtunnel support.
+
 ## 3.7.0
 - Update Snowflake to v2.9.2. SQS arguments changed!
 
