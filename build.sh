@@ -30,7 +30,7 @@ cp -a IPtProxy.go "$TEMPDIR/"
 
 
 # Fetch submodules lyrebird and snowflake.
-printf '\n\n--- Fetching lyrebird and snowflake dependencies...\n'
+printf '\n\n--- Fetching Lyrebird and Snowflake dependencies...\n'
 if test -e ".git"; then
     # There's a .git directory - we must be in the development pod.
     git submodule update --init --recursive
@@ -53,7 +53,7 @@ else
 fi
 
 # Apply patches.
-printf '\n\n--- Apply patches to lyrebird and snowflake...\n'
+printf '\n\n--- Apply patches to Lyrebird and Snowflake...\n'
 patch --directory="$TEMPDIR/lyrebird" --strip=1 < lyrebird.patch
 patch --directory="$TEMPDIR/snowflake" --strip=1 < snowflake.patch
 
