@@ -1,5 +1,5 @@
 diff --git a/cmd/lyrebird/lyrebird.go b/cmd/lyrebird/lyrebird.go
-index 29c51a3..1555ef6 100644
+index 29c51a3..c74095d 100644
 --- a/cmd/lyrebird/lyrebird.go
 +++ b/cmd/lyrebird/lyrebird.go
 @@ -27,17 +27,16 @@
@@ -26,7 +26,7 @@ index 29c51a3..1555ef6 100644
  const (
  	lyrebirdLogFile = "lyrebird.log"
  	socksAddr       = "127.0.0.1:0"
-+	LyrebirdVersion   = "0.2.0"
++	LyrebirdVersion   = "lyrebird-0.2.0"
 +	LyrebirdLogFile = lyrebirdLogFile
  )
  
