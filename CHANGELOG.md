@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 3.8.2
+- Reissue because of problems with Maven Central.
+
 ## 3.8.1
 - Fixed webtunnel support.
 
