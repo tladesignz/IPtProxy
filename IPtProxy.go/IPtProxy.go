@@ -285,6 +285,8 @@ type SnowflakeClientConnected interface {
 
 // StartSnowflakeProxy - Start the Snowflake proxy.
 //
+// @param pollIntervalMs how often to ask the broker for a new client, in milliseconds. Keep in mind that asking for a client will not always result in getting one. Minumum value is 2000 milliseconds. If set to 0, will default to 120 000ms, i.e. twice the interval that browser-based Snowflake proxies have
+//
 // @param capacity the maximum number of clients a Snowflake will serve. If set to 0, the proxy will accept an unlimited number of clients.
 //
 // @param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
@@ -307,9 +309,25 @@ type SnowflakeClientConnected interface {
 //	if you want to do UI stuff!! OPTIONAL
 //
 //goland:noinspection GoUnusedExportedFunction
-func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile string, keepLocalAddresses, unsafeLogging bool, clientConnected SnowflakeClientConnected) {
+func StartSnowflakeProxy(pollIntervalMs int, capacity int, broker, relay, stun, natProbe, logFile string, keepLocalAddresses, unsafeLogging bool, clientConnected SnowflakeClientConnected) {
 	if snowflakeProxy != nil {
 		return
+	}
+
+	// Same min interval as imposed by Snowflake proxy CLI
+	// https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/blob/f4db64612c500be635dc7eb231505e88552e6a07/proxy/main.go#L20
+	if pollIntervalMs < 2000 {
+		if pollIntervalMs == 0 {
+			// Twice the interval that browser-based Snowflake proxies have:
+			// https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake-webext/-/blob/3649063755f6b7dc8104f64ef4c25cbba8ba9de8/config.js#L24
+			// so that mobile devices (that use IPtProxy) experience less load
+			// than PCs running the extension. See
+			// https://github.com/guardianproject/orbot/issues/1105
+			// https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/issues/40373
+			pollIntervalMs = 120 * 1000
+		} else {
+			log.Fatalf("pollIntervalMs must be >= 2000 milliseconds (or 0 for default). The provided value was %v", pollIntervalMs)
+		}
 	}
 
 	if capacity < 1 {
@@ -317,6 +335,7 @@ func StartSnowflakeProxy(capacity int, broker, relay, stun, natProbe, logFile st
 	}
 
 	snowflakeProxy = &sfp.SnowflakeProxy{
+		PollInterval:           time.Duration(pollIntervalMs) * time.Millisecond,
 		Capacity:               uint(capacity),
 		STUNURL:                stun,
 		BrokerURL:              broker,
