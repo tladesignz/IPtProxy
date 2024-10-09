@@ -4,14 +4,11 @@ go 1.21
 
 toolchain go1.21.1
 
-replace (
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird => ../lyrebird
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 => ../snowflake
-)
-
 require (
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.2.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20241008101304-dfaf2552b2b3
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.9.2
+	golang.org/x/net v0.30.0
 )
 
 require (
@@ -31,14 +28,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.4 // indirect
 	github.com/aws/smithy-go v1.20.1 // indirect
-	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/siphash v1.2.3 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/uuid v1.3.1 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/klauspost/compress v1.17.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.6 // indirect
 	github.com/klauspost/reedsolomon v1.12.0 // indirect
@@ -62,13 +56,8 @@ require (
 	github.com/pion/webrtc/v3 v3.2.29 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_golang v1.19.0 // indirect
-	github.com/prometheus/client_model v0.6.0 // indirect
-	github.com/prometheus/common v0.48.0 // indirect
-	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/quic-go/quic-go v0.40.1 // indirect
 	github.com/realclientip/realclientip-go v1.0.0 // indirect
-	github.com/refraction-networking/utls v1.6.3 // indirect
+	github.com/refraction-networking/utls v1.6.7 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/templexxx/cpu v0.1.0 // indirect
 	github.com/templexxx/xorsimd v0.4.2 // indirect
@@ -78,16 +67,12 @@ require (
 	github.com/xtaci/kcp-go/v5 v5.6.8 // indirect
 	github.com/xtaci/smux v1.5.24 // indirect
 	gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266 // indirect
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0 // indirect
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240220175603-399c24557a18 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/mobile v0.0.0-20240401224555-755f4ef71bbd // indirect
-	golang.org/x/mod v0.16.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	golang.org/x/tools v0.19.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240711104640-e64b1b3562f3 // indirect
+	golang.org/x/crypto v0.28.0 // indirect
+	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
