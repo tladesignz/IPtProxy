@@ -4,12 +4,13 @@ import (
 	"io"
 	"log"
 	"net"
-	"os"
+	"net/url"
 
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports/base"
 	sf "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/client/lib"
+	sproxy "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/proxy"
 	"golang.org/x/net/proxy"
 )
 
@@ -19,7 +20,7 @@ type IPtProxy struct {
 	shutdown        chan struct{}
 }
 
-func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, shutdown chan struct{}) error {
+func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
 	defer ln.Close()
 	for {
 		conn, err := ln.AcceptSocks()
@@ -29,22 +30,35 @@ func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, shutdown chan struct
 			}
 			continue
 		}
-		go clientHandler(f, conn, shutdown)
+		go clientHandler(f, conn, proxyURL, shutdown)
 	}
 }
 
-func clientHandler(f base.ClientFactory, conn *pt.SocksConn, shutdown chan struct{}) {
+func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, shutdown chan struct{}) {
 	defer conn.Close()
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		log.Printf("Error parsing PT args: %s", err.Error())
+		conn.Reject()
 		return
 	}
-	//TODO: when proxy support is added back, update this
 	dialFn := proxy.Direct.Dial
+	if proxyURL != nil {
+		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
+		if err != nil {
+			log.Printf("Error getting proxy dialer: %s", err.Error())
+			conn.Reject()
+		}
+		dialFn = dialer.Dial
+	}
 	remote, err := f.Dial("tcp", conn.Req.Target, dialFn, args)
 	if err != nil {
 		log.Printf("Error dialing PT: %s", err.Error())
+		return
+	}
+	err = conn.Grant(&net.TCPAddr{IP: net.IPv4zero, Port: 0})
+	if err != nil {
+		log.Printf("conn.Grant error: %s", err)
 		return
 	}
 	defer remote.Close()
@@ -79,7 +93,7 @@ func (p *IPtProxy) GetLocalAddress(methodName string) net.Addr {
 	return p.listeners[methodName].Addr()
 }
 
-func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging, unsafeLogging bool, proxy string) {
+func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging, unsafeLogging bool, proxyURL *url.URL) {
 
 	// TODO: set up logging
 
@@ -102,24 +116,37 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 	// This assumes a major version bump due to breaking changes
 	pt.ReportVersion("iptproxy", "4.0.0")
 
-	// TODO: add back in proxy support, which is necessary for iOS
-	if ptInfo.ProxyURL != nil {
-		pt.ProxyError("proxy is not supported")
-		os.Exit(1)
-	}
-
 	p.shutdown = make(chan struct{})
 	listeners := make(map[string]*pt.SocksListener, 0)
 	for _, methodName := range ptInfo.MethodNames {
 		switch methodName {
 		case "snowflake":
+			if proxyURL != nil {
+				if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
+					pt.ProxyError("proxy is not supported:" + err.Error())
+					pt.CmethodError(methodName, err.Error())
+					continue
+				} else {
+					p.SnowflakeConfig.CommunicationProxy = proxyURL
+					client := sproxy.NewSocks5UDPClient(p.SnowflakeConfig.CommunicationProxy)
+					conn, err := client.ListenPacket("udp", nil)
+					if err != nil {
+						pt.ProxyError("proxy test failure:" + err.Error())
+						pt.CmethodError(methodName, err.Error())
+						conn.Close()
+						continue
+					}
+					conn.Close()
+					pt.ProxyDone()
+				}
+			}
 			f := newSnowflakeClientFactory(p.SnowflakeConfig)
 			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 			if err != nil {
 				pt.CmethodError(methodName, err.Error())
 				break
 			}
-			go acceptLoop(f, ln, p.shutdown)
+			go acceptLoop(f, ln, nil, p.shutdown)
 			pt.Cmethod(methodName, ln.Version(), ln.Addr())
 			listeners[methodName] = ln
 		default:
@@ -140,7 +167,7 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 				break
 			}
 			listeners[methodName] = ln
-			go acceptLoop(f, ln, p.shutdown)
+			go acceptLoop(f, ln, proxyURL, p.shutdown)
 
 		}
 	}
