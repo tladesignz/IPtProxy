@@ -16,9 +16,10 @@ import (
 type IPtProxy struct {
 	SnowflakeConfig sf.ClientConfig
 	listeners       map[string]*pt.SocksListener
+	shutdown        chan struct{}
 }
 
-func acceptLoop(f base.ClientFactory, ln *pt.SocksListener) error {
+func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, shutdown chan struct{}) error {
 	defer ln.Close()
 	for {
 		conn, err := ln.AcceptSocks()
@@ -28,12 +29,12 @@ func acceptLoop(f base.ClientFactory, ln *pt.SocksListener) error {
 			}
 			continue
 		}
-		go clientHandler(f, conn)
-		//TODO: maybe a shutdown channel, make sure to close conns
+		go clientHandler(f, conn, shutdown)
 	}
 }
 
-func clientHandler(f base.ClientFactory, conn *pt.SocksConn) {
+func clientHandler(f base.ClientFactory, conn *pt.SocksConn, shutdown chan struct{}) {
+	defer conn.Close()
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		log.Printf("Error parsing PT args: %s", err.Error())
@@ -46,27 +47,32 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn) {
 		log.Printf("Error dialing PT: %s", err.Error())
 		return
 	}
-	copyLoop(conn, remote)
+	defer remote.Close()
+	done := make(chan struct{}, 2)
+	go copyLoop(conn, remote, done)
+	// wait for copy loop to finish or for shutdown signal
+	select {
+	case <-shutdown:
+	case <-done:
+		log.Println("copy loop ended")
+	}
 }
 
 // Exchanges bytes between two ReadWriters.
 // (In this case, between a SOCKS connection and a pt conn)
-func copyLoop(socks, sfconn io.ReadWriter) {
-	done := make(chan struct{}, 2)
+func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 	go func() {
 		if _, err := io.Copy(socks, sfconn); err != nil {
-			log.Printf("copying Snowflake to SOCKS resulted in error: %v", err)
+			log.Printf("copying transport to SOCKS resulted in error: %v", err)
 		}
 		done <- struct{}{}
 	}()
 	go func() {
 		if _, err := io.Copy(sfconn, socks); err != nil {
-			log.Printf("copying SOCKS to Snowflake resulted in error: %v", err)
+			log.Printf("copying SOCKS to transport resulted in error: %v", err)
 		}
 		done <- struct{}{}
 	}()
-	<-done
-	log.Println("copy loop ended")
 }
 
 func (p *IPtProxy) GetLocalAddress(methodName string) net.Addr {
@@ -102,6 +108,7 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 		os.Exit(1)
 	}
 
+	p.shutdown = make(chan struct{})
 	listeners := make(map[string]*pt.SocksListener, 0)
 	for _, methodName := range ptInfo.MethodNames {
 		switch methodName {
@@ -112,7 +119,7 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 				pt.CmethodError(methodName, err.Error())
 				break
 			}
-			go acceptLoop(f, ln)
+			go acceptLoop(f, ln, p.shutdown)
 			pt.Cmethod(methodName, ln.Version(), ln.Addr())
 			listeners[methodName] = ln
 		default:
@@ -133,7 +140,7 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 				break
 			}
 			listeners[methodName] = ln
-			go acceptLoop(f, ln)
+			go acceptLoop(f, ln, p.shutdown)
 
 		}
 	}
@@ -145,4 +152,5 @@ func (p *IPtProxy) StopTransports() {
 	for _, ln := range p.listeners {
 		ln.Close()
 	}
+	close(p.shutdown)
 }
