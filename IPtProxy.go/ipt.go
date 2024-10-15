@@ -1,5 +1,18 @@
 package IPtProxy
 
+/**
+Package IPtProxy combines tor pluggable transport clients into a single library for use
+with mobile applications.
+
+Sample usage:
+ import IPtProxy.IPtProxy;
+ iptproxy = newIPtProxy()
+ iptproxy.Start([]string{"obfs4", "meek"}, nil)
+ obfs4Addr = iptproxy.GetLocalAddress("obfs4")
+ iptproxy.Stop([]string{"obfs4", "meek"})
+
+*/
+
 import (
 	"errors"
 	"io"
@@ -28,7 +41,14 @@ type IPtProxy struct {
 	SnowflakeConfig sf.ClientConfig
 
 	listeners map[string]*pt.SocksListener
-	shutdown  chan struct{}
+	shutdown  map[string]chan struct{}
+}
+
+func NewIPtProxy(stateDir string) *IPtProxy {
+	return &IPtProxy{
+		LogLevel: "ERROR",
+		StateDir: stateDir,
+	}
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
@@ -136,7 +156,7 @@ func createStateDir(path string) error {
 	return err
 }
 
-func (p *IPtProxy) StartTransports(methodNames []string, proxyURL *url.URL) {
+func (p *IPtProxy) Start(methodNames []string, proxyURL *url.URL) {
 
 	// TODO: set up logging
 	if err := ptlog.Init(p.EnableLogging, path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
@@ -153,7 +173,6 @@ func (p *IPtProxy) StartTransports(methodNames []string, proxyURL *url.URL) {
 	}
 	ptlog.Noticef("Launced iptproxy")
 
-	p.shutdown = make(chan struct{})
 	listeners := make(map[string]*pt.SocksListener, 0)
 	for _, methodName := range methodNames {
 		switch methodName {
@@ -180,7 +199,8 @@ func (p *IPtProxy) StartTransports(methodNames []string, proxyURL *url.URL) {
 				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				break
 			}
-			go acceptLoop(f, ln, nil, p.shutdown)
+			p.shutdown[methodName] = make(chan struct{})
+			go acceptLoop(f, ln, nil, p.shutdown[methodName])
 			listeners[methodName] = ln
 		default:
 			// at the moment, everything else is in lyrebird
@@ -200,16 +220,19 @@ func (p *IPtProxy) StartTransports(methodNames []string, proxyURL *url.URL) {
 				break
 			}
 			listeners[methodName] = ln
-			go acceptLoop(f, ln, proxyURL, p.shutdown)
+			p.shutdown[methodName] = make(chan struct{})
+			go acceptLoop(f, ln, proxyURL, p.shutdown[methodName])
 
 		}
 	}
 	p.listeners = listeners
 }
 
-func (p *IPtProxy) StopTransports() {
-	for _, ln := range p.listeners {
-		ln.Close()
+func (p *IPtProxy) Stop(methodNames []string) {
+	for _, methodName := range methodNames {
+		if ln, ok := p.listeners[methodName]; ok {
+			ln.Close()
+		}
+		close(p.shutdown[methodName])
 	}
-	close(p.shutdown)
 }
