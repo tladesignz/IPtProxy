@@ -20,9 +20,15 @@ import (
 )
 
 type IPtProxy struct {
+	EnableLogging bool
+	UnsafeLogging bool
+	LogLevel      string
+	StateDir      string
+
 	SnowflakeConfig sf.ClientConfig
-	listeners       map[string]*pt.SocksListener
-	shutdown        chan struct{}
+
+	listeners map[string]*pt.SocksListener
+	shutdown  chan struct{}
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
@@ -130,17 +136,19 @@ func createStateDir(path string) error {
 	return err
 }
 
-func (p *IPtProxy) StartTransports(methodNames []string, stateDir, logLevel string, enableLogging, unsafeLogging bool, proxyURL *url.URL) {
+func (p *IPtProxy) StartTransports(methodNames []string, proxyURL *url.URL) {
 
 	// TODO: set up logging
-	if err := ptlog.Init(enableLogging, path.Join(stateDir, "ipt.log"), unsafeLogging); err != nil {
+	if err := ptlog.Init(p.EnableLogging, path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
 		log.Fatalf("Failed to set initialize log: %s", err.Error())
 	}
-	if err := ptlog.SetLogLevel(logLevel); err != nil {
-		log.Fatalf("Failed to set log level: %s", err.Error())
+	if p.LogLevel != "" {
+		if err := ptlog.SetLogLevel(p.LogLevel); err != nil {
+			log.Fatalf("Failed to set log level: %s", err.Error())
+		}
 	}
 
-	if err := createStateDir(stateDir); err != nil {
+	if err := createStateDir(p.StateDir); err != nil {
 		log.Fatalf("Failed to set up state directory: %s", err)
 	}
 	ptlog.Noticef("Launced iptproxy")
@@ -181,7 +189,7 @@ func (p *IPtProxy) StartTransports(methodNames []string, stateDir, logLevel stri
 				log.Printf("Failed to initialize %s: no such method", methodName)
 				continue
 			}
-			f, err := t.ClientFactory(stateDir)
+			f, err := t.ClientFactory(p.StateDir)
 			if err != nil {
 				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				continue
