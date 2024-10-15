@@ -1,10 +1,13 @@
 package IPtProxy
 
 import (
+	"errors"
 	"io"
+	"io/fs"
 	"log"
 	"net"
 	"net/url"
+	"os"
 
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
@@ -93,77 +96,91 @@ func (p *IPtProxy) GetLocalAddress(methodName string) net.Addr {
 	return p.listeners[methodName].Addr()
 }
 
-func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging, unsafeLogging bool, proxyURL *url.URL) {
+func createStateDir(path string) error {
+	info, err := os.Stat(path)
+
+	// If dir does not exist, try to create it.
+	if errors.Is(err, os.ErrNotExist) {
+		err = os.MkdirAll(path, 0700)
+
+		if err == nil {
+			info, err = os.Stat(path)
+		}
+	}
+
+	// If it is not a dir, return error
+	if err == nil && !info.IsDir() {
+		err = fs.ErrInvalid
+		return err
+	}
+
+	// Create a file within dir to test writability.
+	tempFile := path + "/.iptproxy-writetest"
+	var file *os.File
+	file, err = os.Create(tempFile)
+
+	// Remove the test file again.
+	if err == nil {
+		file.Close()
+
+		err = os.Remove(tempFile)
+	}
+	return err
+}
+
+func (p *IPtProxy) StartTransports(methodNames []string, stateDir, logLevel string, enableLogging, unsafeLogging bool, proxyURL *url.URL) {
 
 	// TODO: set up logging
 
-	// goptlib will check for the environemnt variables that PT processes usually
-	// get from the tor parent process. In this case, we are starting the PT processes
-	// independently and then reporting the SOCKS5 port in the torrc configuration,
-	// so we need to set these environment variables manually
-	fixEnv(stateLocation)
-
-	stateDir, err := pt.MakeStateDir()
+	err := createStateDir(stateDir)
 	if err != nil {
-		log.Fatalf("No state directory: %s", err)
+		log.Fatalf("Failed to set up state directory: %s", err)
 	}
-
-	ptInfo, err := pt.ClientSetup(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// This assumes a major version bump due to breaking changes
-	pt.ReportVersion("iptproxy", "4.0.0")
 
 	p.shutdown = make(chan struct{})
 	listeners := make(map[string]*pt.SocksListener, 0)
-	for _, methodName := range ptInfo.MethodNames {
+	for _, methodName := range methodNames {
 		switch methodName {
 		case "snowflake":
 			if proxyURL != nil {
 				if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
-					pt.ProxyError("proxy is not supported:" + err.Error())
-					pt.CmethodError(methodName, err.Error())
 					continue
 				} else {
 					p.SnowflakeConfig.CommunicationProxy = proxyURL
 					client := sproxy.NewSocks5UDPClient(p.SnowflakeConfig.CommunicationProxy)
 					conn, err := client.ListenPacket("udp", nil)
 					if err != nil {
-						pt.ProxyError("proxy test failure:" + err.Error())
-						pt.CmethodError(methodName, err.Error())
+						log.Printf("Failed to initialize %s: proxy test failure: %s",
+							methodName, err.Error())
 						conn.Close()
 						continue
 					}
 					conn.Close()
-					pt.ProxyDone()
 				}
 			}
 			f := newSnowflakeClientFactory(p.SnowflakeConfig)
 			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 			if err != nil {
-				pt.CmethodError(methodName, err.Error())
+				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				break
 			}
 			go acceptLoop(f, ln, nil, p.shutdown)
-			pt.Cmethod(methodName, ln.Version(), ln.Addr())
 			listeners[methodName] = ln
 		default:
 			// at the moment, everything else is in lyrebird
 			t := transports.Get(methodName)
 			if t == nil {
-				pt.CmethodError(methodName, "no such method")
+				log.Printf("Failed to initialize %s: no such method", methodName)
 				continue
 			}
 			f, err := t.ClientFactory(stateDir)
 			if err != nil {
-				pt.CmethodError(methodName, err.Error())
+				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				continue
 			}
 			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 			if err != nil {
-				pt.CmethodError(methodName, err.Error())
+				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				break
 			}
 			listeners[methodName] = ln
@@ -172,7 +189,6 @@ func (p *IPtProxy) StartTransports(stateLocation, logLevel string, enableLogging
 		}
 	}
 	p.listeners = listeners
-	pt.CmethodsDone()
 }
 
 func (p *IPtProxy) StopTransports() {
