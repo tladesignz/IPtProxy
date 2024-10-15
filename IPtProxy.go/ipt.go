@@ -8,8 +8,10 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"path"
 
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
+	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports/base"
 	sf "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/client/lib"
@@ -131,11 +133,17 @@ func createStateDir(path string) error {
 func (p *IPtProxy) StartTransports(methodNames []string, stateDir, logLevel string, enableLogging, unsafeLogging bool, proxyURL *url.URL) {
 
 	// TODO: set up logging
+	if err := ptlog.Init(enableLogging, path.Join(stateDir, "ipt.log"), unsafeLogging); err != nil {
+		log.Fatalf("Failed to set initialize log: %s", err.Error())
+	}
+	if err := ptlog.SetLogLevel(logLevel); err != nil {
+		log.Fatalf("Failed to set log level: %s", err.Error())
+	}
 
-	err := createStateDir(stateDir)
-	if err != nil {
+	if err := createStateDir(stateDir); err != nil {
 		log.Fatalf("Failed to set up state directory: %s", err)
 	}
+	ptlog.Noticef("Launced iptproxy")
 
 	p.shutdown = make(chan struct{})
 	listeners := make(map[string]*pt.SocksListener, 0)
