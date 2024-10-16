@@ -1,8 +1,8 @@
 module github.com/tladesignz/IPtProxy.git
 
-go 1.21
+go 1.22.0
 
-toolchain go1.21.1
+toolchain go1.23.2
 
 require (
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0
@@ -69,10 +69,11 @@ require (
 	gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266 // indirect
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240711104640-e64b1b3562f3 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/mod v0.17.0 // indirect
+	golang.org/x/mobile v0.0.0-20241016134751-7ff83004ec2c // indirect
+	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	golang.org/x/tools v0.26.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
