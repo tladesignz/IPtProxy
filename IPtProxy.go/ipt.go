@@ -10,39 +10,45 @@ Sample gomobile usage:
  import IPtProxy.IPtProxy;
 
  // Create a new IPtProxy instance with provided state directory
- iptproxy = newIPtProxy(/path/to/statedir)
+ iptproxy = IPtProxy.newIPtProxy(/path/to/statedir)
+ iptproxy.init()
 
- // Start listening for obfs4 connections
- iptproxy.Start([]string{"obfs4", "meek"}, nil)
+ // Start listening for obfs4 connections, using an outgoing proxy
+ String[] transports = {"obfs4", "meek"}
+ iptproxy.start(transports, "socks5://localhost:8001")
 
  // Get the address that is listening for SOCKS connections for each transport
- obfs4Addr = iptproxy.GetLocalAddress("obfs4")
- meekAddr = iptproxy.GetLocalAddress("meek")
+ obfs4Addr = iptproxy.getLocalAddress("obfs4")
+ meekAddr = iptproxy.getLocalAddress("meek")
 
  // Start listening for snowflake connections
  // Note that snowflake setup can happen either here or with SOCKS arguments on
  // a per-connection basis.
  String[] iceServers = {"stun:stun.l.google.com:19302", "stun:stun.l.google.com:5349"};
  iptproxy.setSnowflakeIceServers(iceServers)
- iptproxy.Start([]string{"snowflake"}, nil)
+ transports = {"snowflake"}
+ iptproxy.start(transports, "")
 
 
- // Transports are stopped individually
- iptproxy.Stop([]string{"obfs4"})
+ // Stop transports, either all at once, or individually
+ tranports = {"snowflake", "obfs4", "meek_lite"}
+ iptproxy.stop(transports)
 
- // ...
-
- iptproxy.Stop([]string{"snowflake, meek"})
 
 Sample pure go usage:
  import github.com/tladesignz/IPtProxy
 
  func main() {
-	 iptproxy := &IPtProxy{
-		 StateDir: /path/to/pt/statedir,
-		 LogLevel: "ERROR",
-		 EnableLogging: true,
-	 }
+	 iptproxy := NewIPtProxy(/path/to/statedir)
+	 iptproxy.Init()
+
+	 iptproxy.Start([]string{"snowflake", "meek_lite", "obfs4"}, "")
+	 addr := iptproxy.GetLocalAddress("snowflake")
+	 fmt.Printf("Listening for snowflake connections on: %s", addr)
+
+	 // ...
+
+	 iptproxy.Stop([]string{"snowflake", "obfs4", "meek_lite"})
  }
 
 */
