@@ -2,14 +2,48 @@ package IPtProxy
 
 /**
 Package IPtProxy combines tor pluggable transport clients into a single library for use
-with mobile applications.
+with mobile applications. Transports, when started, will listen for incoming SOCKS
+connections on an available local address and proxy traffic between those connections
+and a configured bridge.
 
-Sample usage:
+Sample gomobile usage:
  import IPtProxy.IPtProxy;
- iptproxy = newIPtProxy()
+
+ // Create a new IPtProxy instance with provided state directory
+ iptproxy = newIPtProxy(/path/to/statedir)
+
+ // Start listening for obfs4 connections
  iptproxy.Start([]string{"obfs4", "meek"}, nil)
+
+ // Get the address that is listening for SOCKS connections for each transport
  obfs4Addr = iptproxy.GetLocalAddress("obfs4")
- iptproxy.Stop([]string{"obfs4", "meek"})
+ meekAddr = iptproxy.GetLocalAddress("meek")
+
+ // Start listening for snowflake connections
+ // Note that snowflake setup can happen either here or with SOCKS arguments on
+ // a per-connection basis.
+ String iceServers = {"stun:stun.l.google.com:19302", "stun:stun.l.google.com:5349"};
+ iptproxy.setSnowflakeIceServers(iceServers)
+ iptproxy.Start([]string{"snowflake"}, nil)
+
+
+ // Transports are stopped individually
+ iptproxy.Stop([]string{"obfs4"})
+
+ // ...
+
+ iptproxy.Stop([]string{"snowflake, meek"})
+
+Sample pure go usage:
+ import github.com/tladesignz/IPtProxy
+
+ func main() {
+	 iptproxy := &IPtProxy{
+		 StateDir: /path/to/pt/statedir,
+		 LogLevel: "ERROR",
+		 EnableLogging: true,
+	 }
+ }
 
 */
 
@@ -38,7 +72,12 @@ type IPtProxy struct {
 	LogLevel      string
 	StateDir      string
 
-	SnowflakeConfig sf.ClientConfig
+	SnowflakeIceServers   []string
+	SnowflakeBrokerUrl    string
+	SnowflakeFrontDomains []string
+	SnowflakeAmpCacheUrl  string
+	SnowflakeSqsUrl       string
+	SnowflakeSqsCreds     string
 
 	listeners map[string]*pt.SocksListener
 	shutdown  map[string]chan struct{}
@@ -46,8 +85,9 @@ type IPtProxy struct {
 
 func NewIPtProxy(stateDir string) *IPtProxy {
 	return &IPtProxy{
-		LogLevel: "ERROR",
-		StateDir: stateDir,
+		LogLevel:      "ERROR",
+		StateDir:      stateDir,
+		EnableLogging: true,
 	}
 }
 
@@ -156,9 +196,8 @@ func createStateDir(path string) error {
 	return err
 }
 
-func (p *IPtProxy) Start(methodNames []string, proxyURL *url.URL) {
+func (p *IPtProxy) Start(methodNames []string, proxy string) {
 
-	// TODO: set up logging
 	if err := ptlog.Init(p.EnableLogging, path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
 		log.Fatalf("Failed to set initialize log: %s", err.Error())
 	}
@@ -173,16 +212,29 @@ func (p *IPtProxy) Start(methodNames []string, proxyURL *url.URL) {
 	}
 	ptlog.Noticef("Launced iptproxy")
 
+	proxyURL, err := url.Parse(proxy)
+	if err != nil {
+		log.Fatalf("Failed to parse proxy address: %s", err.Error())
+	}
+
 	listeners := make(map[string]*pt.SocksListener, 0)
 	for _, methodName := range methodNames {
 		switch methodName {
 		case "snowflake":
+			config := sf.ClientConfig{
+				BrokerURL:    p.SnowflakeBrokerUrl,
+				AmpCacheURL:  p.SnowflakeAmpCacheUrl,
+				SQSQueueURL:  p.SnowflakeSqsUrl,
+				SQSCredsStr:  p.SnowflakeSqsCreds,
+				FrontDomains: p.SnowflakeFrontDomains,
+				ICEAddresses: p.SnowflakeIceServers,
+			}
 			if proxyURL != nil {
 				if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
 					continue
 				} else {
-					p.SnowflakeConfig.CommunicationProxy = proxyURL
-					client := sproxy.NewSocks5UDPClient(p.SnowflakeConfig.CommunicationProxy)
+					config.CommunicationProxy = proxyURL
+					client := sproxy.NewSocks5UDPClient(proxyURL)
 					conn, err := client.ListenPacket("udp", nil)
 					if err != nil {
 						log.Printf("Failed to initialize %s: proxy test failure: %s",
@@ -193,7 +245,7 @@ func (p *IPtProxy) Start(methodNames []string, proxyURL *url.URL) {
 					conn.Close()
 				}
 			}
-			f := newSnowflakeClientFactory(p.SnowflakeConfig)
+			f := newSnowflakeClientFactory(config)
 			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 			if err != nil {
 				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
