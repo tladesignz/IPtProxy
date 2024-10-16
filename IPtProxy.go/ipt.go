@@ -22,7 +22,7 @@ Sample gomobile usage:
  // Start listening for snowflake connections
  // Note that snowflake setup can happen either here or with SOCKS arguments on
  // a per-connection basis.
- String iceServers = {"stun:stun.l.google.com:19302", "stun:stun.l.google.com:5349"};
+ String[] iceServers = {"stun:stun.l.google.com:19302", "stun:stun.l.google.com:5349"};
  iptproxy.setSnowflakeIceServers(iceServers)
  iptproxy.Start([]string{"snowflake"}, nil)
 
@@ -89,6 +89,26 @@ func NewIPtProxy(stateDir string) *IPtProxy {
 		StateDir:      stateDir,
 		EnableLogging: true,
 	}
+}
+
+func (p *IPtProxy) Init() {
+	if err := createStateDir(p.StateDir); err != nil {
+		log.Fatalf("Failed to set up state directory: %s", err)
+	}
+	if err := ptlog.Init(p.EnableLogging,
+		path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
+		log.Fatalf("Failed to set initialize log: %s", err.Error())
+	}
+	if p.LogLevel != "" {
+		if err := ptlog.SetLogLevel(p.LogLevel); err != nil {
+			log.Fatalf("Failed to set log level: %s", err.Error())
+		}
+	}
+	if err := transports.Init(); err != nil {
+		log.Fatalf("Failed to initialize transports: %s", err.Error())
+	}
+	p.listeners = make(map[string]*pt.SocksListener, 0)
+	p.shutdown = make(map[string]chan struct{}, 0)
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
@@ -160,8 +180,11 @@ func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 	}()
 }
 
-func (p *IPtProxy) GetLocalAddress(methodName string) net.Addr {
-	return p.listeners[methodName].Addr()
+func (p *IPtProxy) GetLocalAddress(methodName string) string {
+	if ln, ok := p.listeners[methodName]; ok {
+		return ln.Addr().String()
+	}
+	return ""
 }
 
 func createStateDir(path string) error {
@@ -197,31 +220,22 @@ func createStateDir(path string) error {
 }
 
 func (p *IPtProxy) Start(methodNames []string, proxy string) {
+	var proxyURL *url.URL
+	var err error
 
-	if err := ptlog.Init(p.EnableLogging, path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
-		log.Fatalf("Failed to set initialize log: %s", err.Error())
-	}
-	if p.LogLevel != "" {
-		if err := ptlog.SetLogLevel(p.LogLevel); err != nil {
-			log.Fatalf("Failed to set log level: %s", err.Error())
+	ptlog.Noticef("Launced iptproxy for transports: %v", methodNames)
+
+	if proxy != "" {
+		proxyURL, err = url.Parse(proxy)
+		if err != nil {
+			log.Fatalf("Failed to parse proxy address: %s", err.Error())
 		}
 	}
 
-	if err := createStateDir(p.StateDir); err != nil {
-		log.Fatalf("Failed to set up state directory: %s", err)
-	}
-	ptlog.Noticef("Launced iptproxy")
-
-	proxyURL, err := url.Parse(proxy)
-	if err != nil {
-		log.Fatalf("Failed to parse proxy address: %s", err.Error())
-	}
-
-	listeners := make(map[string]*pt.SocksListener, 0)
 	for _, methodName := range methodNames {
 		switch methodName {
 		case "snowflake":
-			config := sf.ClientConfig{
+			config := &sf.ClientConfig{
 				BrokerURL:    p.SnowflakeBrokerUrl,
 				AmpCacheURL:  p.SnowflakeAmpCacheUrl,
 				SQSQueueURL:  p.SnowflakeSqsUrl,
@@ -231,6 +245,7 @@ func (p *IPtProxy) Start(methodNames []string, proxy string) {
 			}
 			if proxyURL != nil {
 				if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
+					log.Printf("Error setting up proxy: %s", err.Error())
 					continue
 				} else {
 					config.CommunicationProxy = proxyURL
@@ -252,8 +267,8 @@ func (p *IPtProxy) Start(methodNames []string, proxy string) {
 				break
 			}
 			p.shutdown[methodName] = make(chan struct{})
+			p.listeners[methodName] = ln
 			go acceptLoop(f, ln, nil, p.shutdown[methodName])
-			listeners[methodName] = ln
 		default:
 			// at the moment, everything else is in lyrebird
 			t := transports.Get(methodName)
@@ -271,20 +286,24 @@ func (p *IPtProxy) Start(methodNames []string, proxy string) {
 				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 				break
 			}
-			listeners[methodName] = ln
+			p.listeners[methodName] = ln
 			p.shutdown[methodName] = make(chan struct{})
 			go acceptLoop(f, ln, proxyURL, p.shutdown[methodName])
 
 		}
 	}
-	p.listeners = listeners
 }
 
 func (p *IPtProxy) Stop(methodNames []string) {
 	for _, methodName := range methodNames {
 		if ln, ok := p.listeners[methodName]; ok {
 			ln.Close()
+			log.Printf("Shutting down %s", methodName)
+			close(p.shutdown[methodName])
+			delete(p.shutdown, methodName)
+			delete(p.listeners, methodName)
+		} else {
+			log.Printf("No listener for %s", methodName)
 		}
-		close(p.shutdown[methodName])
 	}
 }
