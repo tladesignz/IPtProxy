@@ -14,10 +14,10 @@ import (
 
 type snowflakeClientFactory struct {
 	transport sf.Transport
-	config    sf.ClientConfig
+	config    *sf.ClientConfig
 }
 
-func newSnowflakeClientFactory(config sf.ClientConfig) *snowflakeClientFactory {
+func newSnowflakeClientFactory(config *sf.ClientConfig) *snowflakeClientFactory {
 
 	return &snowflakeClientFactory{
 		config: config,
