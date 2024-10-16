@@ -10,29 +10,28 @@ Sample gomobile usage:
  import IPtProxy.IPtProxy;
 
  // Create a new IPtProxy instance with provided state directory
- iptproxy = IPtProxy.newIPtProxy(/path/to/statedir)
- iptproxy.init()
+ iptproxy = IPtProxy.newIPtProxy(/path/to/statedir);
+ iptproxy.init();
 
- // Start listening for obfs4 connections, using an outgoing proxy
- String[] transports = {"obfs4", "meek"}
- iptproxy.start(transports, "socks5://localhost:8001")
+ // Start listening for obfs4 and meek connections, using an outgoing proxy
+ iptproxy.start("obfs4", "socks5://localhost:8001");
+ iptproxy.start("meek_lite", "socks5://localhost:8001");
 
  // Get the address that is listening for SOCKS connections for each transport
- obfs4Addr = iptproxy.getLocalAddress("obfs4")
- meekAddr = iptproxy.getLocalAddress("meek")
+ obfs4Addr = iptproxy.getLocalAddress("obfs4");
+ meekAddr = iptproxy.getLocalAddress("meek_lite");
 
  // Start listening for snowflake connections
  // Note that snowflake setup can happen either here or with SOCKS arguments on
  // a per-connection basis.
- String[] iceServers = {"stun:stun.l.google.com:19302", "stun:stun.l.google.com:5349"};
- iptproxy.setSnowflakeIceServers(iceServers)
- transports = {"snowflake"}
- iptproxy.start(transports, "")
+ iptproxy.setSnowflakeIceServers("stun:stun.l.google.com:19302,stun:stun.l.google.com:5349");
+ iptproxy.start("snowflake", "");
 
 
- // Stop transports, either all at once, or individually
- tranports = {"snowflake", "obfs4", "meek_lite"}
- iptproxy.stop(transports)
+ // Stop transports
+ iptproxy.stop("snowflake");
+ iptproxy.stop("obfs4");
+ iptproxy.stop("meek_lite");
 
 
 Sample pure go usage:
@@ -42,13 +41,17 @@ Sample pure go usage:
 	 iptproxy := NewIPtProxy(/path/to/statedir)
 	 iptproxy.Init()
 
-	 iptproxy.Start([]string{"snowflake", "meek_lite", "obfs4"}, "")
+	 iptproxy.Start("snowflake")
+	 iptproxy.Start("meek_lite")
+	 iptproxy.Start("obfs4")
 	 addr := iptproxy.GetLocalAddress("snowflake")
 	 fmt.Printf("Listening for snowflake connections on: %s", addr)
 
 	 // ...
 
-	 iptproxy.Stop([]string{"snowflake", "obfs4", "meek_lite"})
+	 iptproxy.Stop("snowflake")
+	 iptproxy.Stop("obfs4")
+	 iptproxy.Stop("meek_lite")
  }
 
 */
@@ -62,6 +65,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
@@ -78,9 +82,12 @@ type IPtProxy struct {
 	LogLevel      string
 	StateDir      string
 
-	SnowflakeIceServers   []string
-	SnowflakeBrokerUrl    string
-	SnowflakeFrontDomains []string
+	// SnowflakeIceServers is a comma-separated list of ICE server addresses
+	SnowflakeIceServers string
+	SnowflakeBrokerUrl  string
+	// SnowflakeFrontDomains is a comma-separated list of domains for either
+	// the domain fronting or AMP cache rendezvous methods
+	SnowflakeFrontDomains string
 	SnowflakeAmpCacheUrl  string
 	SnowflakeSqsUrl       string
 	SnowflakeSqsCreds     string
@@ -232,11 +239,11 @@ func createStateDir(path string) error {
 	return err
 }
 
-func (p *IPtProxy) Start(methodNames []string, proxy string) {
+func (p *IPtProxy) Start(methodName string, proxy string) {
 	var proxyURL *url.URL
 	var err error
 
-	ptlog.Noticef("Launced iptproxy for transports: %v", methodNames)
+	ptlog.Noticef("Launced iptproxy for transport: %v", methodName)
 
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
@@ -245,78 +252,76 @@ func (p *IPtProxy) Start(methodNames []string, proxy string) {
 		}
 	}
 
-	for _, methodName := range methodNames {
-		switch methodName {
-		case "snowflake":
-			config := &sf.ClientConfig{
-				BrokerURL:    p.SnowflakeBrokerUrl,
-				AmpCacheURL:  p.SnowflakeAmpCacheUrl,
-				SQSQueueURL:  p.SnowflakeSqsUrl,
-				SQSCredsStr:  p.SnowflakeSqsCreds,
-				FrontDomains: p.SnowflakeFrontDomains,
-				ICEAddresses: p.SnowflakeIceServers,
-			}
-			if proxyURL != nil {
-				if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
-					log.Printf("Error setting up proxy: %s", err.Error())
-					continue
-				} else {
-					config.CommunicationProxy = proxyURL
-					client := sproxy.NewSocks5UDPClient(proxyURL)
-					conn, err := client.ListenPacket("udp", nil)
-					if err != nil {
-						log.Printf("Failed to initialize %s: proxy test failure: %s",
-							methodName, err.Error())
-						conn.Close()
-						continue
-					}
-					conn.Close()
-				}
-			}
-			f := newSnowflakeClientFactory(config)
-			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
-			if err != nil {
-				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
-				break
-			}
-			p.shutdown[methodName] = make(chan struct{})
-			p.listeners[methodName] = ln
-			go acceptLoop(f, ln, nil, p.shutdown[methodName])
-		default:
-			// at the moment, everything else is in lyrebird
-			t := transports.Get(methodName)
-			if t == nil {
-				log.Printf("Failed to initialize %s: no such method", methodName)
-				continue
-			}
-			f, err := t.ClientFactory(p.StateDir)
-			if err != nil {
-				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
-				continue
-			}
-			ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
-			if err != nil {
-				log.Printf("Failed to initialize %s: %s", methodName, err.Error())
-				break
-			}
-			p.listeners[methodName] = ln
-			p.shutdown[methodName] = make(chan struct{})
-			go acceptLoop(f, ln, proxyURL, p.shutdown[methodName])
-
+	switch methodName {
+	case "snowflake":
+		iceServers := strings.Split(strings.TrimSpace(p.SnowflakeIceServers), ",")
+		frontDomains := strings.Split(strings.TrimSpace(p.SnowflakeFrontDomains), ",")
+		config := &sf.ClientConfig{
+			BrokerURL:    p.SnowflakeBrokerUrl,
+			AmpCacheURL:  p.SnowflakeAmpCacheUrl,
+			SQSQueueURL:  p.SnowflakeSqsUrl,
+			SQSCredsStr:  p.SnowflakeSqsCreds,
+			FrontDomains: frontDomains,
+			ICEAddresses: iceServers,
 		}
+		if proxyURL != nil {
+			if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
+				log.Printf("Error setting up proxy: %s", err.Error())
+				return
+			} else {
+				config.CommunicationProxy = proxyURL
+				client := sproxy.NewSocks5UDPClient(proxyURL)
+				conn, err := client.ListenPacket("udp", nil)
+				if err != nil {
+					log.Printf("Failed to initialize %s: proxy test failure: %s",
+						methodName, err.Error())
+					conn.Close()
+					return
+				}
+				conn.Close()
+			}
+		}
+		f := newSnowflakeClientFactory(config)
+		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
+		if err != nil {
+			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			return
+		}
+		p.shutdown[methodName] = make(chan struct{})
+		p.listeners[methodName] = ln
+		go acceptLoop(f, ln, nil, p.shutdown[methodName])
+	default:
+		// at the moment, everything else is in lyrebird
+		t := transports.Get(methodName)
+		if t == nil {
+			log.Printf("Failed to initialize %s: no such method", methodName)
+			return
+		}
+		f, err := t.ClientFactory(p.StateDir)
+		if err != nil {
+			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			return
+		}
+		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
+		if err != nil {
+			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			return
+		}
+		p.listeners[methodName] = ln
+		p.shutdown[methodName] = make(chan struct{})
+		go acceptLoop(f, ln, proxyURL, p.shutdown[methodName])
+
 	}
 }
 
-func (p *IPtProxy) Stop(methodNames []string) {
-	for _, methodName := range methodNames {
-		if ln, ok := p.listeners[methodName]; ok {
-			ln.Close()
-			log.Printf("Shutting down %s", methodName)
-			close(p.shutdown[methodName])
-			delete(p.shutdown, methodName)
-			delete(p.listeners, methodName)
-		} else {
-			log.Printf("No listener for %s", methodName)
-		}
+func (p *IPtProxy) Stop(methodName string) {
+	if ln, ok := p.listeners[methodName]; ok {
+		ln.Close()
+		log.Printf("Shutting down %s", methodName)
+		close(p.shutdown[methodName])
+		delete(p.shutdown, methodName)
+		delete(p.listeners, methodName)
+	} else {
+		log.Printf("No listener for %s", methodName)
 	}
 }
