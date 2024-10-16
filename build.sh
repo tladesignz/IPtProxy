@@ -28,35 +28,6 @@ rm -rf "$TEMPDIR"
 mkdir -p "$TEMPDIR"
 cp -a IPtProxy.go "$TEMPDIR/"
 
-
-# Fetch submodules lyrebird and snowflake.
-printf '\n\n--- Fetching Lyrebird and Snowflake dependencies...\n'
-if test -e ".git"; then
-    # There's a .git directory - we must be in the development pod.
-    git submodule update --init --recursive
-    cd lyrebird || exit 1
-    git reset --hard
-    cp -a . "$TEMPDIR/lyrebird"
-    cd ../snowflake || exit 1
-    git reset --hard
-    cp -a . "$TEMPDIR/snowflake"
-    cd ..
-else
-    # No .git directory - That's a normal install.
-    git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird.git "$TEMPDIR/lyrebird"
-    cd "$TEMPDIR/lyrebird" || exit 1
-    git checkout --force --quiet aab4891
-    git clone https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake.git "$TEMPDIR/snowflake"
-    cd "$TEMPDIR/snowflake" || exit 1
-    git checkout --force --quiet 05a9580
-    cd "$CURRENT" || exit 1
-fi
-
-# Apply patches.
-printf '\n\n--- Apply patches to Lyrebird and Snowflake...\n'
-patch --directory="$TEMPDIR/lyrebird" --strip=1 < lyrebird.patch
-patch --directory="$TEMPDIR/snowflake" --strip=1 < snowflake.patch
-
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
 export PATH=~/go/bin:$PATH
