@@ -193,6 +193,13 @@ func (p *IPtProxy) GetLocalAddress(methodName string) string {
 	return ""
 }
 
+func (p *IPtProxy) GetPort(methodName string) uint16 {
+	if ln, ok := p.listeners[methodName]; ok {
+		return ln.Addr().(*net.TCPAddr).AddrPort().Port()
+	}
+	return 0
+}
+
 func createStateDir(path string) error {
 	info, err := os.Stat(path)
 
