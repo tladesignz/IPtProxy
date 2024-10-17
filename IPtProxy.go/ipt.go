@@ -73,6 +73,7 @@ import (
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports/base"
 	sf "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/client/lib"
 	sproxy "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/proxy"
+	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
 )
 
@@ -324,4 +325,12 @@ func (p *IPtProxy) Stop(methodName string) {
 	} else {
 		log.Printf("No listener for %s", methodName)
 	}
+}
+
+func SnowflakeVersion() string {
+	return sfversion.GetVersion()
+}
+
+func LyrebirdVersion() string {
+	return "lyrebird-0.2.0"
 }
