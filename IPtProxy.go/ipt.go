@@ -200,9 +200,9 @@ func (p *IPtProxy) GetLocalAddress(methodName string) string {
 	return ""
 }
 
-func (p *IPtProxy) GetPort(methodName string) uint16 {
+func (p *IPtProxy) GetPort(methodName string) int {
 	if ln, ok := p.listeners[methodName]; ok {
-		return ln.Addr().(*net.TCPAddr).AddrPort().Port()
+		return int(ln.Addr().(*net.TCPAddr).AddrPort().Port())
 	}
 	return 0
 }
