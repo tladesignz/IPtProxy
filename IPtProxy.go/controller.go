@@ -224,14 +224,14 @@ func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 	}()
 }
 
-func (c *Controller) GetLocalAddress(methodName string) string {
+func (c *Controller) LocalAddress(methodName string) string {
 	if ln, ok := c.listeners[methodName]; ok {
 		return ln.Addr().String()
 	}
 	return ""
 }
 
-func (c *Controller) GetPort(methodName string) int {
+func (c *Controller) Port(methodName string) int {
 	if ln, ok := c.listeners[methodName]; ok {
 		return int(ln.Addr().(*net.TCPAddr).AddrPort().Port())
 	}
