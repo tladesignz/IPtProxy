@@ -363,6 +363,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 			ICEAddresses: iceServers,
 			Max:          maxPeers,
 		}
+
 		if proxyURL != nil {
 			if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
 				ptlog.Errorf("Error setting up proxy: %s", err.Error())
@@ -380,15 +381,19 @@ func (c *Controller) Start(methodName string, proxy string) {
 				_ = conn.Close()
 			}
 		}
+
 		f := newSnowflakeClientFactory(config)
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
+
 		c.shutdown[methodName] = make(chan struct{})
 		c.listeners[methodName] = ln
+
 		go acceptLoop(f, ln, nil, c.shutdown[methodName])
+
 	default:
 		// at the moment, everything else is in lyrebird
 		t := transports.Get(methodName)
@@ -396,20 +401,23 @@ func (c *Controller) Start(methodName string, proxy string) {
 			ptlog.Errorf("Failed to initialize %s: no such method", methodName)
 			return
 		}
+
 		f, err := t.ClientFactory(c.stateDir)
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
+
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
+
 		c.listeners[methodName] = ln
 		c.shutdown[methodName] = make(chan struct{})
-		go acceptLoop(f, ln, proxyURL, c.shutdown[methodName])
 
+		go acceptLoop(f, ln, proxyURL, c.shutdown[methodName])
 	}
 }
 
@@ -420,7 +428,9 @@ func (c *Controller) Start(methodName string, proxy string) {
 func (c *Controller) Stop(methodName string) {
 	if ln, ok := c.listeners[methodName]; ok {
 		_ = ln.Close()
+
 		ptlog.Noticef("Shutting down %s", methodName)
+
 		close(c.shutdown[methodName])
 		delete(c.shutdown, methodName)
 		delete(c.listeners, methodName)
