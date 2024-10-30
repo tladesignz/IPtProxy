@@ -77,18 +77,25 @@ import (
 
 const LogFileName = "ipt.log"
 
+//goland:noinspection GoUnusedConst
 const ScrambleSuit = "scramblesuit"
 
+//goland:noinspection GoUnusedConst
 const Obfs2 = "obfs2"
 
+//goland:noinspection GoUnusedConst
 const Obfs3 = "obfs3"
 
+//goland:noinspection GoUnusedConst
 const Obfs4 = "obfs4"
 
+//goland:noinspection GoUnusedConst
 const MeekLite = "meek_lite"
 
+//goland:noinspection GoUnusedConst
 const Webtunnel = "webtunnel"
 
+//goland:noinspection GoUnusedConst
 const Snowflake = "snowflake"
 
 type Controller struct {
@@ -108,6 +115,7 @@ type Controller struct {
 	shutdown  map[string]chan struct{}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func NewController(stateDir string, enableLogging, unsafeLogging bool, logLevel string) *Controller {
 	c := &Controller{
 		stateDir: stateDir,
@@ -165,7 +173,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		log.Printf("Error parsing PT args: %s", err.Error())
-		conn.Reject()
+		_ = conn.Reject()
 		return
 	}
 	dialFn := proxy.Direct.Dial
@@ -173,7 +181,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
 		if err != nil {
 			log.Printf("Error getting proxy dialer: %s", err.Error())
-			conn.Reject()
+			_ = conn.Reject()
 		}
 		dialFn = dialer.Dial
 	}
@@ -254,7 +262,7 @@ func createStateDir(path string) error {
 
 	// Remove the test file again.
 	if err == nil {
-		file.Close()
+		_ = file.Close()
 
 		err = os.Remove(tempFile)
 	}
@@ -297,10 +305,10 @@ func (c *Controller) Start(methodName string, proxy string) {
 				if err != nil {
 					log.Printf("Failed to initialize %s: proxy test failure: %s",
 						methodName, err.Error())
-					conn.Close()
+					_ = conn.Close()
 					return
 				}
-				conn.Close()
+				_ = conn.Close()
 			}
 		}
 		f := newSnowflakeClientFactory(config)
@@ -338,7 +346,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 
 func (c *Controller) Stop(methodName string) {
 	if ln, ok := c.listeners[methodName]; ok {
-		ln.Close()
+		_ = ln.Close()
 		log.Printf("Shutting down %s", methodName)
 		close(c.shutdown[methodName])
 		delete(c.shutdown, methodName)
@@ -348,10 +356,12 @@ func (c *Controller) Stop(methodName string) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func SnowflakeVersion() string {
 	return sfversion.GetVersion()
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func LyrebirdVersion() string {
 	return "lyrebird-0.2.0"
 }
