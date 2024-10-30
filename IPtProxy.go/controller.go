@@ -109,6 +109,7 @@ type Controller struct {
 	SnowflakeAmpCacheUrl  string
 	SnowflakeSqsUrl       string
 	SnowflakeSqsCreds     string
+	SnowflakeMaxPeers     int
 
 	stateDir  string
 	listeners map[string]*pt.SocksListener
@@ -287,6 +288,12 @@ func (c *Controller) Start(methodName string, proxy string) {
 	case "snowflake":
 		iceServers := strings.Split(strings.TrimSpace(c.SnowflakeIceServers), ",")
 		frontDomains := strings.Split(strings.TrimSpace(c.SnowflakeFrontDomains), ",")
+
+		maxPeers := c.SnowflakeMaxPeers
+		if maxPeers < 1 {
+			maxPeers = 1
+		}
+
 		config := &sf.ClientConfig{
 			BrokerURL:    c.SnowflakeBrokerUrl,
 			AmpCacheURL:  c.SnowflakeAmpCacheUrl,
@@ -294,6 +301,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 			SQSCredsStr:  c.SnowflakeSqsCreds,
 			FrontDomains: frontDomains,
 			ICEAddresses: iceServers,
+			Max:          maxPeers,
 		}
 		if proxyURL != nil {
 			if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
