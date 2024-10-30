@@ -77,6 +77,20 @@ import (
 
 const LogFileName = "ipt.log"
 
+const ScrambleSuit = "scramblesuit"
+
+const Obfs2 = "obfs2"
+
+const Obfs3 = "obfs3"
+
+const Obfs4 = "obfs4"
+
+const MeekLite = "meek_lite"
+
+const Webtunnel = "webtunnel"
+
+const Snowflake = "snowflake"
+
 type Controller struct {
 
 	// SnowflakeIceServers is a comma-separated list of ICE server addresses
