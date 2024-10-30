@@ -10,8 +10,7 @@ Sample gomobile usage:
  import IPtProxy.Controller;
 
  // Create a new IPtProxy instance with provided state directory
- Controller iptproxy = Controller.newController("/path/to/statedir");
- iptproxy.init();
+ Controller iptproxy = Controller.newController("/path/to/statedir", true, false, "DEBUG");
 
  // Start listening for obfs4 and meek connections, using an outgoing proxy
  iptproxy.start("obfs4", "socks5://localhost:8001");
@@ -38,8 +37,7 @@ Sample pure go usage:
  import github.com/tladesignz/IPtProxy
 
  func main() {
-	 iptproxy := NewController(/path/to/statedir)
-	 iptproxy.Init()
+	 iptproxy := NewController("/path/to/statedir", true, false, "DEBUG")
 
 	 iptproxy.Start("snowflake")
 	 iptproxy.Start("meek_lite")
@@ -77,11 +75,9 @@ import (
 	"golang.org/x/net/proxy"
 )
 
+const LogFileName = "ipt.log"
+
 type Controller struct {
-	EnableLogging bool
-	UnsafeLogging bool
-	LogLevel      string
-	StateDir      string
 
 	// SnowflakeIceServers is a comma-separated list of ICE server addresses
 	SnowflakeIceServers string
@@ -93,36 +89,47 @@ type Controller struct {
 	SnowflakeSqsUrl       string
 	SnowflakeSqsCreds     string
 
+	stateDir  string
 	listeners map[string]*pt.SocksListener
 	shutdown  map[string]chan struct{}
 }
 
-func NewController(stateDir string) *Controller {
-	return &Controller{
-		LogLevel:      "ERROR",
-		StateDir:      stateDir,
-		EnableLogging: true,
+func NewController(stateDir string, enableLogging, unsafeLogging bool, logLevel string) *Controller {
+	c := &Controller{
+		stateDir: stateDir,
 	}
+
+	if logLevel == "" {
+		logLevel = "ERROR"
+	}
+
+	if err := createStateDir(c.stateDir); err != nil {
+		log.Printf("Failed to set up state directory: %s", err)
+		return nil
+	}
+	if err := ptlog.Init(enableLogging,
+		path.Join(c.stateDir, LogFileName), unsafeLogging); err != nil {
+		log.Printf("Failed to set initialize log: %s", err.Error())
+		return nil
+	}
+	if err := ptlog.SetLogLevel(logLevel); err != nil {
+		log.Printf("Failed to set log level: %s", err.Error())
+		ptlog.Warnf("Failed to set log level: %s", err.Error())
+	}
+
+	if err := transports.Init(); err != nil {
+		ptlog.Warnf("Failed to initialize transports: %s", err.Error())
+		return nil
+	}
+
+	c.listeners = make(map[string]*pt.SocksListener)
+	c.shutdown = make(map[string]chan struct{})
+
+	return c
 }
 
-func (c *Controller) Init() {
-	if err := createStateDir(c.StateDir); err != nil {
-		log.Fatalf("Failed to set up state directory: %s", err)
-	}
-	if err := ptlog.Init(c.EnableLogging,
-		path.Join(c.StateDir, "ipt.log"), c.UnsafeLogging); err != nil {
-		log.Fatalf("Failed to set initialize log: %s", err.Error())
-	}
-	if c.LogLevel != "" {
-		if err := ptlog.SetLogLevel(c.LogLevel); err != nil {
-			log.Fatalf("Failed to set log level: %s", err.Error())
-		}
-	}
-	if err := transports.Init(); err != nil {
-		log.Fatalf("Failed to initialize transports: %s", err.Error())
-	}
-	c.listeners = make(map[string]*pt.SocksListener, 0)
-	c.shutdown = make(map[string]chan struct{}, 0)
+func (c *Controller) StateDir() string {
+	return c.stateDir
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
@@ -298,7 +305,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 			log.Printf("Failed to initialize %s: no such method", methodName)
 			return
 		}
-		f, err := t.ClientFactory(c.StateDir)
+		f, err := t.ClientFactory(c.stateDir)
 		if err != nil {
 			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 			return
