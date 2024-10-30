@@ -7,10 +7,10 @@ connections on an available local address and proxy traffic between those connec
 and a configured bridge.
 
 Sample gomobile usage:
- import IPtProxy.IPtProxy;
+ import IPtProxy.Controller;
 
  // Create a new IPtProxy instance with provided state directory
- iptproxy = IPtProxy.newIPtProxy(/path/to/statedir);
+ Controller iptproxy = Controller.newController("/path/to/statedir");
  iptproxy.init();
 
  // Start listening for obfs4 and meek connections, using an outgoing proxy
@@ -38,7 +38,7 @@ Sample pure go usage:
  import github.com/tladesignz/IPtProxy
 
  func main() {
-	 iptproxy := NewIPtProxy(/path/to/statedir)
+	 iptproxy := NewController(/path/to/statedir)
 	 iptproxy.Init()
 
 	 iptproxy.Start("snowflake")
@@ -77,7 +77,7 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-type IPtProxy struct {
+type Controller struct {
 	EnableLogging bool
 	UnsafeLogging bool
 	LogLevel      string
@@ -97,32 +97,32 @@ type IPtProxy struct {
 	shutdown  map[string]chan struct{}
 }
 
-func NewIPtProxy(stateDir string) *IPtProxy {
-	return &IPtProxy{
+func NewController(stateDir string) *Controller {
+	return &Controller{
 		LogLevel:      "ERROR",
 		StateDir:      stateDir,
 		EnableLogging: true,
 	}
 }
 
-func (p *IPtProxy) Init() {
-	if err := createStateDir(p.StateDir); err != nil {
+func (c *Controller) Init() {
+	if err := createStateDir(c.StateDir); err != nil {
 		log.Fatalf("Failed to set up state directory: %s", err)
 	}
-	if err := ptlog.Init(p.EnableLogging,
-		path.Join(p.StateDir, "ipt.log"), p.UnsafeLogging); err != nil {
+	if err := ptlog.Init(c.EnableLogging,
+		path.Join(c.StateDir, "ipt.log"), c.UnsafeLogging); err != nil {
 		log.Fatalf("Failed to set initialize log: %s", err.Error())
 	}
-	if p.LogLevel != "" {
-		if err := ptlog.SetLogLevel(p.LogLevel); err != nil {
+	if c.LogLevel != "" {
+		if err := ptlog.SetLogLevel(c.LogLevel); err != nil {
 			log.Fatalf("Failed to set log level: %s", err.Error())
 		}
 	}
 	if err := transports.Init(); err != nil {
 		log.Fatalf("Failed to initialize transports: %s", err.Error())
 	}
-	p.listeners = make(map[string]*pt.SocksListener, 0)
-	p.shutdown = make(map[string]chan struct{}, 0)
+	c.listeners = make(map[string]*pt.SocksListener, 0)
+	c.shutdown = make(map[string]chan struct{}, 0)
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
@@ -194,15 +194,15 @@ func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 	}()
 }
 
-func (p *IPtProxy) GetLocalAddress(methodName string) string {
-	if ln, ok := p.listeners[methodName]; ok {
+func (c *Controller) GetLocalAddress(methodName string) string {
+	if ln, ok := c.listeners[methodName]; ok {
 		return ln.Addr().String()
 	}
 	return ""
 }
 
-func (p *IPtProxy) GetPort(methodName string) int {
-	if ln, ok := p.listeners[methodName]; ok {
+func (c *Controller) GetPort(methodName string) int {
+	if ln, ok := c.listeners[methodName]; ok {
 		return int(ln.Addr().(*net.TCPAddr).AddrPort().Port())
 	}
 	return 0
@@ -240,11 +240,11 @@ func createStateDir(path string) error {
 	return err
 }
 
-func (p *IPtProxy) Start(methodName string, proxy string) {
+func (c *Controller) Start(methodName string, proxy string) {
 	var proxyURL *url.URL
 	var err error
 
-	ptlog.Noticef("Launced iptproxy for transport: %v", methodName)
+	ptlog.Noticef("Launched for transport: %v", methodName)
 
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
@@ -255,13 +255,13 @@ func (p *IPtProxy) Start(methodName string, proxy string) {
 
 	switch methodName {
 	case "snowflake":
-		iceServers := strings.Split(strings.TrimSpace(p.SnowflakeIceServers), ",")
-		frontDomains := strings.Split(strings.TrimSpace(p.SnowflakeFrontDomains), ",")
+		iceServers := strings.Split(strings.TrimSpace(c.SnowflakeIceServers), ",")
+		frontDomains := strings.Split(strings.TrimSpace(c.SnowflakeFrontDomains), ",")
 		config := &sf.ClientConfig{
-			BrokerURL:    p.SnowflakeBrokerUrl,
-			AmpCacheURL:  p.SnowflakeAmpCacheUrl,
-			SQSQueueURL:  p.SnowflakeSqsUrl,
-			SQSCredsStr:  p.SnowflakeSqsCreds,
+			BrokerURL:    c.SnowflakeBrokerUrl,
+			AmpCacheURL:  c.SnowflakeAmpCacheUrl,
+			SQSQueueURL:  c.SnowflakeSqsUrl,
+			SQSCredsStr:  c.SnowflakeSqsCreds,
 			FrontDomains: frontDomains,
 			ICEAddresses: iceServers,
 		}
@@ -288,9 +288,9 @@ func (p *IPtProxy) Start(methodName string, proxy string) {
 			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
-		p.shutdown[methodName] = make(chan struct{})
-		p.listeners[methodName] = ln
-		go acceptLoop(f, ln, nil, p.shutdown[methodName])
+		c.shutdown[methodName] = make(chan struct{})
+		c.listeners[methodName] = ln
+		go acceptLoop(f, ln, nil, c.shutdown[methodName])
 	default:
 		// at the moment, everything else is in lyrebird
 		t := transports.Get(methodName)
@@ -298,7 +298,7 @@ func (p *IPtProxy) Start(methodName string, proxy string) {
 			log.Printf("Failed to initialize %s: no such method", methodName)
 			return
 		}
-		f, err := t.ClientFactory(p.StateDir)
+		f, err := t.ClientFactory(c.StateDir)
 		if err != nil {
 			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 			return
@@ -308,20 +308,20 @@ func (p *IPtProxy) Start(methodName string, proxy string) {
 			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
-		p.listeners[methodName] = ln
-		p.shutdown[methodName] = make(chan struct{})
-		go acceptLoop(f, ln, proxyURL, p.shutdown[methodName])
+		c.listeners[methodName] = ln
+		c.shutdown[methodName] = make(chan struct{})
+		go acceptLoop(f, ln, proxyURL, c.shutdown[methodName])
 
 	}
 }
 
-func (p *IPtProxy) Stop(methodName string) {
-	if ln, ok := p.listeners[methodName]; ok {
+func (c *Controller) Stop(methodName string) {
+	if ln, ok := c.listeners[methodName]; ok {
 		ln.Close()
 		log.Printf("Shutting down %s", methodName)
-		close(p.shutdown[methodName])
-		delete(p.shutdown, methodName)
-		delete(p.listeners, methodName)
+		close(c.shutdown[methodName])
+		delete(c.shutdown, methodName)
+		delete(c.listeners, methodName)
 	} else {
 		log.Printf("No listener for %s", methodName)
 	}
