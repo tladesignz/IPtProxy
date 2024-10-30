@@ -339,8 +339,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
 		if err != nil {
-			ptlog.Errorf("Failed to parse proxy address: %s", err.Error())
-			return
+			ptlog.Warnf("Failed to parse proxy address: %s", err.Error())
 		}
 	}
 
