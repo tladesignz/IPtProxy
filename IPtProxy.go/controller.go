@@ -172,7 +172,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 	defer conn.Close()
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
-		log.Printf("Error parsing PT args: %s", err.Error())
+		ptlog.Errorf("Error parsing PT args: %s", err.Error())
 		_ = conn.Reject()
 		return
 	}
@@ -180,19 +180,19 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 	if proxyURL != nil {
 		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
 		if err != nil {
-			log.Printf("Error getting proxy dialer: %s", err.Error())
+			ptlog.Errorf("Error getting proxy dialer: %s", err.Error())
 			_ = conn.Reject()
 		}
 		dialFn = dialer.Dial
 	}
 	remote, err := f.Dial("tcp", conn.Req.Target, dialFn, args)
 	if err != nil {
-		log.Printf("Error dialing PT: %s", err.Error())
+		ptlog.Errorf("Error dialing PT: %s", err.Error())
 		return
 	}
 	err = conn.Grant(&net.TCPAddr{IP: net.IPv4zero, Port: 0})
 	if err != nil {
-		log.Printf("conn.Grant error: %s", err)
+		ptlog.Errorf("conn.Grant error: %s", err)
 		return
 	}
 	defer remote.Close()
@@ -202,7 +202,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 	select {
 	case <-shutdown:
 	case <-done:
-		log.Println("copy loop ended")
+		ptlog.Noticef("copy loop ended")
 	}
 }
 
@@ -211,13 +211,13 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, 
 func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 	go func() {
 		if _, err := io.Copy(socks, sfconn); err != nil {
-			log.Printf("copying transport to SOCKS resulted in error: %v", err)
+			ptlog.Errorf("copying transport to SOCKS resulted in error: %v", err)
 		}
 		done <- struct{}{}
 	}()
 	go func() {
 		if _, err := io.Copy(sfconn, socks); err != nil {
-			log.Printf("copying SOCKS to transport resulted in error: %v", err)
+			ptlog.Errorf("copying SOCKS to transport resulted in error: %v", err)
 		}
 		done <- struct{}{}
 	}()
@@ -273,12 +273,13 @@ func (c *Controller) Start(methodName string, proxy string) {
 	var proxyURL *url.URL
 	var err error
 
-	ptlog.Noticef("Launched for transport: %v", methodName)
+	ptlog.Noticef("Launched transport: %v", methodName)
 
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
 		if err != nil {
-			log.Fatalf("Failed to parse proxy address: %s", err.Error())
+			ptlog.Errorf("Failed to parse proxy address: %s", err.Error())
+			return
 		}
 	}
 
@@ -296,14 +297,14 @@ func (c *Controller) Start(methodName string, proxy string) {
 		}
 		if proxyURL != nil {
 			if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
-				log.Printf("Error setting up proxy: %s", err.Error())
+				ptlog.Errorf("Error setting up proxy: %s", err.Error())
 				return
 			} else {
 				config.CommunicationProxy = proxyURL
 				client := sproxy.NewSocks5UDPClient(proxyURL)
 				conn, err := client.ListenPacket("udp", nil)
 				if err != nil {
-					log.Printf("Failed to initialize %s: proxy test failure: %s",
+					ptlog.Errorf("Failed to initialize %s: proxy test failure: %s",
 						methodName, err.Error())
 					_ = conn.Close()
 					return
@@ -314,7 +315,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 		f := newSnowflakeClientFactory(config)
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
-			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
 		c.shutdown[methodName] = make(chan struct{})
@@ -324,17 +325,17 @@ func (c *Controller) Start(methodName string, proxy string) {
 		// at the moment, everything else is in lyrebird
 		t := transports.Get(methodName)
 		if t == nil {
-			log.Printf("Failed to initialize %s: no such method", methodName)
+			ptlog.Errorf("Failed to initialize %s: no such method", methodName)
 			return
 		}
 		f, err := t.ClientFactory(c.stateDir)
 		if err != nil {
-			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
-			log.Printf("Failed to initialize %s: %s", methodName, err.Error())
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
 			return
 		}
 		c.listeners[methodName] = ln
@@ -347,12 +348,12 @@ func (c *Controller) Start(methodName string, proxy string) {
 func (c *Controller) Stop(methodName string) {
 	if ln, ok := c.listeners[methodName]; ok {
 		_ = ln.Close()
-		log.Printf("Shutting down %s", methodName)
+		ptlog.Noticef("Shutting down %s", methodName)
 		close(c.shutdown[methodName])
 		delete(c.shutdown, methodName)
 		delete(c.listeners, methodName)
 	} else {
-		log.Printf("No listener for %s", methodName)
+		ptlog.Warnf("No listener for %s", methodName)
 	}
 }
 
