@@ -66,14 +66,11 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"strings"
 
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports/base"
-	sf "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/client/lib"
-	sproxy "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/proxy"
 	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
 )
@@ -140,7 +137,7 @@ type Controller struct {
 	SnowflakeSqsCreds string
 
 	// SnowflakeMaxPeers - Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
-	SnowflakeMaxPeers int
+	SnowflakeMaxPeers string
 
 	stateDir  string
 	listeners map[string]*pt.SocksListener
@@ -197,7 +194,18 @@ func (c *Controller) StateDir() string {
 	return c.stateDir
 }
 
-func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, shutdown chan struct{}) error {
+// addExtraArgs adds the args in extraArgs to the connection args
+func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
+	for name, _ := range *extraArgs {
+		//only overwrite if connection arg doesn't exist
+		if arg, ok := args.Get(name); !ok {
+			args.Add(name, arg)
+		}
+	}
+}
+
+func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL,
+	extraArgs *pt.Args, shutdown chan struct{}) error {
 	defer ln.Close()
 	for {
 		conn, err := ln.AcceptSocks()
@@ -207,12 +215,14 @@ func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL, s
 			}
 			continue
 		}
-		go clientHandler(f, conn, proxyURL, shutdown)
+		go clientHandler(f, conn, proxyURL, extraArgs, shutdown)
 	}
 }
 
-func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL, shutdown chan struct{}) {
+func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL,
+	extraArgs *pt.Args, shutdown chan struct{}) {
 	defer conn.Close()
+	addExtraArgs(&conn.Req.Args, extraArgs)
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		ptlog.Errorf("Error parsing PT args: %s", err.Error())
@@ -345,43 +355,26 @@ func (c *Controller) Start(methodName string, proxy string) {
 
 	switch methodName {
 	case "snowflake":
-		iceServers := strings.Split(strings.TrimSpace(c.SnowflakeIceServers), ",")
-		frontDomains := strings.Split(strings.TrimSpace(c.SnowflakeFrontDomains), ",")
+		extraArgs := &pt.Args{}
+		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
+		extraArgs.Add("ice", c.SnowflakeIceServers)
+		extraArgs.Add("max", c.SnowflakeMaxPeers)
+		extraArgs.Add("url", c.SnowflakeBrokerUrl)
+		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
+		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
+		extraArgs.Add("sqscreds", c.SnowflakeSqsCreds)
+		extraArgs.Add("proxy", proxy)
 
-		maxPeers := c.SnowflakeMaxPeers
-		if maxPeers < 1 {
-			maxPeers = 1
+		t := transports.Get(methodName)
+		if t == nil {
+			ptlog.Errorf("Failed to initialize %s: no such method", methodName)
+			return
 		}
-
-		config := &sf.ClientConfig{
-			BrokerURL:    c.SnowflakeBrokerUrl,
-			AmpCacheURL:  c.SnowflakeAmpCacheUrl,
-			SQSQueueURL:  c.SnowflakeSqsUrl,
-			SQSCredsStr:  c.SnowflakeSqsCreds,
-			FrontDomains: frontDomains,
-			ICEAddresses: iceServers,
-			Max:          maxPeers,
+		f, err := t.ClientFactory(c.stateDir)
+		if err != nil {
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
+			return
 		}
-
-		if proxyURL != nil {
-			if err := sproxy.CheckProxyProtocolSupport(proxyURL); err != nil {
-				ptlog.Errorf("Error setting up proxy: %s", err.Error())
-				return
-			} else {
-				config.CommunicationProxy = proxyURL
-				client := sproxy.NewSocks5UDPClient(proxyURL)
-				conn, err := client.ListenPacket("udp", nil)
-				if err != nil {
-					ptlog.Errorf("Failed to initialize %s: proxy test failure: %s",
-						methodName, err.Error())
-					_ = conn.Close()
-					return
-				}
-				_ = conn.Close()
-			}
-		}
-
-		f := newSnowflakeClientFactory(config)
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
@@ -391,7 +384,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 		c.shutdown[methodName] = make(chan struct{})
 		c.listeners[methodName] = ln
 
-		go acceptLoop(f, ln, nil, c.shutdown[methodName])
+		go acceptLoop(f, ln, nil, extraArgs, c.shutdown[methodName])
 
 	default:
 		// at the moment, everything else is in lyrebird
@@ -416,7 +409,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 		c.listeners[methodName] = ln
 		c.shutdown[methodName] = make(chan struct{})
 
-		go acceptLoop(f, ln, proxyURL, c.shutdown[methodName])
+		go acceptLoop(f, ln, proxyURL, nil, c.shutdown[methodName])
 	}
 }
 
