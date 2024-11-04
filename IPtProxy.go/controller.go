@@ -78,40 +78,29 @@ import (
 // LogFileName - the filename of the log residing in `StateDir`.
 const LogFileName = "ipt.log"
 
-// ScrambleSuit - DEPRECATED transport implemented in Lyrebird.
-//
 //goland:noinspection GoUnusedConst
-const ScrambleSuit = "scramblesuit"
+const (
+	// ScrambleSuit - DEPRECATED transport implemented in Lyrebird.
+	ScrambleSuit = "scramblesuit"
 
-// Obfs2 - DEPRECATED transport implemented in Lyrebird.
-//
-//goland:noinspection GoUnusedConst
-const Obfs2 = "obfs2"
+	// Obfs2 - DEPRECATED transport implemented in Lyrebird.
+	Obfs2 = "obfs2"
 
-// Obfs3 - DEPRECATED transport implemented in Lyrebird.
-//
-//goland:noinspection GoUnusedConst
-const Obfs3 = "obfs3"
+	// Obfs3 - DEPRECATED transport implemented in Lyrebird.
+	Obfs3 = "obfs3"
 
-// Obfs4 - Transport implemented in Lyrebird.
-//
-//goland:noinspection GoUnusedConst
-const Obfs4 = "obfs4"
+	// Obfs4 - Transport implemented in Lyrebird.
+	Obfs4 = "obfs4"
 
-// MeekLite - Transport implemented in Lyrebird.
-//
-//goland:noinspection GoUnusedConst
-const MeekLite = "meek_lite"
+	// MeekLite - Transport implemented in Lyrebird.
+	MeekLite = "meek_lite"
 
-// Webtunnel - Transport implemented in Lyrebird.
-//
-//goland:noinspection GoUnusedConst
-const Webtunnel = "webtunnel"
+	// Webtunnel - Transport implemented in Lyrebird.
+	Webtunnel = "webtunnel"
 
-// Snowflake - Transport implemented in Snowflake.
-//
-//goland:noinspection GoUnusedConst
-const Snowflake = "snowflake"
+	// Snowflake - Transport implemented in Snowflake.
+	Snowflake = "snowflake"
+)
 
 // Controller - Class to start and stop transports.
 type Controller struct {
