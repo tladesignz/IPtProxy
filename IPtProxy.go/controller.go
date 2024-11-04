@@ -186,7 +186,7 @@ func (c *Controller) StateDir() string {
 
 // addExtraArgs adds the args in extraArgs to the connection args
 func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
-	for name, _ := range *extraArgs {
+	for name := range *extraArgs {
 		//only overwrite if connection arg doesn't exist
 		if arg, ok := args.Get(name); !ok {
 			args.Add(name, arg)
@@ -200,7 +200,8 @@ func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL,
 	for {
 		conn, err := ln.AcceptSocks()
 		if err != nil {
-			if e, ok := err.(net.Error); ok && !e.Temporary() {
+			var e net.Error
+			if errors.As(err, &e) && !e.Temporary() {
 				return err
 			}
 			continue
