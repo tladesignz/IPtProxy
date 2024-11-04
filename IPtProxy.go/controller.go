@@ -73,6 +73,7 @@ import (
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports/base"
 	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
+	"strconv"
 )
 
 // LogFileName - the filename of the log residing in `StateDir`.
@@ -126,7 +127,7 @@ type Controller struct {
 	SnowflakeSqsCreds string
 
 	// SnowflakeMaxPeers - Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
-	SnowflakeMaxPeers string
+	SnowflakeMaxPeers int
 
 	stateDir  string
 	listeners map[string]*pt.SocksListener
@@ -347,7 +348,7 @@ func (c *Controller) Start(methodName string, proxy string) {
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
-		extraArgs.Add("max", c.SnowflakeMaxPeers)
+		extraArgs.Add("max", strconv.Itoa(c.SnowflakeMaxPeers))
 		extraArgs.Add("url", c.SnowflakeBrokerUrl)
 		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
 		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
