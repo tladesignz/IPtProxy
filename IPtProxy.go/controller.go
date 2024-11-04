@@ -133,7 +133,7 @@ type Controller struct {
 	// SnowflakeSqsUrl - URL of SQS Queue to use as a proxy for signaling.
 	SnowflakeSqsUrl string
 
-	// @SnowflakeSqsCreds - Credentials to access SQS Queue.
+	// SnowflakeSqsCreds - Credentials to access SQS Queue.
 	SnowflakeSqsCreds string
 
 	// SnowflakeMaxPeers - Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
