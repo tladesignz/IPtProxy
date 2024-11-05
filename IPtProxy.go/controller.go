@@ -445,5 +445,5 @@ func SnowflakeVersion() string {
 //
 //goland:noinspection GoUnusedExportedFunction
 func LyrebirdVersion() string {
-	return "lyrebird-0.2.0"
+	return "lyrebird-0.4.0"
 }
