@@ -67,6 +67,7 @@ import (
 	"os"
 	"path"
 
+	"fmt"
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
@@ -336,7 +337,10 @@ func createStateDir(path string) error {
 // `Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
 //
 // @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
-func (c *Controller) Start(methodName string, proxy string) {
+//
+// @throws if the proxy URL cannot be parsed, if the given `methodName` cannot be found, if the transport cannot
+// be initialized or if it couldn't bind a port for listening.
+func (c *Controller) Start(methodName string, proxy string) error {
 	var proxyURL *url.URL
 	var err error
 
@@ -345,7 +349,8 @@ func (c *Controller) Start(methodName string, proxy string) {
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
 		if err != nil {
-			ptlog.Warnf("Failed to parse proxy address: %s", err.Error())
+			ptlog.Errorf("Failed to parse proxy address: %s", err.Error())
+			return err
 		}
 	}
 
@@ -364,17 +369,17 @@ func (c *Controller) Start(methodName string, proxy string) {
 		t := transports.Get(methodName)
 		if t == nil {
 			ptlog.Errorf("Failed to initialize %s: no such method", methodName)
-			return
+			return fmt.Errorf("failed to initialize %s: no such method", methodName)
 		}
 		f, err := t.ClientFactory(c.stateDir)
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
-			return
+			return err
 		}
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
-			return
+			return err
 		}
 
 		c.shutdown[methodName] = make(chan struct{})
@@ -387,19 +392,19 @@ func (c *Controller) Start(methodName string, proxy string) {
 		t := transports.Get(methodName)
 		if t == nil {
 			ptlog.Errorf("Failed to initialize %s: no such method", methodName)
-			return
+			return fmt.Errorf("failed to initialize %s: no such method", methodName)
 		}
 
 		f, err := t.ClientFactory(c.stateDir)
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
-			return
+			return err
 		}
 
 		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
 		if err != nil {
 			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
-			return
+			return err
 		}
 
 		c.listeners[methodName] = ln
@@ -407,6 +412,8 @@ func (c *Controller) Start(methodName string, proxy string) {
 
 		go acceptLoop(f, ln, proxyURL, nil, c.shutdown[methodName])
 	}
+
+	return nil
 }
 
 // Stop - Stop given transport.
