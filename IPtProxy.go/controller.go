@@ -186,6 +186,10 @@ func (c *Controller) StateDir() string {
 
 // addExtraArgs adds the args in extraArgs to the connection args
 func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
+	if extraArgs == nil {
+		return
+	}
+
 	for name := range *extraArgs {
 		//only overwrite if connection arg doesn't exist
 		if arg, ok := args.Get(name); !ok {
@@ -226,6 +230,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL,
 		if err != nil {
 			ptlog.Errorf("Error getting proxy dialer: %s", err.Error())
 			_ = conn.Reject()
+			return
 		}
 		dialFn = dialer.Dial
 	}
