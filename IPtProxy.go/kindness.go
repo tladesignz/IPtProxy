@@ -7,6 +7,13 @@ import (
 	sfp "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/proxy/lib"
 )
 
+// SnowflakeClientConnected - Interface to use when clients connect
+// to the snowflake proxy. For use with StartSnowflakeProxy
+type SnowflakeClientConnected interface {
+	// Connected - callback method to handle snowflake proxy client connections.
+	Connected()
+}
+
 // SnowflakeProxy - Class to start and stop a Snowflake proxy.
 type SnowflakeProxy struct {
 
@@ -25,6 +32,11 @@ type SnowflakeProxy struct {
 	// NatProbeUrl - Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 	NatProbeUrl string
 
+	// ClientConnected - A delegate which is called when a client successfully connected.
+	// Will be called on its own thread! You will need to switch to your own UI thread,
+	// if you want to do UI stuff!
+	ClientConnected SnowflakeClientConnected
+
 	isRunning bool
 	proxy     *sfp.SnowflakeProxy
 }
@@ -38,6 +50,9 @@ func (sp *SnowflakeProxy) Start() {
 		sp.Capacity = 0
 	}
 
+	eventDispatcher := event.NewSnowflakeEventDispatcher()
+	eventDispatcher.AddSnowflakeEventListener(sp)
+
 	sp.proxy = &sfp.SnowflakeProxy{
 		Capacity:               uint(sp.Capacity),
 		STUNURL:                sp.StunServer,
@@ -48,7 +63,7 @@ func (sp *SnowflakeProxy) Start() {
 		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
 		AllowNonTLSRelay:       false,
-		EventDispatcher:        event.NewSnowflakeEventDispatcher(),
+		EventDispatcher:        eventDispatcher,
 	}
 
 	go func() {
@@ -56,7 +71,8 @@ func (sp *SnowflakeProxy) Start() {
 		err := sp.proxy.Start()
 		if err != nil {
 			sp.isRunning = false
-			log.Fatal(err)
+			eventDispatcher.RemoveSnowflakeEventListener(sp)
+			log.Print(err)
 		}
 	}()
 }
@@ -65,6 +81,7 @@ func (sp *SnowflakeProxy) Start() {
 func (sp *SnowflakeProxy) Stop() {
 	if sp.isRunning {
 		sp.proxy.Stop()
+		sp.proxy.EventDispatcher.RemoveSnowflakeEventListener(sp)
 		sp.isRunning = false
 		sp.proxy = nil
 	}
@@ -73,4 +90,10 @@ func (sp *SnowflakeProxy) Stop() {
 // IsRunning - Checks to see if a snowflake proxy is running in your app.
 func (sp *SnowflakeProxy) IsRunning() bool {
 	return sp.isRunning
+}
+
+func (sp *SnowflakeProxy) OnNewSnowflakeEvent(event event.SnowflakeEvent) {
+	if event.String() == "connected" && sp.ClientConnected != nil {
+		sp.ClientConnected.Connected()
+	}
 }
