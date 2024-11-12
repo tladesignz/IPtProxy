@@ -92,8 +92,13 @@ func (sp *SnowflakeProxy) IsRunning() bool {
 	return sp.isRunning
 }
 
-func (sp *SnowflakeProxy) OnNewSnowflakeEvent(event event.SnowflakeEvent) {
-	if event.String() == "connected" && sp.ClientConnected != nil {
-		sp.ClientConnected.Connected()
+func (sp *SnowflakeProxy) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
+	switch e.(type) {
+	case event.EventOnProxyClientConnected:
+		if sp.ClientConnected != nil {
+			sp.ClientConnected.Connected()
+		}
+
+	default:
 	}
 }
