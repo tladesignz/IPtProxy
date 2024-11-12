@@ -27,6 +27,21 @@ type SnowflakeProxy struct {
 
 	isRunning bool
 	proxy     *sfp.SnowflakeProxy
+
+	// OnConnected - Callback for when a client has successfully connected to the proxy
+	OnConnected func()
+}
+
+type proxyEventCallbacks struct {
+	onConnectedCallback func()
+}
+
+func (c *proxyEventCallbacks) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
+	switch e.(type) {
+	case event.EventOnProxyClientConnected:
+		c.onConnectedCallback()
+	default:
+	}
 }
 
 // Start - Start the Snowflake proxy.
@@ -38,6 +53,12 @@ func (sp *SnowflakeProxy) Start() {
 		sp.Capacity = 0
 	}
 
+	dispatcher := event.NewSnowflakeEventDispatcher()
+	callbacks := &proxyEventCallbacks{
+		onConnectedCallback: sp.OnConnected,
+	}
+	dispatcher.AddSnowflakeEventListener(callbacks)
+
 	sp.proxy = &sfp.SnowflakeProxy{
 		Capacity:               uint(sp.Capacity),
 		STUNURL:                sp.StunServer,
@@ -48,7 +69,7 @@ func (sp *SnowflakeProxy) Start() {
 		ProxyType:              "iptproxy",
 		RelayDomainNamePattern: "snowflake.torproject.net$",
 		AllowNonTLSRelay:       false,
-		EventDispatcher:        event.NewSnowflakeEventDispatcher(),
+		EventDispatcher:        dispatcher,
 	}
 
 	go func() {
@@ -59,6 +80,7 @@ func (sp *SnowflakeProxy) Start() {
 			log.Fatal(err)
 		}
 	}()
+
 }
 
 // Stop - Stop the Snowflake proxy.
