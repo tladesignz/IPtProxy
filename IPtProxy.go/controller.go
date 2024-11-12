@@ -104,6 +104,11 @@ const (
 	Snowflake = "snowflake"
 )
 
+// OnTransportStopped - Interface to get notified when a transport stopped again.
+type OnTransportStopped interface {
+	Stopped(name string, error error)
+}
+
 // Controller - Class to start and stop transports.
 type Controller struct {
 
@@ -130,9 +135,10 @@ type Controller struct {
 	// SnowflakeMaxPeers - Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
 	SnowflakeMaxPeers int
 
-	stateDir  string
-	listeners map[string]*pt.SocksListener
-	shutdown  map[string]chan struct{}
+	stateDir         string
+	transportStopped OnTransportStopped
+	listeners        map[string]*pt.SocksListener
+	shutdown         map[string]chan struct{}
 }
 
 // NewController - Create a new Controller object.
@@ -143,10 +149,15 @@ type Controller struct {
 //
 // @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 //
+// @param transportStopped A delegate, which is called, when the started transport stopped again.
+// Will be called on its own thread! You will need to switch to your own UI thread,
+// if you want to do UI stuff!
+//
 //goland:noinspection GoUnusedExportedFunction
-func NewController(stateDir string, enableLogging, unsafeLogging bool, logLevel string) *Controller {
+func NewController(stateDir string, enableLogging, unsafeLogging bool, logLevel string, transportStopped OnTransportStopped) *Controller {
 	c := &Controller{
-		stateDir: stateDir,
+		stateDir:         stateDir,
+		transportStopped: transportStopped,
 	}
 
 	if logLevel == "" {
@@ -200,59 +211,94 @@ func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
 }
 
 func acceptLoop(f base.ClientFactory, ln *pt.SocksListener, proxyURL *url.URL,
-	extraArgs *pt.Args, shutdown chan struct{}) error {
+	extraArgs *pt.Args, shutdown chan struct{}, methodName string, transportStopped OnTransportStopped) {
 	defer ln.Close()
 	for {
 		conn, err := ln.AcceptSocks()
 		if err != nil {
 			var e net.Error
 			if errors.As(err, &e) && !e.Temporary() {
-				return err
+				return
 			}
+
 			continue
 		}
-		go clientHandler(f, conn, proxyURL, extraArgs, shutdown)
+
+		go clientHandler(f, conn, proxyURL, extraArgs, shutdown, methodName, transportStopped)
 	}
 }
 
 func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL,
-	extraArgs *pt.Args, shutdown chan struct{}) {
+	extraArgs *pt.Args, shutdown chan struct{}, methodName string, transportStopped OnTransportStopped) {
+
 	defer conn.Close()
+
 	addExtraArgs(&conn.Req.Args, extraArgs)
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		ptlog.Errorf("Error parsing PT args: %s", err.Error())
 		_ = conn.Reject()
+
+		if transportStopped != nil {
+			transportStopped.Stopped(methodName, err)
+		}
+
 		return
 	}
+
 	dialFn := proxy.Direct.Dial
 	if proxyURL != nil {
 		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
 		if err != nil {
 			ptlog.Errorf("Error getting proxy dialer: %s", err.Error())
 			_ = conn.Reject()
+
+			if transportStopped != nil {
+				transportStopped.Stopped(methodName, err)
+			}
+
 			return
 		}
 		dialFn = dialer.Dial
 	}
+
 	remote, err := f.Dial("tcp", conn.Req.Target, dialFn, args)
 	if err != nil {
 		ptlog.Errorf("Error dialing PT: %s", err.Error())
+
+		if transportStopped != nil {
+			transportStopped.Stopped(methodName, err)
+		}
+
 		return
 	}
+
 	err = conn.Grant(&net.TCPAddr{IP: net.IPv4zero, Port: 0})
 	if err != nil {
 		ptlog.Errorf("conn.Grant error: %s", err)
+
+		if transportStopped != nil {
+			transportStopped.Stopped(methodName, err)
+		}
+
 		return
 	}
+
 	defer remote.Close()
+
 	done := make(chan struct{}, 2)
 	go copyLoop(conn, remote, done)
+
 	// wait for copy loop to finish or for shutdown signal
 	select {
 	case <-shutdown:
 	case <-done:
 		ptlog.Noticef("copy loop ended")
+	}
+
+	if transportStopped != nil {
+		ptlog.Noticef("call transportStopped")
+		transportStopped.Stopped(methodName, nil)
 	}
 }
 
@@ -385,7 +431,7 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		c.shutdown[methodName] = make(chan struct{})
 		c.listeners[methodName] = ln
 
-		go acceptLoop(f, ln, nil, extraArgs, c.shutdown[methodName])
+		go acceptLoop(f, ln, nil, extraArgs, c.shutdown[methodName], methodName, c.transportStopped)
 
 	default:
 		// at the moment, everything else is in lyrebird
@@ -410,7 +456,7 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		c.listeners[methodName] = ln
 		c.shutdown[methodName] = make(chan struct{})
 
-		go acceptLoop(f, ln, proxyURL, nil, c.shutdown[methodName])
+		go acceptLoop(f, ln, proxyURL, nil, c.shutdown[methodName], methodName, c.transportStopped)
 	}
 
 	return nil
