@@ -203,9 +203,11 @@ func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
 	}
 
 	for name := range *extraArgs {
-		//only overwrite if connection arg doesn't exist
-		if arg, ok := args.Get(name); !ok {
-			args.Add(name, arg)
+		// Only add if extra arg doesn't already exist, and is not empty.
+		if value, ok := args.Get(name); !ok || value == "" {
+			if value, ok := extraArgs.Get(name); ok && value != "" {
+				args.Add(name, value)
+			}
 		}
 	}
 }
@@ -402,15 +404,10 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 	switch methodName {
 	case "snowflake":
-		maxPeers := c.SnowflakeMaxPeers
-		if maxPeers < 1 {
-			maxPeers = 1
-		}
-
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
-		extraArgs.Add("max", strconv.Itoa(maxPeers))
+		extraArgs.Add("max", strconv.Itoa(max(1, c.SnowflakeMaxPeers)))
 		extraArgs.Add("url", c.SnowflakeBrokerUrl)
 		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
 		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
