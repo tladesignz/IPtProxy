@@ -285,6 +285,8 @@ gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266 h1:Ivjs
 gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266/go.mod h1:K/3SQWdJL6udzwInHk1gaYaECYxMp9dDayniPq6gCSo=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0 h1:rzdY78Ox2T+VlXcxGxELF+6VyUXlZBhmRqZu5etLm+c=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0/go.mod h1:70bhd4JKW/+1HLfm+TMrgHJsUHG4coelMWwiVEJ2gAg=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0 h1:KD9m+mRBwtEdqe94Sv72uiedMWeRdIr4sXbrRyzRiIo=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0/go.mod h1:70bhd4JKW/+1HLfm+TMrgHJsUHG4coelMWwiVEJ2gAg=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20241030185903-a764667d3240 h1:VAQt1mp0mMyNBCf1+ADCDV2IqP7lfVSfMT+PHw7tv64=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20241030185903-a764667d3240/go.mod h1:6cfedxwvLLU4dF2lRNr+h7Tco9jVoCxwg7rBm8mvCmQ=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20241107220700-297ae51866f5 h1:gAjiraznMdklvdoc9AgazVEo4d+fryf0zOz4UBGrQUo=
@@ -293,6 +295,8 @@ gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.9
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.9.2/go.mod h1:pJJtS5nhVfZL/4sD4nx14me4vfV/O+AwdSDxSkF22MA=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.0 h1:DLVnb/hZm1PsE3uSFFVIYtNs07SVtG8IswFp5xl1VhU=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.0/go.mod h1:DI4jAA1yfL9jzwDsSuW6D5ePrDCzEArQ58vdhKWHxDA=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.1 h1:Oik2tb1qbnbrxOlvRNul2FrBi4j2pnqFvPPEWCOSG1I=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.1/go.mod h1:DI4jAA1yfL9jzwDsSuW6D5ePrDCzEArQ58vdhKWHxDA=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240711104640-e64b1b3562f3 h1:1sjrPMDqd/vG8VWf7WYL2K8BqbcO0MSfB4xdv39zlSU=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.0-20240711104640-e64b1b3562f3/go.mod h1:aEzSbkzOc38Cg7gLg0BmRDwQgxwjbbKSiAv052xTS7I=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

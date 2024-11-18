@@ -5,9 +5,9 @@ go 1.22.0
 toolchain go1.23.2
 
 require (
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.5.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20241107220700-297ae51866f5
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.10.1
 	golang.org/x/net v0.30.0
 )
 
