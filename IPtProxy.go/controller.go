@@ -392,8 +392,6 @@ func (c *Controller) Start(methodName string, proxy string) error {
 	var proxyURL *url.URL
 	var err error
 
-	ptlog.Noticef("Launched transport: %v", methodName)
-
 	if proxy != "" {
 		proxyURL, err = url.Parse(proxy)
 		if err != nil {
@@ -461,6 +459,8 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		go acceptLoop(f, ln, proxyURL, nil, c.shutdown[methodName], methodName, c.transportStopped)
 	}
 
+	ptlog.Noticef("Launched transport: %v", methodName)
+
 	return nil
 }
 
@@ -493,5 +493,5 @@ func SnowflakeVersion() string {
 //
 //goland:noinspection GoUnusedExportedFunction
 func LyrebirdVersion() string {
-	return "lyrebird-0.4.0"
+	return "lyrebird-0.5.0"
 }
