@@ -402,10 +402,15 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 	switch methodName {
 	case "snowflake":
+		maxPeers := c.SnowflakeMaxPeers
+		if maxPeers < 1 {
+			maxPeers = 1
+		}
+
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
-		extraArgs.Add("max", strconv.Itoa(c.SnowflakeMaxPeers))
+		extraArgs.Add("max", strconv.Itoa(maxPeers))
 		extraArgs.Add("url", c.SnowflakeBrokerUrl)
 		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
 		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
