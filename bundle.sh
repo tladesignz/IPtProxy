@@ -6,10 +6,10 @@ prepare()
   version=$2
 
   cd "$(dirname "$0")" || exit 1
-  mkdir -p "bundle"
   rm -rf bundle/**
-  cp -af IPtProxy.aar bundle/${artifact}-${version}.aar
-  cp -af IPtProxy-sources.jar bundle/${artifact}-${version}-sources.jar
+  mkdir -p bundle/com/netzarchitekten/${artifact}/${version}
+  cp -af IPtProxy.aar bundle/com/netzarchitekten/${artifact}/${version}/${artifact}-${version}.aar
+  cp -af IPtProxy-sources.jar bundle/com/netzarchitekten/${artifact}/${version}/${artifact}-${version}-sources.jar
 }
 
 pom()
@@ -17,7 +17,7 @@ pom()
   artifact=$1
   version=$2
 
-  cat > bundle/${artifact}-${version}.pom <<EOF
+  cat > bundle/com/netzarchitekten/${artifact}/${version}/${artifact}-${version}.pom <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -83,23 +83,34 @@ sign()
   fi
 
   if gpg --list-secret-keys | grep -Eo '[0-9A-F]{40}'; then
-  	for f in bundle/${artifact}-*${version}*.*; do
+  	for f in bundle/com/netzarchitekten/${artifact}/${version}/${artifact}-*${version}*.*; do
   	    gpg ${forceKey} --armor --detach-sign $f
   	done
   fi
+}
+
+checksum()
+{
+  artifact=$1
+  version=$2
+
+  for f in bundle/com/netzarchitekten/${artifact}/${version}/${artifact}-*${version}*.*; do
+      md5 -q $f > $f.md5
+      sha1sum $f | cut -f1 -d' ' > $f.sha1
+  done
 }
 
 bundle()
 {
   artifact=$1
   version=$2
-  file=bundle-${artifact}-${version}.jar
+  file=bundle-${artifact}-${version}.zip
 
   rm -f $file
 
   cd bundle || exit 1
 
-  jar cvf ../$file ${artifact}-${version}*.*
+  zip -r ../$file *
 
   cd ..
 
@@ -118,4 +129,5 @@ fi
 prepare $artifact $version
 pom $artifact $version
 sign $artifact $version $keyId
+checksum $artifact $version
 bundle $artifact $version

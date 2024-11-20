@@ -150,6 +150,9 @@ iOSInjectionProject/
 # Vagrant
 .vagrant
 
-# Maven Repo bundle tool.
+# Android publishing stuff.
+IPtProxy.aar
+IPtProxy-sources.jar
 bundle
 bundle-IPtProxy-*.jar
+bundle-IPtProxy-*.zip

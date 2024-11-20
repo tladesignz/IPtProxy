@@ -276,9 +276,10 @@ To see your available keys, run this:
 gpg --list-secret-keys
 ```
 
-- Go to https://s01.oss.sonatype.org/#staging-upload.
-- Select upload mode "Artifact Bundle".
-- Upload bundle and release.
+- Go to https://central.sonatype.com/publishing/namespaces.
+- Push "Publish Component".
+- Enter "com.netzarchitekten:IPtProxy:<version>" as the "Deployment Name".
+- Choose bundle file and hit "Publish Component".
 
 See also: https://gitlab.com/-/snippets/2482490
 
