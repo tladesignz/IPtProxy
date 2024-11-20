@@ -11,8 +11,16 @@
 #include "Universe.objc.h"
 
 
+@class IPtProxyController;
+@class IPtProxySnowflakeProxy;
+@protocol IPtProxyOnTransportStopped;
+@class IPtProxyOnTransportStopped;
 @protocol IPtProxySnowflakeClientConnected;
 @class IPtProxySnowflakeClientConnected;
+
+@protocol IPtProxyOnTransportStopped <NSObject>
+- (void)stopped:(NSString* _Nullable)name error:(NSError* _Nullable)error;
+@end
 
 @protocol IPtProxySnowflakeClientConnected <NSObject>
 /**
@@ -21,33 +29,186 @@
 - (void)connected;
 @end
 
-@interface IPtProxy : NSObject
 /**
- * StateLocation - Sets TOR_PT_STATE_LOCATION
+ * Controller - Class to start and stop transports.
  */
-+ (NSString* _Nonnull) stateLocation;
-+ (void) setStateLocation:(NSString* _Nonnull)v;
+@interface IPtProxyController : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
 
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * NewController - Create a new Controller object.
+
+@param enableLogging Log to StateDir/ipt.log.
+
+@param unsafeLogging Disable the address scrubber.
+
+@param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
+
+@param transportStopped A delegate, which is called, when the started transport stopped again.
+Will be called on its own thread! You will need to switch to your own UI thread,
+if you want to do UI stuff!
+ */
+- (nullable instancetype)init:(NSString* _Nullable)stateDir enableLogging:(BOOL)enableLogging unsafeLogging:(BOOL)unsafeLogging logLevel:(NSString* _Nullable)logLevel transportStopped:(id<IPtProxyOnTransportStopped> _Nullable)transportStopped;
+/**
+ * SnowflakeIceServers is a comma-separated list of ICE server addresses.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeIceServers;
+/**
+ * SnowflakeBrokerUrl - URL of signaling broker.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeBrokerUrl;
+/**
+ * SnowflakeFrontDomains is a comma-separated list of domains for either
+the domain fronting or AMP cache rendezvous methods.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeFrontDomains;
+/**
+ * SnowflakeAmpCacheUrl - URL of AMP cache to use as a proxy for signaling.
+Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeAmpCacheUrl;
+/**
+ * SnowflakeSqsUrl - URL of SQS Queue to use as a proxy for signaling.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeSqsUrl;
+/**
+ * SnowflakeSqsCreds - Credentials to access SQS Queue.
+ */
+@property (nonatomic) NSString* _Nonnull snowflakeSqsCreds;
+/**
+ * SnowflakeMaxPeers - Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
+ */
+@property (nonatomic) long snowflakeMaxPeers;
+/**
+ * LocalAddress - Address of the given transport.
+
+@param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
+`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+
+@return address string containing host and port where the given transport listens.
+ */
+- (NSString* _Nonnull)localAddress:(NSString* _Nullable)methodName;
+/**
+ * Port - Port of the given transport.
+
+@param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
+`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+
+@return port number on localhost where the given transport listens.
+ */
+- (long)port:(NSString* _Nullable)methodName;
+/**
+ * Start - Start given transport.
+
+@param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
+`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+
+@param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
+
+@throws if the proxy URL cannot be parsed, if the given `methodName` cannot be found, if the transport cannot
+be initialized or if it couldn't bind a port for listening.
+ */
+- (BOOL)start:(NSString* _Nullable)methodName proxy:(NSString* _Nullable)proxy error:(NSError* _Nullable* _Nullable)error;
+/**
+ * StateDir - The StateDir set in the constructor.
+
+@returns the directory you set in the constructor, where transports store their state and where the log file resides.
+ */
+- (NSString* _Nonnull)stateDir;
+/**
+ * Stop - Stop given transport.
+
+@param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
+`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+ */
+- (void)stop:(NSString* _Nullable)methodName;
 @end
 
 /**
- * IsPortAvailable - Checks to see if a given port is not in use.
-
-@param port The port to check.
+ * SnowflakeProxy - Class to start and stop a Snowflake proxy.
  */
-FOUNDATION_EXPORT BOOL IPtProxyIsPortAvailable(long port);
+@interface IPtProxySnowflakeProxy : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * Capacity - the maximum number of clients a Snowflake will serve. If set to 0, the proxy will accept an unlimited number of clients.
+ */
+@property (nonatomic) long capacity;
+/**
+ * BrokerUrl - Defaults to https://snowflake-broker.torproject.net/, if empty.
+ */
+@property (nonatomic) NSString* _Nonnull brokerUrl;
+/**
+ * RelayUrl - WebSocket relay URL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
+ */
+@property (nonatomic) NSString* _Nonnull relayUrl;
+/**
+ * StunServer - STUN URL. Defaults to stun:stun.l.google.com:19302, if empty.
+ */
+@property (nonatomic) NSString* _Nonnull stunServer;
+/**
+ * NatProbeUrl - Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
+ */
+@property (nonatomic) NSString* _Nonnull natProbeUrl;
+/**
+ * ClientConnected - A delegate which is called when a client successfully connected.
+Will be called on its own thread! You will need to switch to your own UI thread,
+if you want to do UI stuff!
+ */
+@property (nonatomic) id<IPtProxySnowflakeClientConnected> _Nullable clientConnected;
+/**
+ * IsRunning - Checks to see if a snowflake proxy is running in your app.
+ */
+- (BOOL)isRunning;
+// skipped method SnowflakeProxy.OnNewSnowflakeEvent with unsupported parameter or return types
 
 /**
- * IsSnowflakeProxyRunning - Checks to see if a snowflake proxy is running in your app.
+ * Start - Start the Snowflake proxy.
  */
-FOUNDATION_EXPORT BOOL IPtProxyIsSnowflakeProxyRunning(void);
+- (void)start;
+/**
+ * Stop - Stop the Snowflake proxy.
+ */
+- (void)stop;
+@end
 
 /**
- * LyrebirdLogFile - The log file name used by Lyrebird.
-
-The Lyrebird log file can be found at `filepath.Join(StateLocation, LyrebirdLogFile())`.
+ * LogFileName - the filename of the log residing in `StateDir`.
  */
-FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdLogFile(void);
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyLogFileName;
+/**
+ * MeekLite - Transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyMeekLite;
+/**
+ * Obfs2 - DEPRECATED transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyObfs2;
+/**
+ * Obfs3 - DEPRECATED transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyObfs3;
+/**
+ * Obfs4 - Transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyObfs4;
+/**
+ * ScrambleSuit - DEPRECATED transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyScrambleSuit;
+/**
+ * Snowflake - Transport implemented in Snowflake.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxySnowflake;
+/**
+ * Webtunnel - Transport implemented in Lyrebird.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyWebtunnel;
 
 /**
  * LyrebirdVersion - The version of Lyrebird bundled with IPtProxy.
@@ -55,145 +216,39 @@ FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdLogFile(void);
 FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdVersion(void);
 
 /**
- * MeekPort - Port where Lyrebird will provide its Meek service.
-Only use this after calling StartLyrebird! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxyMeekPort(void);
+ * NewController - Create a new Controller object.
 
-/**
- * Obfs2Port - Port where Lyrebird will provide its Obfs2 service.
-Only use this property after calling StartLyrebird! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxyObfs2Port(void);
+@param enableLogging Log to StateDir/ipt.log.
 
-/**
- * Obfs3Port - Port where Lyrebird will provide its Obfs3 service.
-Only use this property after calling StartLyrebird! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxyObfs3Port(void);
+@param unsafeLogging Disable the address scrubber.
 
-/**
- * Obfs4Port - Port where Lyrebird will provide its Obfs4 service.
-Only use this property after calling StartLyrebird! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxyObfs4Port(void);
+@param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 
-/**
- * ScramblesuitPort - Port where Lyrebird will provide its Scramblesuit service.
-Only use this property after calling StartLyrebird! It might have changed after that!
+@param transportStopped A delegate, which is called, when the started transport stopped again.
+Will be called on its own thread! You will need to switch to your own UI thread,
+if you want to do UI stuff!
  */
-FOUNDATION_EXPORT long IPtProxyScramblesuitPort(void);
-
-/**
- * SnowflakePort - Port where Snowflake will provide its service.
-Only use this property after calling StartSnowflake! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxySnowflakePort(void);
+FOUNDATION_EXPORT IPtProxyController* _Nullable IPtProxyNewController(NSString* _Nullable stateDir, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable logLevel, id<IPtProxyOnTransportStopped> _Nullable transportStopped);
 
 /**
  * SnowflakeVersion - The version of Snowflake bundled with IPtProxy.
  */
 FOUNDATION_EXPORT NSString* _Nonnull IPtProxySnowflakeVersion(void);
 
-/**
- * StartLyrebird - Start Lyrebird.
-
-This will test, if the default ports are available. If not, it will increment them until there is.
-Only use the port properties after calling this, they might have been changed!
-
-@param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
-
-@param enableLogging Log to TOR_PT_STATE_LOCATION/lyrebird.log.
-
-@param unsafeLogging Disable the address scrubber.
-
-@param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
-
-@return Port number where Lyrebird will listen on for Obfs4(!), if no error happens during start up.
-
-	If you need the other ports, check MeekPort, Obfs2Port, Obfs3Port, ScramblesuitPort and WebtunnelPort properties!
- */
-FOUNDATION_EXPORT long IPtProxyStartLyrebird(NSString* _Nullable logLevel, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable proxy);
-
-/**
- * StartSnowflake - Start the Snowflake client.
-
-@param ice Comma-separated list of ICE servers.
-
-@param url URL of signaling broker.
-
-@param fronts Comma-separated list of front domains.
-
-@param ampCache OPTIONAL. URL of AMP cache to use as a proxy for signaling.
-
-	Only needed when you want to do the rendezvous over AMP instead of a domain fronted server.
-
-@param sqsQueueURL OPTIONAL. URL of SQS Queue to use as a proxy for signaling.
-
-@param sqsCredsStr OPTIONAL. Credentials to access SQS Queue
-
-@param logFile Name of log file. OPTIONAL. Defaults to no log.
-
-@param logToStateDir Resolve the log file relative to Tor's PT state dir.
-
-@param keepLocalAddresses Keep local LAN address ICE candidates.
-
-@param unsafeLogging Prevent logs from being scrubbed.
-
-@param maxPeers Capacity for number of multiplexed WebRTC peers. DEFAULTs to 1 if less than that.
-
-@return Port number where Snowflake will listen on, if no error happens during start up.
- */
-FOUNDATION_EXPORT long IPtProxyStartSnowflake(NSString* _Nullable ice, NSString* _Nullable url, NSString* _Nullable fronts, NSString* _Nullable ampCache, NSString* _Nullable sqsQueueURL, NSString* _Nullable sqsCredsStr, NSString* _Nullable logFile, BOOL logToStateDir, BOOL keepLocalAddresses, BOOL unsafeLogging, long maxPeers);
-
-/**
- * StartSnowflakeProxy - Start the Snowflake proxy.
-
-@param capacity the maximum number of clients a Snowflake will serve. If set to 0, the proxy will accept an unlimited number of clients.
-
-@param broker Broker URL. OPTIONAL. Defaults to https://snowflake-broker.torproject.net/, if empty.
-
-@param relay WebSocket relay URL. OPTIONAL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
-
-@param stun STUN URL. OPTIONAL. Defaults to stun:stun.l.google.com:19302, if empty.
-
-@param natProbe OPTIONAL. Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
-
-@param logFile Name of log file. OPTIONAL. Defaults to STDERR.
-
-@param keepLocalAddresses Keep local LAN address ICE candidates.
-
-@param unsafeLogging Prevent logs from being scrubbed.
-
-@param clientConnected A delegate which is called when a client successfully connected.
-
-	Will be called on its own thread! You will need to switch to your own UI thread,
-	if you want to do UI stuff!! OPTIONAL
- */
-FOUNDATION_EXPORT void IPtProxyStartSnowflakeProxy(long capacity, NSString* _Nullable broker, NSString* _Nullable relay, NSString* _Nullable stun, NSString* _Nullable natProbe, NSString* _Nullable logFile, BOOL keepLocalAddresses, BOOL unsafeLogging, id<IPtProxySnowflakeClientConnected> _Nullable clientConnected);
-
-/**
- * StopLyrebird - Stop Lyrebird.
- */
-FOUNDATION_EXPORT void IPtProxyStopLyrebird(void);
-
-/**
- * StopSnowflake - Stop the Snowflake client.
- */
-FOUNDATION_EXPORT void IPtProxyStopSnowflake(void);
-
-/**
- * StopSnowflakeProxy - Stop the Snowflake proxy.
- */
-FOUNDATION_EXPORT void IPtProxyStopSnowflakeProxy(void);
-
-/**
- * WebtunnelPort - Port where Lyrebird will provide its Webtunnel service.
-Only use this property after calling StartLyrebird! It might have changed after that!
- */
-FOUNDATION_EXPORT long IPtProxyWebtunnelPort(void);
+@class IPtProxyOnTransportStopped;
 
 @class IPtProxySnowflakeClientConnected;
+
+/**
+ * OnTransportStopped - Interface to get notified when a transport stopped again.
+ */
+@interface IPtProxyOnTransportStopped : NSObject <goSeqRefInterface, IPtProxyOnTransportStopped> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)stopped:(NSString* _Nullable)name error:(NSError* _Nullable)error;
+@end
 
 /**
  * SnowflakeClientConnected - Interface to use when clients connect

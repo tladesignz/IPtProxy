@@ -10,8 +10,8 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version |
 |-----------|---------|
-| Lyrebird  | 0.2.0   |
-| Snowflake | 2.9.2   |
+| Lyrebird  | 0.5.0   |
+| Snowflake | 2.10.1  |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -20,23 +20,13 @@ easy to install binary including a wrapper around both.
 
 Problems solved in particular are:
 
-- One cannot compile `main` packages with `gomobile`. Both PTs are patched
-  to avoid this.
+- One cannot compile `main` packages with `gomobile`. For both PTs, IPtProxy
+  provides wrapper code to use them as libraries.
 - Both PTs are gathered under one roof here, since you cannot have two
-  `gomobile` frameworks as dependencies, since there are some common Go
+  `gomobile` frameworks as dependencies. There are some common Go
   runtime functions exported, which would create a name clash.
-- Environment variable changes during runtime will not be recognized by
-  `goptlib` when done from within Swift/Objective-C. Therefore, sensible
-  values are hardcoded in the Go wrapper.
-- Snowflake and Lyrebird/Obfs4proxy are patched to accept all configuration parameters
-  directly.
-- Free ports to be used are automatically found by this library and returned to the
-  consuming app. You can use the initial values for premature configuration, which
-  is just fine in situations, where you can be pretty sure, they're going to be 
-  available (typically on iOS). 
-  When that's not the case (e.g. multiple instances of your app on a multi-user
-  Android), you should first start the transports and then use the returned ports
-  for configuration of other components (e.g. Tor). 
+- Free ports to be used are automatically found by this library and can be fetched
+- by the consuming app after start. 
 
 ## iOS/macOS
 
@@ -46,7 +36,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 3.8'
+pod 'IPtProxy', '~> 4.0'
 ```
 
 ### Getting Started
@@ -64,28 +54,32 @@ let fm = FileManager.default
 
 // Good choice for apps where IPtProxy runs inside an extension:
 
-if let ptDir = fm
+guard let ptDir = fm
     .containerURL(forSecurityApplicationGroupIdentifier: "group.com.example.app")? 
     .appendingPathComponent("pt_state")?
     .path
-{
-    IPtProxy.setStateLocation(ptDir)
+else {
+    return
 }
+
+let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO")
 
 // For normal apps which run IPtProxy inline:
 
-if let ptDir = fm.urls(for: .documentDirectory, in: .userDomainMask)
+guard let ptDir = fm.urls(for: .documentDirectory, in: .userDomainMask)
     .first?
     .appendingPathComponent("pt_state")
     .path 
-{
-    IPtProxy.setStateLocation(ptDir)
+else {
+    return
 }
+
+let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO")
 ```
 
 There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI-ios)
 which explains the use of IPtProxy and provides all the necessary UI and additional 
-information to use this library in a Tor context.
+information to use this library in a Tor context. (Also for macOS, despite the name!)
 
 For a headache-free start into the world of Tor on iOS and macOS, check out
 the new [`TorManager` project](https://github.com/tladesignz/TorManager).
@@ -100,50 +94,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:3.8.2'
-```
-
-It is also available through [JitPack](https://jitpack.io). To install
-it from there, add the following line to your `build.gradle` file:
-
-```groovy
-implementation 'com.github.tladesignz:IPtProxy:3.8.2'
-```
-
-And add this to your root `build.gradle` at the end of repositories:
-
-```groovy
-allprojects {
-  repositories {
-    // ...
-    maven {
-      url 'https://jitpack.io'
-      content {
-        includeModule('com.github.tladesignz', 'IPtProxy')
-      }
-    }
-  }
-}
-```
-
-For newer Android Studio projects created in 
-[Android Studio Bumblebee | 2021.1.1](https://developer.android.com/studio/preview/features?hl=hu#settings-gradle) 
-or newer, the JitPack repository needs to be added into the root level file `settings.gradle` 
-instead of `build.gradle`:
-
-```groovy
-dependencyResolutionManagement {
-  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-  repositories {
-    // ...
-    maven {
-      url 'https://jitpack.io'
-      content {
-        includeModule('com.github.tladesignz', 'IPtProxy')
-      }
-    }
-  }
-}
+implementation 'com.netzarchitekten:IPtProxy:4.0.0'
 ```
 
 #### Security Concerns:
@@ -186,9 +137,11 @@ are good choices for this.
 **Do not use a directory outside the app's private storage!**
 
 ```java
+import IPtProxy
+
 File ptDir = new File(getCacheDir(), "pt_state");
 
-IPtProxy.setStateLocation(ptDir.getAbsolutePath());
+Controller ptc = Controller(ptDir, true, false, "INFO");
 ```
 
 
@@ -196,7 +149,7 @@ IPtProxy.setStateLocation(ptDir.getAbsolutePath());
 
 ### Requirements
 
-This repository contains a precompiled iOS and Android version of IPtProxy.
+This repository contains a precompiled iOS and macOS version of IPtProxy.
 If you want to compile it yourself, you'll need Go 1.21 as a prerequisite.
 
 You will also need Xcode installed when compiling for iOS and an Android NDK
@@ -212,7 +165,7 @@ for `$GOPATH` is `$HOME/go`:
 export PATH=$HOME/go/bin/:$PATH` 
 ```
 
-### iOS
+### iOS/macOS
 
 Make sure Xcode and Xcode's command line tools are installed. Then run
 
@@ -282,8 +235,6 @@ A release commit needs the following:
 
   - [Podspec](IPtProxy.podspec)
   - [README](README.md)
-  - [JitPack](jitpack.yml)
-  - [pom](pom.xml)
 
 ### Do fresh builds
 
@@ -342,6 +293,7 @@ https://tordev.guardianproject.info
 - Benjamin Erhart, berhart@netzarchitekten.com
 - Nathan Freitas
 - Bim
+- cohosh
 
 for the Guardian Project https://guardianproject.info
 
