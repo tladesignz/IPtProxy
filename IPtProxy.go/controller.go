@@ -401,7 +401,7 @@ func (c *Controller) Start(methodName string, proxy string) error {
 	}
 
 	switch methodName {
-	case "snowflake":
+	case Snowflake:
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
