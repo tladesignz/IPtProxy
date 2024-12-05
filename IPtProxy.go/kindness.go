@@ -5,6 +5,7 @@ import (
 
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
 	sfp "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/proxy/lib"
+	"time"
 )
 
 // SnowflakeClientConnected - Interface to use when clients connect
@@ -32,6 +33,9 @@ type SnowflakeProxy struct {
 	// NatProbeUrl - Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 	NatProbeUrl string
 
+	// PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
+	PollInterval int
+
 	// ClientConnected - A delegate which is called when a client successfully connected.
 	// Will be called on its own thread! You will need to switch to your own UI thread,
 	// if you want to do UI stuff!
@@ -50,10 +54,15 @@ func (sp *SnowflakeProxy) Start() {
 		sp.Capacity = 0
 	}
 
+	if sp.PollInterval < 0 {
+		sp.PollInterval = 0
+	}
+
 	eventDispatcher := event.NewSnowflakeEventDispatcher()
 	eventDispatcher.AddSnowflakeEventListener(sp)
 
 	sp.proxy = &sfp.SnowflakeProxy{
+		PollInterval:           time.Duration(sp.PollInterval) * time.Second,
 		Capacity:               uint(sp.Capacity),
 		STUNURL:                sp.StunServer,
 		BrokerURL:              sp.BrokerUrl,
