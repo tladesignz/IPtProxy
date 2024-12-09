@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 4.0.1
+- Added support of manipulating `PollInterval` of `SnowflakeProxy`.
+
 ## 4.0.0
 - Complete rewrite of IPtProxy:
   - Got rid of patches and the goptlib interface.

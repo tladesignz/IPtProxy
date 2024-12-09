@@ -156,6 +156,10 @@ be initialized or if it couldn't bind a port for listening.
  */
 @property (nonatomic) NSString* _Nonnull natProbeUrl;
 /**
+ * PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
+ */
+@property (nonatomic) long pollInterval;
+/**
  * ClientConnected - A delegate which is called when a client successfully connected.
 Will be called on its own thread! You will need to switch to your own UI thread,
 if you want to do UI stuff!
