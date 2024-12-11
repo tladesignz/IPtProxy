@@ -26,7 +26,77 @@ Problems solved in particular are:
   `gomobile` frameworks as dependencies. There are some common Go
   runtime functions exported, which would create a name clash.
 - Free ports to be used are automatically found by this library and can be fetched
-- by the consuming app after start. 
+- by the consuming app after start.
+
+## Caveat
+
+IPtProxy is now provided with classes. You **should not** instantiate multiple objects of these classes!
+
+Instead, instantiate `Controller` and/or `SnowflakeProxy` once, if you need them and keep a reference around.
+
+It's good practice, to have all the IPtProxy handling contained in one place, so you can just store your references
+there. If that is not feasible within your project, Swift provides the possibility to keep singleton references in an 
+extension to their respective objects like so:
+
+```swift
+import IPtProxy
+
+extension IPtProxyController {
+
+    // See below how to get `ptDir`!
+    var ptDir = ""
+
+    // Set `ptDir` first, before accessing this the first time! 
+    static let shared = {
+		return IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO", transportStopped: nil)
+    }()
+}
+
+extension IPtProxySnowflakeProxy {
+
+    static let shared = {
+        let sp = IPtProxySnowflakeProxy()
+        sp.capacity = 0
+        sp.brokerUrl = "..."
+        sp.relayUrl = "..."
+        sp.stunServer = "..."
+        sp.natProbeUrl = "..."
+        sp.pollInterval = 60
+        
+        return sp
+    }()
+}
+```
+
+On Android, you might resort to a subclassed [`Application`](https://developer.android.com/reference/android/app/Application) 
+object, if you already use one, or just any holder object: 
+
+```kotlin
+import IPtProxy
+
+object Transports {
+
+    // See below how to get `ptDir`!
+    var ptDir = ""
+
+    // Set `ptDir` first, before accessing this the first time! 
+    val controller: Controller by lazy {
+        Controller(ptDir, true, false, "INFO", null)
+    }
+    
+    val snowflakeProxy: SnowflakeProxy by lazy {
+        val sp = SnowflakeProxy()
+        sp.capacity = 0
+        sp.brokerUrl = "..."
+        sp.relayUrl = "..."
+        sp.stunServer = "..."
+        sp.natProbeUrl = "..."
+        sp.pollInterval = 60
+        
+        sp
+    }
+}
+```
 
 ## iOS/macOS
 
@@ -47,7 +117,7 @@ to store their state information and log files.
 **From version 2.0.0 onwards, there's no default anymore!**
 This is out of security concerns, esp. on Android.
 
-You will need to provide `StateLocation` *before* use of any transport:
+You will need to provide `stateDir` *before* use of any transport:
 
 ```swift
 let fm = FileManager.default
@@ -62,7 +132,7 @@ else {
     return
 }
 
-let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO")
+let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO", transportStopped: nil)
 
 // For normal apps which run IPtProxy inline:
 
@@ -74,7 +144,7 @@ else {
     return
 }
 
-let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO")
+let ptc = IPtProxyController(ptDir, enableLogging: true, unsafeLogging: false, logLevel: "INFO", transportStopped: nil)
 ```
 
 There's a companion library [IPtProxyUI](https://github.com/tladesignz/IPtProxyUI-ios)
@@ -129,7 +199,7 @@ to store their state information and log files.
 **From version 2.0.0 onwards, there's no default anymore!**
 This is out of security concerns, esp. on Android.
 
-You will need to provide `StateLocation` *before* use of any transport.
+You will need to provide `stateDir` *before* use of any transport.
 
 `Context#getCacheDir()`, `Context#getFilesDir()` or `Context#getNoBackupFilesDir()` 
 are good choices for this.
@@ -141,7 +211,7 @@ import IPtProxy
 
 File ptDir = new File(getCacheDir(), "pt_state");
 
-Controller ptc = Controller(ptDir, true, false, "INFO");
+Controller ptc = Controller(ptDir.getPath(), true, false, "INFO", null);
 ```
 
 
