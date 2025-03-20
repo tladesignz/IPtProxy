@@ -293,6 +293,7 @@ If `Lyrebird` or `Snowflake` was updated, you might need to update the dependenc
 
 ```shell
 cd IPtProxy.go
+go get -u
 go mod tidy
 go get golang.org/x/mobile/cmd/gomobile@latest
 ```
