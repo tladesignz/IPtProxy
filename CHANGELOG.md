@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 4.1.1
+- Failed CocoaPods upload makes version 4.1.0 unusable. Need to use a new version name.
+
 ## 4.1.0
 - Updated Snowflake to version 2.11.0.
 - Updated Lyrebird to version 0.6.0.
