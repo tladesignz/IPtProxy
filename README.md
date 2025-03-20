@@ -2,7 +2,6 @@
 
 Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 
-[![JitPack](https://jitpack.io/v/tladesignz/IPtProxy.svg)](https://jitpack.io/#tladesignz/IPtProxy)
 [![Maven Central](https://img.shields.io/maven-central/v/com.netzarchitekten/IPtProxy.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.netzarchitekten%22%20AND%20a:%22IPtProxy%22)
 [![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
@@ -10,8 +9,8 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version |
 |-----------|---------|
-| Lyrebird  | 0.5.0   |
-| Snowflake | 2.10.1  |
+| Lyrebird  | 0.6.0   |
+| Snowflake | 2.11.0  |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
@@ -265,7 +264,7 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 ```
 
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
-if you don't want to rely on Maven Central or JitPack.
+if you don't want to rely on Maven Central.
 
 On certain CPU architectures `gobind` might fail with this error due to setting
 a flag that is no longer supported by Go since version 1.16:
