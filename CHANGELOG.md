@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 4.1.2
+- Fixed `LyrebirdVersion()` return string.
+
 ## 4.1.1
 - Failed CocoaPods upload makes version 4.1.0 unusable. Need to use a new version name.
 
