@@ -305,6 +305,7 @@ A release commit needs the following:
 
   - [Podspec](IPtProxy.podspec)
   - [README](README.md)
+  - [controller.go](IPtProxy.go/controller.go)
 
 ### Do fresh builds
 
