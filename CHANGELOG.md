@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 4.2.0
+- Updated Lyrebird to version 0.6.1.
+
 ## 4.1.2
 - Fixed `LyrebirdVersion()` return string.
 

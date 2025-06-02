@@ -9,7 +9,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version |
 |-----------|---------|
-| Lyrebird  | 0.6.0   |
+| Lyrebird  | 0.6.1   |
 | Snowflake | 2.11.0  |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
@@ -105,7 +105,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 4.1'
+pod 'IPtProxy', '~> 4.2'
 ```
 
 ### Getting Started
@@ -163,7 +163,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:4.1.2'
+implementation 'com.netzarchitekten:IPtProxy:4.2.0'
 ```
 
 #### Security Concerns:
