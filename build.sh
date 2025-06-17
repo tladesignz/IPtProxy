@@ -35,7 +35,7 @@ cd "$TEMPDIR/IPtProxy.go" || exit 1
 
 gomobile init
 
-MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=12.0 -androidapi=21 -v -tags=netcgo -trimpath
+MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=12.0 -androidapi=24 -v -tags=netcgo -trimpath
 
 ### Note:
 # $ go tool link -h
