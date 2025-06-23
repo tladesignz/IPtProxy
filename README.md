@@ -2,7 +2,7 @@
 
 Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.netzarchitekten/IPtProxy.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.netzarchitekten%22%20AND%20a:%22IPtProxy%22)
+[![Maven Central](https://img.shields.io/maven-central/v/com.netzarchitekten/IPtProxy.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.netzarchitekten/IPtProxy)
 [![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
