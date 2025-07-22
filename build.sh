@@ -35,6 +35,8 @@ cd "$TEMPDIR/IPtProxy.go" || exit 1
 
 gomobile init
 
+export CGO_LDFLAGS="-Wl,-z,max-page-size=16384"
+
 MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=12.0 -androidapi=21 -v -tags=netcgo -trimpath
 
 ### Note:
