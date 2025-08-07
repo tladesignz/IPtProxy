@@ -33,6 +33,9 @@ type SnowflakeProxy struct {
 	// NatProbeUrl - Defaults to https://snowflake-broker.torproject.net:8443/probe, if empty.
 	NatProbeUrl string
 
+	// NATTypeMeasurementInterval is time before NAT type is retested. Defaults to 0, if empty.
+	NATTypeMeasurementInterval int64
+
 	// PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
 	PollInterval int
 
@@ -62,17 +65,18 @@ func (sp *SnowflakeProxy) Start() {
 	eventDispatcher.AddSnowflakeEventListener(sp)
 
 	sp.proxy = &sfp.SnowflakeProxy{
-		PollInterval:           time.Duration(sp.PollInterval) * time.Second,
-		Capacity:               uint(sp.Capacity),
-		STUNURL:                sp.StunServer,
-		BrokerURL:              sp.BrokerUrl,
-		KeepLocalAddresses:     false,
-		RelayURL:               sp.RelayUrl,
-		NATProbeURL:            sp.NatProbeUrl,
-		ProxyType:              "iptproxy",
-		RelayDomainNamePattern: "snowflake.torproject.net$",
-		AllowNonTLSRelay:       false,
-		EventDispatcher:        eventDispatcher,
+		PollInterval:               time.Duration(sp.PollInterval) * time.Second,
+		Capacity:                   uint(sp.Capacity),
+		STUNURL:                    sp.StunServer,
+		BrokerURL:                  sp.BrokerUrl,
+		KeepLocalAddresses:         false,
+		RelayURL:                   sp.RelayUrl,
+		NATProbeURL:                sp.NatProbeUrl,
+		NATTypeMeasurementInterval: time.Duration(sp.NATTypeMeasurementInterval),
+		ProxyType:                  "iptproxy",
+		RelayDomainNamePattern:     "snowflake.torproject.net$",
+		AllowNonTLSRelay:           false,
+		EventDispatcher:            eventDispatcher,
 	}
 
 	go func() {
