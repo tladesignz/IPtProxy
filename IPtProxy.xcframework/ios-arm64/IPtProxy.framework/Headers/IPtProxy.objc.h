@@ -156,6 +156,10 @@ be initialized or if it couldn't bind a port for listening.
  */
 @property (nonatomic) NSString* _Nonnull natProbeUrl;
 /**
+ * NATTypeMeasurementInterval is time before NAT type is retested. Defaults to 0, if empty.
+ */
+@property (nonatomic) int64_t natTypeMeasurementInterval;
+/**
  * PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
  */
 @property (nonatomic) long pollInterval;

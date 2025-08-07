@@ -1,5 +1,11 @@
 # IPtProxy Changelog
 
+## 4.2.1
+- Updated dependencies.
+- Added `SnowflakeProxy.NATTypeMeasurementInterval` configuration.
+- Support Android 16kB memory alignment.
+- Increased minimal Android API to 24.
+
 ## 4.2.0
 - Updated Lyrebird to version 0.6.1.
 

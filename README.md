@@ -219,10 +219,10 @@ Controller ptc = Controller(ptDir.getPath(), true, false, "INFO", null);
 ### Requirements
 
 This repository contains a precompiled iOS and macOS version of IPtProxy.
-If you want to compile it yourself, you'll need Go 1.21 as a prerequisite.
+If you want to compile it yourself, you'll need Go 1.24 as a prerequisite.
 
-You will also need Xcode installed when compiling for iOS and an Android NDK
-when compiling for Android.
+You will also need Xcode installed when compiling for iOS and (preferrably) the
+latest Android NDK when compiling for Android.
 
 The build script needs the gomobile binary and will install it, if not available, yet.
 However, you'll still need to make it accessible in your `$PATH`.
@@ -247,7 +247,8 @@ if you don't want to rely on CocoaPods.
 
 ### Android
 
-Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, on Debian systems you can install it with: 
+Make sure that `javac` is in your `$PATH`. If you do not have a JDK instance, 
+on Debian systems you can install it with: 
 
 ```shell
 apt install default-jdk 
@@ -327,7 +328,7 @@ git push --tags
 ### CocoaPods
 
 ```shell
-pod trunk push --skip-import-validation
+pod trunk push
 ```
 
 ### Maven Central
