@@ -4,14 +4,31 @@ TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
 TEMPDIR="$TMPDIR/IPtProxy"
 
-if test "$1" = "android"; then
+if [ "$1" = "android" ]; then
   TARGET=android
   OUTPUT=IPtProxy.aar
+  MIN_VERSION=28
+
+  NDK_SOURCE_PROPERTIES="$ANDROID_NDK_HOME/source.properties"
+
+  if [ ! -f "$NDK_SOURCE_PROPERTIES" ]; then
+    echo "--- Android NDK not found or too old."
+    exit 1
+  fi
+
+  NDK_VERSION=$(grep "Pkg.Revision" "$NDK_SOURCE_PROPERTIES" | cut -d' ' -f3)
+
+  NDK_MAJOR_VERSION=${NDK_VERSION%%.*}
+
+  if [ "$NDK_MAJOR_VERSION" -lt "$MIN_VERSION" ]; then
+    echo "--- Android NDK version $NDK_VERSION too old. Use at least version $MIN_VERSION."
+    exit 1
+  fi
 fi
 
 cd "$(dirname "$0")" || exit 1
 
-if test -e $OUTPUT; then
+if [ -e $OUTPUT ]; then
     echo "--- No build necessary, $OUTPUT already exists."
     exit
 fi
