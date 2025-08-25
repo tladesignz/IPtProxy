@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 4.2.2
+- Expose `SnowflakeProxy`.`EphemeralMinPort` and `EphemeralMaxPort` arguments.
+
 ## 4.2.1
 - Updated dependencies.
 - Added `SnowflakeProxy.NATTypeMeasurementInterval` configuration.

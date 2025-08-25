@@ -148,6 +148,24 @@ be initialized or if it couldn't bind a port for listening.
  */
 @property (nonatomic) NSString* _Nonnull relayUrl;
 /**
+ * EphemeralMinPort - limit the range of ports that
+ICE UDP connections may allocate from.
+When specifying the range, make sure it's at least 2x as wide
+as the amount of clients that you are hoping to serve concurrently
+(see the `Capacity` property).
+If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
+ */
+@property (nonatomic) long ephemeralMinPort;
+/**
+ * EphemeralMaxPort - limit the range of ports that
+ICE UDP connections may allocate from.
+When specifying the range, make sure it's at least 2x as wide
+as the amount of clients that you are hoping to serve concurrently
+(see the `Capacity` property).
+If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
+ */
+@property (nonatomic) long ephemeralMaxPort;
+/**
  * StunServer - STUN URL. Defaults to stun:stun.l.google.com:19302, if empty.
  */
 @property (nonatomic) NSString* _Nonnull stunServer;
