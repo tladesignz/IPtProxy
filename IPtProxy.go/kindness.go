@@ -27,6 +27,22 @@ type SnowflakeProxy struct {
 	// RelayUrl - WebSocket relay URL. Defaults to wss://snowflake.bamsoftware.com/, if empty.
 	RelayUrl string
 
+	// EphemeralMinPort - limit the range of ports that
+	// ICE UDP connections may allocate from.
+	// When specifying the range, make sure it's at least 2x as wide
+	// as the amount of clients that you are hoping to serve concurrently
+	// (see the `Capacity` property).
+	// If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
+	EphemeralMinPort int
+
+	// EphemeralMaxPort - limit the range of ports that
+	// ICE UDP connections may allocate from.
+	// When specifying the range, make sure it's at least 2x as wide
+	// as the amount of clients that you are hoping to serve concurrently
+	// (see the `Capacity` property).
+	// If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
+	EphemeralMaxPort int
+
 	// StunServer - STUN URL. Defaults to stun:stun.l.google.com:19302, if empty.
 	StunServer string
 
@@ -71,6 +87,8 @@ func (sp *SnowflakeProxy) Start() {
 		BrokerURL:                  sp.BrokerUrl,
 		KeepLocalAddresses:         false,
 		RelayURL:                   sp.RelayUrl,
+		EphemeralMinPort:           uint16(sp.EphemeralMinPort),
+		EphemeralMaxPort:           uint16(sp.EphemeralMaxPort),
 		NATProbeURL:                sp.NatProbeUrl,
 		NATTypeMeasurementInterval: time.Duration(sp.NATTypeMeasurementInterval),
 		ProxyType:                  "iptproxy",
