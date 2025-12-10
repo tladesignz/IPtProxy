@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 4.3.0
+- Updated Lyrebird to version 0.8.0.
+- Increased minimal iOS version to 15.0.
+
 ## 4.2.2
 - Expose `SnowflakeProxy`.`EphemeralMinPort` and `EphemeralMaxPort` arguments.
 

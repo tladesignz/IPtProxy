@@ -9,7 +9,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version |
 |-----------|---------|
-| Lyrebird  | 0.6.1   |
+| Lyrebird  | 0.8.0   |
 | Snowflake | 2.11.0  |
 
 Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
@@ -105,7 +105,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 4.2'
+pod 'IPtProxy', '~> 4.3'
 ```
 
 ### Getting Started
@@ -163,7 +163,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:4.2.2'
+implementation 'com.netzarchitekten:IPtProxy:4.3.0'
 ```
 
 #### Security Concerns:
@@ -221,7 +221,7 @@ Controller ptc = Controller(ptDir.getPath(), true, false, "INFO", null);
 This repository contains a precompiled iOS and macOS version of IPtProxy.
 If you want to compile it yourself, you'll need Go 1.24 as a prerequisite.
 
-You will also need Xcode installed when compiling for iOS and (preferrably) the
+You will also need Xcode installed when compiling for iOS and (preferably) the
 latest Android NDK when compiling for Android.
 
 The build script needs the gomobile binary and will install it, if not available, yet.
