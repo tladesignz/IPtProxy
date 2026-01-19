@@ -13,12 +13,36 @@
 
 @class IPtProxyController;
 @class IPtProxySnowflakeProxy;
-@protocol IPtProxyOnTransportStopped;
-@class IPtProxyOnTransportStopped;
+@protocol IPtProxyOnTransportEvents;
+@class IPtProxyOnTransportEvents;
 @protocol IPtProxySnowflakeClientConnected;
 @class IPtProxySnowflakeClientConnected;
 
-@protocol IPtProxyOnTransportStopped <NSObject>
+@protocol IPtProxyOnTransportEvents <NSObject>
+/**
+ * Connected - This will always fire immediately before returning from Controller.Start, except with Snowflake,
+where it fires later, namely every time a successful connection to a proxy was achieved.
+
+@param name The transport name that connected.
+ */
+- (void)connected:(NSString* _Nullable)name;
+/**
+ * Error - Currently only called when an error happened during Snowflake proxy discovery: Either the WebRTC offer
+couldn't be created, the broker could not match us with a proxy, or the connection to the given proxy could not
+be made. This will continue until either Connected is called because of a successful connection to a proxy, or
+Controller.Stop is used to stop the transport again.
+When further connections are attempted by the client, the same cycle will repeat.
+
+@param name The transport name that errored.
+@param error The error that occurred.
+ */
+- (void)error:(NSString* _Nullable)name error:(NSError* _Nullable)error;
+/**
+ * Stopped - Called when the transport stopped again, with or without an error.
+
+@param name The transport name that stopped.
+@param error The error that caused the transport to stop, or nil if the transport stopped without error.
+ */
 - (void)stopped:(NSString* _Nullable)name error:(NSError* _Nullable)error;
 @end
 
@@ -46,11 +70,12 @@
 
 @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 
-@param transportStopped A delegate, which is called, when the started transport stopped again.
-Will be called on its own thread! You will need to switch to your own UI thread,
+@param transportEvents A delegate, which is called when the transport stopped again, when errors happened, or when
+the transport actually got a full connection.
+Will be called on its own thread! You will need to switch to your own UI thread
 if you want to do UI stuff!
  */
-- (nullable instancetype)init:(NSString* _Nullable)stateDir enableLogging:(BOOL)enableLogging unsafeLogging:(BOOL)unsafeLogging logLevel:(NSString* _Nullable)logLevel transportStopped:(id<IPtProxyOnTransportStopped> _Nullable)transportStopped;
+- (nullable instancetype)init:(NSString* _Nullable)stateDir enableLogging:(BOOL)enableLogging unsafeLogging:(BOOL)unsafeLogging logLevel:(NSString* _Nullable)logLevel transportEvents:(id<IPtProxyOnTransportEvents> _Nullable)transportEvents;
 /**
  * SnowflakeIceServers is a comma-separated list of ICE server addresses.
  */
@@ -250,29 +275,55 @@ FOUNDATION_EXPORT NSString* _Nonnull IPtProxyLyrebirdVersion(void);
 
 @param logLevel Log level (ERROR/WARN/INFO/DEBUG). Defaults to ERROR if empty string.
 
-@param transportStopped A delegate, which is called, when the started transport stopped again.
-Will be called on its own thread! You will need to switch to your own UI thread,
+@param transportEvents A delegate, which is called when the transport stopped again, when errors happened, or when
+the transport actually got a full connection.
+Will be called on its own thread! You will need to switch to your own UI thread
 if you want to do UI stuff!
  */
-FOUNDATION_EXPORT IPtProxyController* _Nullable IPtProxyNewController(NSString* _Nullable stateDir, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable logLevel, id<IPtProxyOnTransportStopped> _Nullable transportStopped);
+FOUNDATION_EXPORT IPtProxyController* _Nullable IPtProxyNewController(NSString* _Nullable stateDir, BOOL enableLogging, BOOL unsafeLogging, NSString* _Nullable logLevel, id<IPtProxyOnTransportEvents> _Nullable transportEvents);
 
 /**
  * SnowflakeVersion - The version of Snowflake bundled with IPtProxy.
  */
 FOUNDATION_EXPORT NSString* _Nonnull IPtProxySnowflakeVersion(void);
 
-@class IPtProxyOnTransportStopped;
+@class IPtProxyOnTransportEvents;
 
 @class IPtProxySnowflakeClientConnected;
 
 /**
- * OnTransportStopped - Interface to get notified when a transport stopped again.
+ * OnTransportEvents - Interface to get notified when the transport stopped again, when errors happened, or when
+the transport actually got a full connection.
  */
-@interface IPtProxyOnTransportStopped : NSObject <goSeqRefInterface, IPtProxyOnTransportStopped> {
+@interface IPtProxyOnTransportEvents : NSObject <goSeqRefInterface, IPtProxyOnTransportEvents> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * Connected - This will always fire immediately before returning from Controller.Start, except with Snowflake,
+where it fires later, namely every time a successful connection to a proxy was achieved.
+
+@param name The transport name that connected.
+ */
+- (void)connected:(NSString* _Nullable)name;
+/**
+ * Error - Currently only called when an error happened during Snowflake proxy discovery: Either the WebRTC offer
+couldn't be created, the broker could not match us with a proxy, or the connection to the given proxy could not
+be made. This will continue until either Connected is called because of a successful connection to a proxy, or
+Controller.Stop is used to stop the transport again.
+When further connections are attempted by the client, the same cycle will repeat.
+
+@param name The transport name that errored.
+@param error The error that occurred.
+ */
+- (void)error:(NSString* _Nullable)name error:(NSError* _Nullable)error;
+/**
+ * Stopped - Called when the transport stopped again, with or without an error.
+
+@param name The transport name that stopped.
+@param error The error that caused the transport to stop, or nil if the transport stopped without error.
+ */
 - (void)stopped:(NSString* _Nullable)name error:(NSError* _Nullable)error;
 @end
 

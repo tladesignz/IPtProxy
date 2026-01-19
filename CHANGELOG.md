@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 5.0.0
+- Updated Lyrebird to version 0.8.1.
+- Improved `OnTransportStopped` to a more versatile `OnTransportEvents`, which reports errors during Snowflake proxy
+  search and also its success.
+
 ## 4.3.0
 - Updated Lyrebird to version 0.8.0.
 - Increased minimal iOS version to 15.0.
