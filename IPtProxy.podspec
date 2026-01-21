@@ -8,11 +8,11 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '1.7.0'
-  s.summary          = 'Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
+  s.version          = '5.0.0'
+  s.summary          = 'Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
-    Both Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
+    Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
     is a little annoying to use on iOS and Android.
     This project encapsulates all the machinations to make it work and provides an
     easy to install binary including a wrapper around both.
@@ -30,15 +30,15 @@ Pod::Spec.new do |s|
     - The ports where the PTs will listen on are hardcoded, since communicating
       the used ports back to the app would be quite some work (e.g. trying to
       read it from STDOUT) for very little benefit.
-    - Snowflake and Obfs4proxy are patched to accept all configuration parameters
+    - Snowflake and Lyrebird/Obfs4proxy are patched to accept all configuration parameters
       directly.
 
     Contained transport versions:
 
-    | Transport  | Version |
-    |------------|--------:|
-    | Obfs4proxy |  0.0.13 |
-    | Snowflake  |   2.3.0 |
+    | Transport | Version |
+    |-----------|--------:|
+    | Lyrebird  |   0.8.1 |
+    | Snowflake |  2.11.0 |
 
                        DESC
 
@@ -46,10 +46,10 @@ Pod::Spec.new do |s|
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Benjamin Erhart' => 'berhart@netzarchitekten.com' }
   s.source           = { :git => 'https://github.com/tladesignz/IPtProxy.git', :tag => s.version.to_s }
-  s.social_media_url = 'https://twitter.com/tladesignz'
+  s.social_media_url = 'https://chaos.social/@tla'
 
-  s.ios.deployment_target = '11.0'
-  s.osx.deployment_target = '12'
+  s.ios.deployment_target = '15.0'
+  s.osx.deployment_target = '11.0'
 
   s.preserve_paths = 'build.sh', '*.patch', 'IPtProxy.go/*'
 
@@ -62,11 +62,14 @@ Pod::Spec.new do |s|
     :name => 'Go build of IPtProxy.xcframework',
     :execution_position => :before_compile,
     :script => 'sh "$PODS_TARGET_SRCROOT/build.sh"',
+    :output_files => ['$(DERIVED_FILE_DIR)/IPtProxy.xcframework'],
   }
 
   # This will only work, if `prepare_command` was successful, or if you
   # called `pod update` a second time after a build which will have triggered
   # the `script_phase`, or if you ran `build.sh` manually.
-  s.vendored_frameworks = "IPtProxy.xcframework"
+  s.vendored_frameworks = 'IPtProxy.xcframework'
+
+  s.libraries = 'resolv'
 
 end

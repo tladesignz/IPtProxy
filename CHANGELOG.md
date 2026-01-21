@@ -1,5 +1,124 @@
 # IPtProxy Changelog
 
+## 5.0.0
+- Updated Lyrebird to version 0.8.1.
+- Improved `OnTransportStopped` to a more versatile `OnTransportEvents`, which reports errors during Snowflake proxy
+  search and also its success.
+
+## 4.3.0
+- Updated Lyrebird to version 0.8.0.
+- Increased minimal iOS version to 15.0.
+
+## 4.2.2
+- Expose `SnowflakeProxy`.`EphemeralMinPort` and `EphemeralMaxPort` arguments.
+
+## 4.2.1
+- Updated dependencies.
+- Added `SnowflakeProxy.NATTypeMeasurementInterval` configuration.
+- Support Android 16kB memory alignment.
+- Increased minimal Android API to 24.
+
+## 4.2.0
+- Updated Lyrebird to version 0.6.1.
+
+## 4.1.2
+- Fixed `LyrebirdVersion()` return string.
+
+## 4.1.1
+- Failed CocoaPods upload makes version 4.1.0 unusable. Need to use a new version name.
+
+## 4.1.0
+- Updated Snowflake to version 2.11.0.
+- Updated Lyrebird to version 0.6.0.
+
+## 4.0.1
+- Added support of manipulating `PollInterval` of `SnowflakeProxy`.
+
+## 4.0.0
+- Complete rewrite of IPtProxy:
+  - Got rid of patches and the goptlib interface.
+  - Instead, have our own unified code which creates transports using Lyrebird and Snowflake as dependencies.
+  - Structured with classes now instead of global functions.
+  - Improved interface: 
+    - When `#start` returns, it's now safe to use the transport.
+    - `#start` will throw errors if something's wrong.
+    - Callback for when transport stopped.
+- Finally removed Jitpack.
+- Updated Snowflake to v2.10.1.
+- Updated Lyrebird to v0.5.0.
+
+## 3.8.2
+- Reissue because of problems with Maven Central.
+
+## 3.8.1
+- Fixed webtunnel support.
+
+## 3.8.0
+- Update Lyrebird to v0.2.0. Added Webtunnel support.
+
+## 3.7.0
+- Update Snowflake to v2.9.2. SQS arguments changed!
+
+## 3.6.0
+- Fixed `StartSnowflake` argument order.
+
+## 3.5.0
+- Update Snowflake to v2.9.1. Contains SQS support, hence new arguments.
+
+## 3.4.0
+- Update Snowflake to v2.8.1.
+
+## 3.3.0
+- Update Snowflake to v2.8.0.
+
+## 3.2.1
+- Removed doubled "front" argument, therefore fixed backwards compatibility with IPtProxy 3.
+
+## 3.2.0
+- Update Snowflake to v2.7.0.
+- Raised minimum needed iOS to 12, since Xcode 15 dropped support for 11.
+- Raised minimum needed Android API to 21, since NDK 26.1. dropped support for 19 and 20.
+
+## 3.1.1
+- Fixed broken compilation on Apple platforms due to missing library.
+
+## 3.1.0
+- Update Snowflake to v2.6.0.
+
+## 3.0.0
+- Follow Tor's renaming of the Obfs4proxy fork to Lyrebird. Breaks APIs, hence the 
+  huge version jump.
+
+## 2.0.0
+- Improved build by stripping paths in output binary, which leak build environment info.
+- Log Snowflake Proxy to STDOUT instead of STDERR.
+- Fixed event dispatcher crash in recent versions of Snowflake Proxy.
+- Switched Obfs4proxy to new fork by Tor Project which has hardened TLS negotiation.
+- Fixed security issue with default `StateLocation`. Consumers are now forced to
+  define it themselves before first use. Breaking change!
+
+## 1.10.1
+- Fixed Snowflake version number.
+
+## 1.10.0
+- Updated Snowflake to latest version 2.5.1.
+
+## 1.9.0
+- Updated Snowflake to latest version 2.4.1.
+- Force netcgo to ensure DNS caching.
+
+## 1.8.1
+- Added `Obfs4proxyLogFile` which returns the static log file name of Obfs4proxy.
+
+## 1.8.0
+- Updated Obfs4proxy to latest version 0.0.14.
+- Updated Snowflake to latest version 2.3.1.
+- Added support for macOS 11.
+- Fixed warning in Xcode 14.
+
+## 1.7.1
+- Fixed Snowflake Proxy support.
+
 ## 1.7.0
 - Update Snowflake to latest version 2.3.0.
 - Added `IPtProxySnowflakeVersion` returning the version of the used Snowflake.
