@@ -76,8 +76,8 @@ import (
 	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
 	"strconv"
-	dnstt_client "www.bamsoftware.com/git/dnstt.git/dnstt-client/lib"
-	"time"
+	"sync"
+	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client/lib"
 )
 
 // LogFileName - the filename of the log residing in `StateDir`.
@@ -105,6 +105,9 @@ const (
 
 	// Snowflake - Transport implemented in Snowflake.
 	Snowflake = "snowflake"
+
+	// Dnstt - Transport implemented in DNSTT.
+	Dnstt = "dnstt"
 )
 
 // OnTransportEvents - Interface to get notified when the transport stopped again, when errors happened, or when
@@ -166,8 +169,6 @@ type Controller struct {
 	transportEvents OnTransportEvents
 	listeners       map[string]*pt.SocksListener
 	shutdown        map[string]chan struct{}
-	dnsttRunning    bool
-	dnsttPort		int
 }
 
 // NewController - Create a new Controller object.
@@ -215,9 +216,6 @@ func NewController(stateDir string, enableLogging, unsafeLogging bool, logLevel 
 
 	c.listeners = make(map[string]*pt.SocksListener)
 	c.shutdown = make(map[string]chan struct{})
-
-	c.dnsttRunning = false
-	c.dnsttPort = 57000
 
 	return c
 }
@@ -435,6 +433,11 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 	switch methodName {
 	case Snowflake:
+		if proxyURL != nil {
+			ptlog.Errorf("Snowflake does not support proxies")
+			return fmt.Errorf("Snowflake does not support proxies")
+		}
+
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
@@ -443,7 +446,6 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
 		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
 		extraArgs.Add("sqscreds", c.SnowflakeSqsCreds)
-		extraArgs.Add("proxy", proxy)
 
 		t := transports.Get(methodName)
 		if t == nil {
@@ -491,6 +493,39 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		c.listeners[methodName] = ln
 
 		go acceptLoop(f, ln, nil, extraArgs, c.shutdown[methodName], methodName, c.transportEvents)
+
+	case Dnstt:
+		if proxyURL != nil {
+			ptlog.Errorf("DNSTT does not support proxies")
+			return fmt.Errorf("DNSTT does not support proxies")
+		}
+
+		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
+		if err != nil {
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
+			return err
+		}
+
+		c.listeners[methodName] = ln
+		c.shutdown[methodName] = make(chan struct{})
+
+		utlsClientHelloID, err := dnsttclient.SampleUTLSDistribution("4*random,3*Firefox_120,1*Firefox_105,3*Chrome_120,1*Chrome_102,1*iOS_14,1*iOS_13")
+		if err != nil {
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
+			return err
+		}
+
+		go func() {
+			var wg sync.WaitGroup
+
+			go dnsttclient.AcceptLoop(ln, utlsClientHelloID, c.shutdown[methodName], &wg)
+
+			wg.Wait()
+		}()
+
+		if c.transportEvents != nil {
+			go c.transportEvents.Connected(methodName)
+		}
 
 	default:
 		// at the moment, everything else is in lyrebird
@@ -557,77 +592,4 @@ func SnowflakeVersion() string {
 //goland:noinspection GoUnusedExportedFunction
 func LyrebirdVersion() string {
 	return "lyrebird-0.8.1"
-}
-
-// StartDnstt - Start the Dnstt client.
-//
-// @return Port number where Dnstt will listen on, if no error happens during start up.
-//
-//goland:noinspection GoUnusedExportedFunction
-func (c *Controller) StartDnstt() int {
-	if c.dnsttRunning {
-		return c.dnsttPort
-	}
-
-	c.dnsttRunning = true
-
-	for !isPortAvailable(c.dnsttPort) {
-		c.dnsttPort++
-	}
-
-	listenAddr := fmt.Sprintf("localhost:%d", c.dnsttPort)
-
-	c.fixEnv()
-
-	utlsClientHelloID, _ := dnstt_client.SampleUTLSDistribution("3*Firefox_65,1*Firefox_63,1*iOS_12_1")
-
-	go dnstt_client.Start(listenAddr, utlsClientHelloID)
-
-	return c.dnsttPort
-}
-
-// StopDnstt - Stop the Dnstt client.
-//
-//goland:noinspection GoUnusedExportedFunction
-func (c *Controller) StopDnstt() {
-	if !c.dnsttRunning {
-		return
-	}
-
-	go dnstt_client.Stop()
-
-	c.dnsttRunning = false
-}
-
-// Hack: Set some environment variables that are either
-// required, or values that we want. Have to do this here, since we can only
-// launch this in a thread and the manipulation of environment variables
-// from within an iOS app won't end up in goptlib properly.
-//
-// Note: This might be called multiple times when using different functions here,
-// but that doesn't necessarily mean, that the values set are independent each
-// time this is called. It's still the ENVIRONMENT, we're changing here, so there might
-// be race conditions.
-func (c *Controller) fixEnv() {
-	_ = os.Setenv("TOR_PT_CLIENT_TRANSPORTS", "dnstt")
-	_ = os.Setenv("TOR_PT_MANAGED_TRANSPORT_VER", "1")
-
-	_ = os.Setenv("TOR_PT_STATE_LOCATION", c.stateDir)
-}
-
-// IsPortAvailable - Checks to see if a given port is not in use.
-//
-// @param port The port to check.
-func isPortAvailable(port int) bool {
-	address := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
-
-	conn, err := net.DialTimeout("tcp", address, 500*time.Millisecond)
-
-	if err != nil {
-		return true
-	}
-
-	_ = conn.Close()
-
-	return false
 }
