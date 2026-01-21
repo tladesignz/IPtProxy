@@ -49,7 +49,7 @@ if test -e ".git"; then
     cd ..
 else
     # No .git directory - That's a normal install.
-    git clone --depth 1 --branch "c9c02b82" https://github.com/tladesignz/dnstt.git
+    git clone --depth 1 --branch "e111260c" https://github.com/tladesignz/dnstt.git
 fi
 
 # Prepare build environment
