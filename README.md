@@ -288,12 +288,12 @@ export GO386=sse2
 
 If `Lyrebird` or `Snowflake` was updated, you might need to update the dependencies:
 
-- Check, that `go.mod` mentions the right versions of `Lyrebird` and `Snowflake`.
-- Then, do the following:
-
 ```shell
 cd IPtProxy.go
-go get -u
+go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib@latest
+go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird@latest
+go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2@latest
+go get golang.org/x/net@latest
 go mod tidy
 go get golang.org/x/mobile/cmd/gomobile@latest
 ```
