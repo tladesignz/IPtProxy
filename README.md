@@ -365,7 +365,7 @@ https://tordev.guardianproject.info
 
 - Benjamin Erhart, berhart@netzarchitekten.com
 - Nathan Freitas
-- Bim
+- Annette
 - cohosh
 
 for the Guardian Project https://guardianproject.info
