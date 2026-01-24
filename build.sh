@@ -2,7 +2,18 @@
 
 TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
-TEMPDIR="$(mktemp -d)/IPtProxy"
+
+if test -d "$TMPDIR"; then
+    :
+elif test -d "$TMP"; then
+    TMPDIR=$TMP
+elif test -d /var/tmp; then
+    TMPDIR=/var/tmp
+else
+    TMPDIR=/tmp
+fi
+
+TEMPDIR="$TMPDIR/IPtProxy"
 
 if [ "$1" = "android" ]; then
   TARGET=android
