@@ -88,3 +88,5 @@ require (
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+tool golang.org/x/mobile/cmd/gomobile
