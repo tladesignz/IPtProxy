@@ -2,7 +2,6 @@
 
 TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
-TEMPDIR="$(mktemp -d)"
 
 if [ "$1" = "android" ]; then
   TARGET=android
@@ -51,6 +50,8 @@ else
     # No .git directory - That's a normal install.
     git clone --depth 1 --branch "e111260c" https://github.com/tladesignz/dnstt.git
 fi
+
+TEMPDIR="$(mktemp -d)"
 
 # Prepare build environment
 printf '\n\n--- Prepare build environment at %s...\n' "$TEMPDIR"
