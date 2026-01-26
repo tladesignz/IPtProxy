@@ -4,9 +4,11 @@ TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
 
 if [ "$1" = "android" ]; then
-  TARGET=android
+  TARGET=android # all ABIs (386, amd64, arm, arm64)
+  # TARGET=android/arm,android/arm64
   OUTPUT=IPtProxy.aar
-  MIN_VERSION=28
+  MIN_NDK_VERSION=28
+  MIN_ANDROID_API_LEVEL=24
 
   NDK_SOURCE_PROPERTIES="$ANDROID_NDK_HOME/source.properties"
 
@@ -19,8 +21,8 @@ if [ "$1" = "android" ]; then
 
   NDK_MAJOR_VERSION=${NDK_VERSION%%.*}
 
-  if [ "$NDK_MAJOR_VERSION" -lt "$MIN_VERSION" ]; then
-    echo "--- Android NDK version $NDK_VERSION too old. Use at least version $MIN_VERSION."
+  if [ "$NDK_MAJOR_VERSION" -lt "$MIN_NDK_VERSION" ]; then
+    echo "--- Android NDK version $NDK_VERSION too old. Use at least version $MIN_NDK_VERSION."
     exit 1
   fi
 fi
@@ -51,7 +53,7 @@ cd "$TEMPDIR/IPtProxy.go" || exit 1
 
 gomobile init
 
-MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=24 -v -tags=netcgo -trimpath
+MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
 
 ### Note:
 # $ go tool link -h
