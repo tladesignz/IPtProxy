@@ -41,8 +41,6 @@ go install golang.org/x/mobile/cmd/gomobile@latest
 # Prepare build environment
 printf '\n\n--- Prepare build environment at %s...\n' "$TEMPDIR"
 CURRENT=$PWD
-rm -rf "$TEMPDIR"
-mkdir -p "$TEMPDIR"
 cp -a IPtProxy.go "$TEMPDIR/"
 
 # Compile framework.
