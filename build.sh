@@ -2,7 +2,6 @@
 
 TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
-TEMPDIR="$(mktemp -d)"
 
 if [ "$1" = "android" ]; then
   TARGET=android
@@ -37,6 +36,8 @@ fi
 printf '\n--- Golang 1.24 or up needs to be installed! Try "brew install go" on MacOS or "snap install go --classic" on Linux if we fail further down!'
 printf '\n--- Installing gomobile...\n'
 go install golang.org/x/mobile/cmd/gomobile@latest
+
+TEMPDIR="$(mktemp -d)"
 
 # Prepare build environment
 printf '\n\n--- Prepare build environment at %s...\n' "$TEMPDIR"
