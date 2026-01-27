@@ -2,13 +2,13 @@
 
 TARGET=ios,iossimulator,macos
 OUTPUT=IPtProxy.xcframework
+MIN_ANDROID_API_LEVEL=24
 
 if [ "$1" = "android" ]; then
   TARGET=android # all ABIs (386, amd64, arm, arm64)
   # TARGET=android/arm,android/arm64
   OUTPUT=IPtProxy.aar
   MIN_NDK_VERSION=28
-  MIN_ANDROID_API_LEVEL=24
 
   NDK_SOURCE_PROPERTIES="$ANDROID_NDK_HOME/source.properties"
 
