@@ -14,7 +14,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	git.torproject.org/pluggable-transports/goptlib.git v1.3.0 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.41.1 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.32.7 // indirect

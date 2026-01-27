@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 5.1.0
+- Added DNSTT Pluggable Transport.
+- Slightly improved build script.
+
 ## 5.0.0
 - Updated Lyrebird to version 0.8.1.
 - Improved `OnTransportStopped` to a more versatile `OnTransportEvents`, which reports errors during Snowflake proxy

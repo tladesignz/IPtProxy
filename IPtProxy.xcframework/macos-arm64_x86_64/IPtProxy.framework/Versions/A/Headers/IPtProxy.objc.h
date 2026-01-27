@@ -229,6 +229,10 @@ if you want to do UI stuff!
 @end
 
 /**
+ * Dnstt - Transport implemented in DNSTT.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyDnstt;
+/**
  * LogFileName - the filename of the log residing in `StateDir`.
  */
 FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyLogFileName;

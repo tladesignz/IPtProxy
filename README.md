@@ -7,25 +7,26 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 [![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 [![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
 
-| Transport | Version |
-|-----------|---------|
-| Lyrebird  | 0.8.1   |
-| Snowflake | 2.11.0  |
+| Transport | Version      |
+|-----------|--------------|
+| Lyrebird  | 0.8.1        |
+| Snowflake | 2.11.0       |
+| DNSTT     | 1.20240513.0 |
 
-Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
+Lyrebird/Obfs4proxy as well as Snowflake and DNSTT Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
 This project encapsulates all the machinations to make it work and provides an
-easy to install binary including a wrapper around both.
+easy-to-install binary including a wrapper around both.
 
 Problems solved in particular are:
 
-- One cannot compile `main` packages with `gomobile`. For both PTs, IPtProxy
+- One cannot compile `main` packages with `gomobile`. For all PTs, IPtProxy
   provides wrapper code to use them as libraries.
-- Both PTs are gathered under one roof here, since you cannot have two
+- All PTs are gathered under one roof here, since you cannot have two
   `gomobile` frameworks as dependencies. There are some common Go
   runtime functions exported, which would create a name clash.
 - Free ports to be used are automatically found by this library and can be fetched
-- by the consuming app after start.
+  by the consuming app after start.
 
 ## Caveat
 
@@ -33,7 +34,7 @@ IPtProxy is now provided with classes. You **should not** instantiate multiple o
 
 Instead, instantiate `Controller` and/or `SnowflakeProxy` once, if you need them and keep a reference around.
 
-It's good practice, to have all the IPtProxy handling contained in one place, so you can just store your references
+It's good practice to have all the IPtProxy handling contained in one place, so you can store your references
 there. If that is not feasible within your project, Swift provides the possibility to keep singleton references in an 
 extension to their respective objects like so:
 
@@ -105,7 +106,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 5.0'
+pod 'IPtProxy', '~> 5.1'
 ```
 
 ### Getting Started
@@ -163,7 +164,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:5.0.0'
+implementation 'com.netzarchitekten:IPtProxy:5.1.0'
 ```
 
 #### Security Concerns:
@@ -171,7 +172,7 @@ implementation 'com.netzarchitekten:IPtProxy:5.0.0'
 Since it is relatively easy in the Java/Android ecosystem to inject malicious
 packages into projects by leveraging the order of repositories and release malicious
 versions of packages on repositories which come *before* the original one in the
-search order, the only way to keep yourself safe is to explicitly define, which 
+search order, the only way to keep yourself safe is to explicitly define which 
 packages should be loaded from which repository, when you use multiple repositories:
 
 https://docs.gradle.org/5.1/userguide/declaring_repositories.html#sec::matching_repositories_to_dependencies

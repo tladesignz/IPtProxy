@@ -8,37 +8,32 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '5.0.0'
-  s.summary          = 'Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS and macOS'
+  s.version          = '5.1.0'
+  s.summary          = 'Lyrebird/Obfs4proxy, Snowflake and DNSTT Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
-    Both Lyrebird/Obfs4proxy and Snowflake Pluggable Transports are written in Go, which
+    Lyrebird/Obfs4proxy as well as Snowflake and DNSTT Pluggable Transports are written in Go, which
     is a little annoying to use on iOS and Android.
     This project encapsulates all the machinations to make it work and provides an
-    easy to install binary including a wrapper around both.
+    easy-to-install binary including a wrapper around both.
 
     Problems solved in particular are:
 
-    - One cannot compile `main` packages with `gomobile`. Both PTs are patched
-      to avoid this.
-    - Both PTs are gathered under one roof here, since you cannot have two
-      `gomobile` frameworks as dependencies, since there are some common Go
-      runtime functions exported, which will create a name clash.
-    - Environment variable changes during runtime will not be recognized by
-      `goptlib` when done from within Swift/Objective-C. Therefore, sensible
-      values are hardcoded in the Go wrapper.
-    - The ports where the PTs will listen on are hardcoded, since communicating
-      the used ports back to the app would be quite some work (e.g. trying to
-      read it from STDOUT) for very little benefit.
-    - Snowflake and Lyrebird/Obfs4proxy are patched to accept all configuration parameters
-      directly.
+    - One cannot compile `main` packages with `gomobile`. For all PTs, IPtProxy
+      provides wrapper code to use them as libraries.
+    - All PTs are gathered under one roof here, since you cannot have two
+      `gomobile` frameworks as dependencies. There are some common Go
+      runtime functions exported, which would create a name clash.
+    - Free ports to be used are automatically found by this library and can be fetched
+      by the consuming app after start.
 
     Contained transport versions:
 
-    | Transport | Version |
-    |-----------|--------:|
-    | Lyrebird  |   0.8.1 |
-    | Snowflake |  2.11.0 |
+    | Transport | Version      |
+    |-----------|--------------|
+    | Lyrebird  | 0.8.1        |
+    | Snowflake | 2.11.0       |
+    | DNSTT     | 1.20240513.0 |
 
                        DESC
 
