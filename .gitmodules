@@ -1,0 +1,3 @@
+[submodule "pt1"]
+	path = dnstt
+	url = https://github.com/tladesignz/dnstt.git

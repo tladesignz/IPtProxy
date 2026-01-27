@@ -76,6 +76,8 @@ import (
 	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
 	"strconv"
+	"sync"
+	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client/lib"
 )
 
 // LogFileName - the filename of the log residing in `StateDir`.
@@ -103,6 +105,9 @@ const (
 
 	// Snowflake - Transport implemented in Snowflake.
 	Snowflake = "snowflake"
+
+	// Dnstt - Transport implemented in DNSTT.
+	Dnstt = "dnstt"
 )
 
 // OnTransportEvents - Interface to get notified when the transport stopped again, when errors happened, or when
@@ -428,6 +433,11 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 	switch methodName {
 	case Snowflake:
+		if proxyURL != nil {
+			ptlog.Errorf("Snowflake does not support proxies")
+			return fmt.Errorf("Snowflake does not support proxies")
+		}
+
 		extraArgs := &pt.Args{}
 		extraArgs.Add("fronts", c.SnowflakeFrontDomains)
 		extraArgs.Add("ice", c.SnowflakeIceServers)
@@ -436,7 +446,6 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		extraArgs.Add("ampcache", c.SnowflakeAmpCacheUrl)
 		extraArgs.Add("sqsqueue", c.SnowflakeSqsUrl)
 		extraArgs.Add("sqscreds", c.SnowflakeSqsCreds)
-		extraArgs.Add("proxy", proxy)
 
 		t := transports.Get(methodName)
 		if t == nil {
@@ -484,6 +493,39 @@ func (c *Controller) Start(methodName string, proxy string) error {
 		c.listeners[methodName] = ln
 
 		go acceptLoop(f, ln, nil, extraArgs, c.shutdown[methodName], methodName, c.transportEvents)
+
+	case Dnstt:
+		if proxyURL != nil {
+			ptlog.Errorf("DNSTT does not support proxies")
+			return fmt.Errorf("DNSTT does not support proxies")
+		}
+
+		ln, err := pt.ListenSocks("tcp", "127.0.0.1:0")
+		if err != nil {
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
+			return err
+		}
+
+		c.listeners[methodName] = ln
+		c.shutdown[methodName] = make(chan struct{})
+
+		utlsClientHelloID, err := dnsttclient.SampleUTLSDistribution("4*random,3*Firefox_120,1*Firefox_105,3*Chrome_120,1*Chrome_102,1*iOS_14,1*iOS_13")
+		if err != nil {
+			ptlog.Errorf("Failed to initialize %s: %s", methodName, err.Error())
+			return err
+		}
+
+		go func() {
+			var wg sync.WaitGroup
+
+			go dnsttclient.AcceptLoop(ln, utlsClientHelloID, c.shutdown[methodName], &wg)
+
+			wg.Wait()
+		}()
+
+		if c.transportEvents != nil {
+			go c.transportEvents.Connected(methodName)
+		}
 
 	default:
 		// at the moment, everything else is in lyrebird

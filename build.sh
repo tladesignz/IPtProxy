@@ -39,12 +39,27 @@ printf '\n--- Golang 1.24 or up needs to be installed! Try "brew install go" on 
 printf '\n--- Installing gomobile...\n'
 go install golang.org/x/mobile/cmd/gomobile@latest
 
+# Fetch DNSTT submodule.
+printf '\n\n--- Fetching transport dependencies...\n'
+if test -e ".git"; then
+    # There's a .git directory - we must be in the development pod.
+    git submodule update --init --recursive
+    cd dnstt ||exit 1
+    git reset --hard
+    git clean -fdx
+    cd ..
+else
+    # No .git directory - That's a normal install.
+    git clone --depth 1 --branch "e111260c" https://github.com/tladesignz/dnstt.git
+fi
+
 TEMPDIR="$(mktemp -d)"
 
 # Prepare build environment
 printf '\n\n--- Prepare build environment at %s...\n' "$TEMPDIR"
 CURRENT=$PWD
 cp -a IPtProxy.go "$TEMPDIR/"
+cp -a dnstt "$TEMPDIR/"
 
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
