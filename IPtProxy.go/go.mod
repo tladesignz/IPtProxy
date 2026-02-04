@@ -78,7 +78,7 @@ require (
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.3 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/mobile v0.0.0-20260120165949-40bd9ace6ce4 // indirect
+	golang.org/x/mobile v0.0.0-20260203041319-574ceaa2f723 // indirect
 	golang.org/x/mod v0.32.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
