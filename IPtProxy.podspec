@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'IPtProxy'
-  s.version          = '5.1.0'
+  s.version          = '5.1.1'
   s.summary          = 'Lyrebird/Obfs4proxy, Snowflake and DNSTT Pluggable Transports for iOS and macOS'
 
   s.description      = <<-DESC
@@ -33,7 +33,7 @@ Pod::Spec.new do |s|
     |-----------|--------------|
     | Lyrebird  | 0.8.1        |
     | Snowflake | 2.11.0       |
-    | DNSTT     | 1.20240513.0 |
+    | DNSTT     | 1.20260125.0 |
 
                        DESC
 

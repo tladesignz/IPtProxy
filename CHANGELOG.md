@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 5.1.1
+- Updated DNSTT to 1.20260125.0.
+
 ## 5.1.0
 - Added DNSTT Pluggable Transport.
 - Slightly improved build script.
