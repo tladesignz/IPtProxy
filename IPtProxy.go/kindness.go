@@ -8,11 +8,42 @@ import (
 	"time"
 )
 
-// SnowflakeClientConnected - Interface to use when clients connect
-// to the snowflake proxy. For use with StartSnowflakeProxy
-type SnowflakeClientConnected interface {
+// SnowflakeClientEvents - Interface to get information about clients connecting, disconnecting, failing to connect and
+// for statistics of the snowflake proxy. For use with StartSnowflakeProxy
+type SnowflakeClientEvents interface {
 	// Connected - callback method to handle snowflake proxy client connections.
 	Connected()
+
+	// Disconnected - The connection with the client has now been closed,
+	// after getting successfully established.
+	Disconnected(country string)
+
+	// ConnectionFailed - Rendezvous with a client succeeded, but a data channel has not been created.
+	ConnectionFailed()
+
+	// Stats - callback method to handle snowflake proxy client statistics.
+	//
+	// BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
+	//
+	// @param connectionCount Completed successful connections.
+	//
+	// @param failedConnectionCount Connections that failed to establish.
+	//
+	// @param inboundBytes number of inbound `inboundUnit` bytes.
+	//
+	// @param outboundBytes number of outbound `outboundUnit` bytes.
+	//
+	// @param inboundUnit unit of inbound bytes. (e.g. "KB")
+	//
+	// @param outboundUnit unit of outbound bytes. (e.g. "KB")
+	//
+	// @param summaryInterval time in nanoseconds between summary statistics.
+	Stats(
+		connectionCount int,
+		failedConnectionCount int64,
+		inboundBytes, outboundBytes int64,
+		inboundUnit, outboundUnit string,
+		summaryInterval int64)
 }
 
 // SnowflakeProxy - Class to start and stop a Snowflake proxy.
@@ -55,10 +86,11 @@ type SnowflakeProxy struct {
 	// PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds if <= 0.
 	PollInterval int
 
-	// ClientConnected - A delegate which is called when a client successfully connected.
+	// ClientEvents - A delegate which is called when a client successfully connected, disconnected, failed, or to
+	// receive statistics.
 	// Will be called on its own thread! You will need to switch to your own UI thread
 	// if you want to do UI stuff!
-	ClientConnected SnowflakeClientConnected
+	ClientEvents SnowflakeClientEvents
 
 	// ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
 	// Defaults to "iptproxy", if empty.
@@ -133,10 +165,26 @@ func (sp *SnowflakeProxy) IsRunning() bool {
 }
 
 func (sp *SnowflakeProxy) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
-	switch e.(type) {
+	switch ev := e.(type) {
 	case event.EventOnProxyClientConnected:
-		if sp.ClientConnected != nil {
-			sp.ClientConnected.Connected()
+		if sp.ClientEvents != nil {
+			sp.ClientEvents.Connected()
+		}
+
+	case event.EventOnProxyConnectionOver:
+		if sp.ClientEvents != nil {
+			sp.ClientEvents.Disconnected(ev.Country)
+		}
+
+	case event.EventOnProxyConnectionFailed:
+		if sp.ClientEvents != nil {
+			sp.ClientEvents.ConnectionFailed()
+		}
+
+	case event.EventOnProxyStats:
+		if sp.ClientEvents != nil {
+			sp.ClientEvents.Stats(ev.ConnectionCount, int64(ev.FailedConnectionCount), ev.InboundBytes, ev.OutboundBytes,
+				ev.InboundUnit, ev.OutboundUnit, ev.SummaryInterval.Nanoseconds())
 		}
 
 	default:
