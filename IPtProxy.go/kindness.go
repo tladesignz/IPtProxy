@@ -30,7 +30,7 @@ type SnowflakeProxy struct {
 	// EphemeralMinPort - limit the range of ports that
 	// ICE UDP connections may allocate from.
 	// When specifying the range, make sure it's at least 2x as wide
-	// as the amount of clients that you are hoping to serve concurrently
+	// as the number of clients that you are hoping to serve concurrently
 	// (see the `Capacity` property).
 	// If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
 	EphemeralMinPort int
@@ -38,7 +38,7 @@ type SnowflakeProxy struct {
 	// EphemeralMaxPort - limit the range of ports that
 	// ICE UDP connections may allocate from.
 	// When specifying the range, make sure it's at least 2x as wide
-	// as the amount of clients that you are hoping to serve concurrently
+	// as the number of clients that you are hoping to serve concurrently
 	// (see the `Capacity` property).
 	// If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
 	EphemeralMaxPort int
@@ -52,13 +52,18 @@ type SnowflakeProxy struct {
 	// NATTypeMeasurementInterval is time before NAT type is retested. Defaults to 0, if empty.
 	NATTypeMeasurementInterval int64
 
-	// PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
+	// PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds if <= 0.
 	PollInterval int
 
 	// ClientConnected - A delegate which is called when a client successfully connected.
-	// Will be called on its own thread! You will need to switch to your own UI thread,
+	// Will be called on its own thread! You will need to switch to your own UI thread
 	// if you want to do UI stuff!
 	ClientConnected SnowflakeClientConnected
+
+	// ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
+	// Defaults to "iptproxy", if empty.
+	// ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
+	ProxyTypeIdentifier string
 
 	isRunning bool
 	proxy     *sfp.SnowflakeProxy
@@ -77,6 +82,10 @@ func (sp *SnowflakeProxy) Start() {
 		sp.PollInterval = 0
 	}
 
+	if sp.ProxyTypeIdentifier == "" {
+		sp.ProxyTypeIdentifier = "iptproxy"
+	}
+
 	eventDispatcher := event.NewSnowflakeEventDispatcher()
 	eventDispatcher.AddSnowflakeEventListener(sp)
 
@@ -91,7 +100,7 @@ func (sp *SnowflakeProxy) Start() {
 		EphemeralMaxPort:           uint16(sp.EphemeralMaxPort),
 		NATProbeURL:                sp.NatProbeUrl,
 		NATTypeMeasurementInterval: time.Duration(sp.NATTypeMeasurementInterval),
-		ProxyType:                  "iptproxy",
+		ProxyType:                  sp.ProxyTypeIdentifier,
 		RelayDomainNamePattern:     "snowflake.torproject.net$",
 		AllowNonTLSRelay:           false,
 		EventDispatcher:            eventDispatcher,
