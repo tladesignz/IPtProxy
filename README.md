@@ -290,13 +290,7 @@ export GO386=sse2
 If `Lyrebird` or `Snowflake` was updated, you might need to update the dependencies:
 
 ```shell
-cd IPtProxy.go
-go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib@latest
-go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird@latest
-go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2@latest
-go get golang.org/x/net@latest
-go get -tool golang.org/x/mobile/cmd/gomobile@latest
-go mod tidy
+./update.sh
 ```
 
 A release commit needs the following:
