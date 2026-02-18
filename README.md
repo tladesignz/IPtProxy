@@ -366,7 +366,7 @@ https://tordev.guardianproject.info
 
 - Benjamin Erhart, berhart@netzarchitekten.com
 - Nathan Freitas
-- Annette
+- [Annette](https://github.com/bitmold)
 - cohosh
 
 for the Guardian Project https://guardianproject.info
