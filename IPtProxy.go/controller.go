@@ -228,16 +228,19 @@ func (c *Controller) StateDir() string {
 }
 
 // addExtraArgs adds the args in extraArgs to the connection args
-func addExtraArgs(args *pt.Args, extraArgs *pt.Args) {
+func addExtraArgs(conn *pt.SocksConn, extraArgs *pt.Args) {
 	if extraArgs == nil {
 		return
 	}
 
+	if conn.Req.Args == nil {
+		conn.Req.Args = make(pt.Args)
+	}
 	for name := range *extraArgs {
 		// Only add if extra arg doesn't already exist, and is not empty.
-		if value, ok := args.Get(name); !ok || value == "" {
+		if value, ok := conn.Req.Args.Get(name); !ok || value == "" {
 			if value, ok := extraArgs.Get(name); ok && value != "" {
-				args.Add(name, value)
+				conn.Req.Args.Add(name, value)
 			}
 		}
 	}
@@ -266,7 +269,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL,
 
 	defer conn.Close()
 
-	addExtraArgs(&conn.Req.Args, extraArgs)
+	addExtraArgs(conn, extraArgs)
 	args, err := f.ParseArgs(&conn.Req.Args)
 	if err != nil {
 		ptlog.Errorf("Error parsing PT args: %s", err.Error())
