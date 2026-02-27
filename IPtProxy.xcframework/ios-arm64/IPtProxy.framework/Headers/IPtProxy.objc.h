@@ -15,8 +15,8 @@
 @class IPtProxySnowflakeProxy;
 @protocol IPtProxyOnTransportEvents;
 @class IPtProxyOnTransportEvents;
-@protocol IPtProxySnowflakeClientConnected;
-@class IPtProxySnowflakeClientConnected;
+@protocol IPtProxySnowflakeClientEvents;
+@class IPtProxySnowflakeClientEvents;
 
 @protocol IPtProxyOnTransportEvents <NSObject>
 /**
@@ -46,11 +46,40 @@ When further connections are attempted by the client, the same cycle will repeat
 - (void)stopped:(NSString* _Nullable)name error:(NSError* _Nullable)error;
 @end
 
-@protocol IPtProxySnowflakeClientConnected <NSObject>
+@protocol IPtProxySnowflakeClientEvents <NSObject>
 /**
  * Connected - callback method to handle snowflake proxy client connections.
  */
 - (void)connected;
+/**
+ * ConnectionFailed - Rendezvous with a client succeeded, but a data channel has not been created.
+ */
+- (void)connectionFailed;
+/**
+ * Disconnected - The connection with the client has now been closed,
+after getting successfully established.
+ */
+- (void)disconnected:(NSString* _Nullable)country;
+/**
+ * Stats - callback method to handle snowflake proxy client statistics.
+
+BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
+
+@param connectionCount Completed successful connections.
+
+@param failedConnectionCount Connections that failed to establish.
+
+@param inboundBytes number of inbound `inboundUnit` bytes.
+
+@param outboundBytes number of outbound `outboundUnit` bytes.
+
+@param inboundUnit unit of inbound bytes. (e.g. "KB")
+
+@param outboundUnit unit of outbound bytes. (e.g. "KB")
+
+@param summaryInterval time in nanoseconds between summary statistics.
+ */
+- (void)stats:(long)connectionCount failedConnectionCount:(int64_t)failedConnectionCount inboundBytes:(int64_t)inboundBytes outboundBytes:(int64_t)outboundBytes inboundUnit:(NSString* _Nullable)inboundUnit outboundUnit:(NSString* _Nullable)outboundUnit summaryInterval:(int64_t)summaryInterval;
 @end
 
 /**
@@ -176,7 +205,7 @@ be initialized or if it couldn't bind a port for listening.
  * EphemeralMinPort - limit the range of ports that
 ICE UDP connections may allocate from.
 When specifying the range, make sure it's at least 2x as wide
-as the amount of clients that you are hoping to serve concurrently
+as the number of clients that you are hoping to serve concurrently
 (see the `Capacity` property).
 If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
  */
@@ -185,7 +214,7 @@ If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
  * EphemeralMaxPort - limit the range of ports that
 ICE UDP connections may allocate from.
 When specifying the range, make sure it's at least 2x as wide
-as the amount of clients that you are hoping to serve concurrently
+as the number of clients that you are hoping to serve concurrently
 (see the `Capacity` property).
 If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
  */
@@ -203,15 +232,22 @@ If EphemeralMinPort or EphemeralMaxPort is left 0, no limit will be applied.
  */
 @property (nonatomic) int64_t natTypeMeasurementInterval;
 /**
- * PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds, if <= 0.
+ * PollInterval - In seconds. How often to ask the broker for a new client. Defaults to 5 seconds if <= 0.
  */
 @property (nonatomic) long pollInterval;
 /**
- * ClientConnected - A delegate which is called when a client successfully connected.
-Will be called on its own thread! You will need to switch to your own UI thread,
+ * ClientEvents - A delegate which is called when a client successfully connected, disconnected, failed, or to
+receive statistics.
+Will be called on its own thread! You will need to switch to your own UI thread
 if you want to do UI stuff!
  */
-@property (nonatomic) id<IPtProxySnowflakeClientConnected> _Nullable clientConnected;
+@property (nonatomic) id<IPtProxySnowflakeClientEvents> _Nullable clientEvents;
+/**
+ * ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
+Defaults to "iptproxy", if empty.
+ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
+ */
+@property (nonatomic) NSString* _Nonnull proxyTypeIdentifier;
 /**
  * IsRunning - Checks to see if a snowflake proxy is running in your app.
  */
@@ -293,7 +329,7 @@ FOUNDATION_EXPORT NSString* _Nonnull IPtProxySnowflakeVersion(void);
 
 @class IPtProxyOnTransportEvents;
 
-@class IPtProxySnowflakeClientConnected;
+@class IPtProxySnowflakeClientEvents;
 
 /**
  * OnTransportEvents - Interface to get notified when the transport stopped again, when errors happened, or when
@@ -332,10 +368,10 @@ When further connections are attempted by the client, the same cycle will repeat
 @end
 
 /**
- * SnowflakeClientConnected - Interface to use when clients connect
-to the snowflake proxy. For use with StartSnowflakeProxy
+ * SnowflakeClientEvents - Interface to get information about clients connecting, disconnecting, failing to connect and
+for statistics of the snowflake proxy. For use with StartSnowflakeProxy
  */
-@interface IPtProxySnowflakeClientConnected : NSObject <goSeqRefInterface, IPtProxySnowflakeClientConnected> {
+@interface IPtProxySnowflakeClientEvents : NSObject <goSeqRefInterface, IPtProxySnowflakeClientEvents> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
@@ -344,6 +380,35 @@ to the snowflake proxy. For use with StartSnowflakeProxy
  * Connected - callback method to handle snowflake proxy client connections.
  */
 - (void)connected;
+/**
+ * ConnectionFailed - Rendezvous with a client succeeded, but a data channel has not been created.
+ */
+- (void)connectionFailed;
+/**
+ * Disconnected - The connection with the client has now been closed,
+after getting successfully established.
+ */
+- (void)disconnected:(NSString* _Nullable)country;
+/**
+ * Stats - callback method to handle snowflake proxy client statistics.
+
+BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
+
+@param connectionCount Completed successful connections.
+
+@param failedConnectionCount Connections that failed to establish.
+
+@param inboundBytes number of inbound `inboundUnit` bytes.
+
+@param outboundBytes number of outbound `outboundUnit` bytes.
+
+@param inboundUnit unit of inbound bytes. (e.g. "KB")
+
+@param outboundUnit unit of outbound bytes. (e.g. "KB")
+
+@param summaryInterval time in nanoseconds between summary statistics.
+ */
+- (void)stats:(long)connectionCount failedConnectionCount:(int64_t)failedConnectionCount inboundBytes:(int64_t)inboundBytes outboundBytes:(int64_t)outboundBytes inboundUnit:(NSString* _Nullable)inboundUnit outboundUnit:(NSString* _Nullable)outboundUnit summaryInterval:(int64_t)summaryInterval;
 @end
 
 #endif

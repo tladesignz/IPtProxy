@@ -164,7 +164,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle` file:
 
 ```groovy
-implementation 'com.netzarchitekten:IPtProxy:5.1.1'
+implementation 'com.netzarchitekten:IPtProxy:5.2.0'
 ```
 
 #### Security Concerns:
@@ -287,7 +287,7 @@ export GO386=sse2
 
 ### Update go.mod
 
-If `Lyrebird` or `Snowflake` was updated, you might need to update the dependencies:
+If `Lyrebird`, `Snowflake` or `DNSTT` was updated, you might need to update the dependencies:
 
 ```shell
 ./update.sh

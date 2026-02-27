@@ -1,5 +1,12 @@
 # IPtProxy Changelog
 
+# 5.2.0
+- Added support for more callbacks to Snowflake proxy.
+- Made Snowflake proxy type identifier configurable.
+- Minor dependency updates.
+- Added update script.
+- Fix potential null pointer exception.
+
 ## 5.1.1
 - Updated DNSTT to 1.20260125.0.
 
