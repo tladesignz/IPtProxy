@@ -358,7 +358,7 @@ func copyLoop(socks, sfconn io.ReadWriter, done chan struct{}) {
 // LocalAddress - Address of the given transport.
 //
 // @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-// `Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+// `Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 //
 // @return address string containing host and port where the given transport listens.
 func (c *Controller) LocalAddress(methodName string) string {
@@ -371,7 +371,7 @@ func (c *Controller) LocalAddress(methodName string) string {
 // Port - Port of the given transport.
 //
 // @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-// `Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+// `Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 //
 // @return port number on localhost where the given transport listens.
 func (c *Controller) Port(methodName string) int {
@@ -416,7 +416,7 @@ func createStateDir(path string) error {
 // Start - Start given transport.
 //
 // @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-// `Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+// `Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 //
 // @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 //
@@ -568,7 +568,7 @@ func (c *Controller) Start(methodName string, proxy string) error {
 // Stop - Stop given transport.
 //
 // @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-// `Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+// `Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 func (c *Controller) Stop(methodName string) {
 	if ln, ok := c.listeners[methodName]; ok {
 		_ = ln.Close()
