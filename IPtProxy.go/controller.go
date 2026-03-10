@@ -520,9 +520,19 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 		go func() {
 			var wg sync.WaitGroup
-			wg.Add(1)
+
 			go dnsttclient.AcceptLoop(ln, utlsClientHelloID, c.shutdown[methodName], &wg)
+
+			ptlog.Warnf("DNSTT after starting accept loop")
+
+			<-c.shutdown[methodName]
+
+			ptlog.Warnf("DNSTT after waiting for shutdown signal")
+
 			wg.Wait()
+
+			ptlog.Warnf("DNSTT after waiting for waitgroup")
+
 			if c.transportEvents != nil {
 				ptlog.Noticef("call OnTransportEvents.Stopped")
 				go c.transportEvents.Stopped(methodName, nil)
