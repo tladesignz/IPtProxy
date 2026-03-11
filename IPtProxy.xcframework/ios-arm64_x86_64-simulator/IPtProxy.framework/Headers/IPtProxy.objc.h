@@ -139,7 +139,7 @@ Only needed when you want to do the rendezvous over AMP instead of a domain fron
  * LocalAddress - Address of the given transport.
 
 @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+`Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 
 @return address string containing host and port where the given transport listens.
  */
@@ -148,7 +148,7 @@ Only needed when you want to do the rendezvous over AMP instead of a domain fron
  * Port - Port of the given transport.
 
 @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+`Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 
 @return port number on localhost where the given transport listens.
  */
@@ -157,7 +157,7 @@ Only needed when you want to do the rendezvous over AMP instead of a domain fron
  * Start - Start given transport.
 
 @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+`Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
 
 @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 
@@ -175,7 +175,7 @@ be initialized or if it couldn't bind a port for listening.
  * Stop - Stop given transport.
 
 @param methodName one of the constants `ScrambleSuit` (deprecated), `Obfs2` (deprecated), `Obfs3` (deprecated),
-`Obfs4`, `MeekLite`, `Webtunnel` or `Snowflake`.
+`Obfs4`, `MeekLite`, `Webtunnel`, `Dnstt` or `Snowflake`.
  */
 - (void)stop:(NSString* _Nullable)methodName;
 @end
@@ -248,6 +248,11 @@ Defaults to "iptproxy", if empty.
 ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
  */
 @property (nonatomic) NSString* _Nonnull proxyTypeIdentifier;
+/**
+ * SummaryInterval - In seconds. The time interval at which proxy stats will be logged.
+A duration of <= 0 will disable periodic summary statistics.
+ */
+@property (nonatomic) long summaryInterval;
 /**
  * IsRunning - Checks to see if a snowflake proxy is running in your app.
  */
