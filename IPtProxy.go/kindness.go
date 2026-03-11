@@ -97,6 +97,10 @@ type SnowflakeProxy struct {
 	// ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
 	ProxyTypeIdentifier string
 
+	// SummaryInterval - In seconds. The time interval at which proxy stats will be logged.
+	// A duration of <= 0 will disable periodic summary statistics.
+	SummaryInterval int
+
 	isRunning bool
 	proxy     *sfp.SnowflakeProxy
 }
@@ -118,6 +122,10 @@ func (sp *SnowflakeProxy) Start() {
 		sp.ProxyTypeIdentifier = "iptproxy"
 	}
 
+	if sp.SummaryInterval <= 0 {
+		sp.SummaryInterval = 0
+	}
+
 	eventDispatcher := event.NewSnowflakeEventDispatcher()
 	eventDispatcher.AddSnowflakeEventListener(sp)
 
@@ -136,6 +144,7 @@ func (sp *SnowflakeProxy) Start() {
 		RelayDomainNamePattern:     "snowflake.torproject.net$",
 		AllowNonTLSRelay:           false,
 		EventDispatcher:            eventDispatcher,
+		SummaryInterval:            time.Duration(sp.SummaryInterval) * time.Second,
 	}
 
 	go func() {
