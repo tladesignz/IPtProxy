@@ -325,7 +325,7 @@ func clientHandler(f base.ClientFactory, conn *pt.SocksConn, proxyURL *url.URL,
 	done := make(chan struct{}, 2)
 	go copyLoop(conn, remote, done)
 
-	// wait for copy loop to finish or for shutdown signal
+	// Wait for the copy loop to finish or for a shutdown signal.
 	select {
 	case <-shutdown:
 	case <-done:
@@ -523,7 +523,20 @@ func (c *Controller) Start(methodName string, proxy string) error {
 
 			go dnsttclient.AcceptLoop(ln, utlsClientHelloID, c.shutdown[methodName], &wg)
 
+			// We need to wait on the shutdown itself; the waitgroup will not be populated, yet.
+			<-c.shutdown[methodName]
+
+			// Wait on the spawned threads which handle all the SOCKS connections to finish.
 			wg.Wait()
+
+			// Finally, let the event listeners know that we stopped.
+			// (This is slightly different from the other transports, as we only notice when the whole transport
+			// stopped. Not when single SOCKS connections stopped. But we're not too phased about that now.
+			// Don't want to mangle the DNSTT code further.)
+			if c.transportEvents != nil {
+				ptlog.Noticef("call OnTransportEvents.Stopped")
+				go c.transportEvents.Stopped(methodName, nil)
+			}
 		}()
 
 		if c.transportEvents != nil {
