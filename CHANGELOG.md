@@ -1,12 +1,16 @@
 # IPtProxy Changelog
 
-# 5.3.0
+## 5.4.0
+- Updated Snowflake to version 2.13.1.
+- Added support for Snowflake Proxy `CovertDTLSConfig` configuration option.
+
+## 5.3.0
 - Fixed DNSTT shutddown issue.
 - Updated Snowflake to version 2.12.1.
 - Added support for Snowflake Proxy `SummaryInterval` configuration option.
 - Improved documentation.
 
-# 5.2.0
+## 5.2.0
 - Added support for more callbacks to Snowflake proxy.
 - Made Snowflake proxy type identifier configurable.
 - Minor dependency updates.

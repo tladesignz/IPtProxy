@@ -63,8 +63,6 @@ after getting successfully established.
 /**
  * Stats - callback method to handle snowflake proxy client statistics.
 
-BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
-
 @param connectionCount Completed successful connections.
 
 @param failedConnectionCount Connections that failed to establish.
@@ -254,6 +252,13 @@ A duration of <= 0 will disable periodic summary statistics.
  */
 @property (nonatomic) long summaryInterval;
 /**
+ * CovertDTLSConfig - used for configuration for randomization or mimicking (Firefox/Chrome browser) of
+DTLS Client Hello messages. String can be `CovertDTLSConfigRandomize`, `CovertDTLSConfigMimic`,
+`CovertDTLSConfigRandomizeMimic` or `CovertDTLSConfigNone`.
+Defaults to `CovertDTLSConfigRandomizeMimic`.
+ */
+@property (nonatomic) NSString* _Nonnull covertDTLSConfig;
+/**
  * IsRunning - Checks to see if a snowflake proxy is running in your app.
  */
 - (BOOL)isRunning;
@@ -269,6 +274,10 @@ A duration of <= 0 will disable periodic summary statistics.
 - (void)stop;
 @end
 
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyCovertDTLSConfigMimic;
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyCovertDTLSConfigNone;
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyCovertDTLSConfigRandomize;
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyCovertDTLSConfigRandomizeMimic;
 /**
  * Dnstt - Transport implemented in DNSTT.
  */
@@ -396,8 +405,6 @@ after getting successfully established.
 - (void)disconnected:(NSString* _Nullable)country;
 /**
  * Stats - callback method to handle snowflake proxy client statistics.
-
-BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
 
 @param connectionCount Completed successful connections.
 
