@@ -3,6 +3,7 @@ package IPtProxy
 import (
 	"log"
 
+	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/covertdtls"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
 	sfp "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/proxy/lib"
 	"time"
@@ -22,8 +23,6 @@ type SnowflakeClientEvents interface {
 	ConnectionFailed()
 
 	// Stats - callback method to handle snowflake proxy client statistics.
-	//
-	// BEWARE! This is called very often. Before doing anything, make sure there are any non-zero values.
 	//
 	// @param connectionCount Completed successful connections.
 	//
@@ -45,6 +44,14 @@ type SnowflakeClientEvents interface {
 		inboundUnit, outboundUnit string,
 		summaryInterval int64)
 }
+
+//goland:noinspection GoUnusedConst
+const (
+	CovertDTLSConfigRandomize      = "randomize"
+	CovertDTLSConfigMimic          = "mimic"
+	CovertDTLSConfigRandomizeMimic = "randomizemimic"
+	CovertDTLSConfigNone           = "none"
+)
 
 // SnowflakeProxy - Class to start and stop a Snowflake proxy.
 type SnowflakeProxy struct {
@@ -101,6 +108,12 @@ type SnowflakeProxy struct {
 	// A duration of <= 0 will disable periodic summary statistics.
 	SummaryInterval int
 
+	// CovertDTLSConfig - used for configuration for randomization or mimicking (Firefox/Chrome browser) of
+	// DTLS Client Hello messages. String can be `CovertDTLSConfigRandomize`, `CovertDTLSConfigMimic`,
+	// `CovertDTLSConfigRandomizeMimic` or `CovertDTLSConfigNone`.
+	// Defaults to `CovertDTLSConfigRandomizeMimic`.
+	CovertDTLSConfig string
+
 	isRunning bool
 	proxy     *sfp.SnowflakeProxy
 }
@@ -126,25 +139,31 @@ func (sp *SnowflakeProxy) Start() {
 		sp.SummaryInterval = 0
 	}
 
+	if sp.CovertDTLSConfig == "" {
+		sp.CovertDTLSConfig = CovertDTLSConfigRandomizeMimic
+	}
+
 	eventDispatcher := event.NewSnowflakeEventDispatcher()
 	eventDispatcher.AddSnowflakeEventListener(sp)
 
 	sp.proxy = &sfp.SnowflakeProxy{
-		PollInterval:               time.Duration(sp.PollInterval) * time.Second,
-		Capacity:                   uint(sp.Capacity),
-		STUNURL:                    sp.StunServer,
-		BrokerURL:                  sp.BrokerUrl,
-		KeepLocalAddresses:         false,
-		RelayURL:                   sp.RelayUrl,
-		EphemeralMinPort:           uint16(sp.EphemeralMinPort),
-		EphemeralMaxPort:           uint16(sp.EphemeralMaxPort),
-		NATProbeURL:                sp.NatProbeUrl,
-		NATTypeMeasurementInterval: time.Duration(sp.NATTypeMeasurementInterval),
-		ProxyType:                  sp.ProxyTypeIdentifier,
-		RelayDomainNamePattern:     "snowflake.torproject.net$",
-		AllowNonTLSRelay:           false,
-		EventDispatcher:            eventDispatcher,
-		SummaryInterval:            time.Duration(sp.SummaryInterval) * time.Second,
+		PollInterval:                    time.Duration(sp.PollInterval) * time.Second,
+		Capacity:                        uint(sp.Capacity),
+		STUNURL:                         sp.StunServer,
+		BrokerURL:                       sp.BrokerUrl,
+		KeepLocalAddresses:              false,
+		RelayURL:                        sp.RelayUrl,
+		EphemeralMinPort:                uint16(sp.EphemeralMinPort),
+		EphemeralMaxPort:                uint16(sp.EphemeralMaxPort),
+		RelayDomainNamePattern:          "snowflake.torproject.net$",
+		AllowProxyingToPrivateAddresses: false,
+		AllowNonTLSRelay:                false,
+		NATProbeURL:                     sp.NatProbeUrl,
+		NATTypeMeasurementInterval:      time.Duration(sp.NATTypeMeasurementInterval),
+		ProxyType:                       sp.ProxyTypeIdentifier,
+		EventDispatcher:                 eventDispatcher,
+		SummaryInterval:                 time.Duration(sp.SummaryInterval) * time.Second,
+		CovertDTLSConfig:                covertdtls.ParseConfigString(sp.CovertDTLSConfig),
 	}
 
 	go func() {
