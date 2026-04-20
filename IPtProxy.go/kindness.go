@@ -43,6 +43,11 @@ type SnowflakeClientEvents interface {
 		inboundBytes, outboundBytes int64,
 		inboundUnit, outboundUnit string,
 		summaryInterval int64)
+
+	// NatTypeUpdated - is invoked when the NAT type of the client is determined during the proxy connection process.
+	//
+	// @param natType will either be `NATUnknown`, `NATRestricted` or `NATUnrestricted`.
+	NatTypeUpdated(natType string)
 }
 
 //goland:noinspection GoUnusedConst
@@ -51,6 +56,15 @@ const (
 	CovertDTLSConfigMimic          = "mimic"
 	CovertDTLSConfigRandomizeMimic = "randomizemimic"
 	CovertDTLSConfigNone           = "none"
+
+	// NATUnknown is set if the proxy cannot connect to probetest.
+	NATUnknown = sfp.NATUnknown // "unknown"
+
+	// NATRestricted is set if the proxy times out when connecting to a symmetric NAT.
+	NATRestricted = sfp.NATRestricted
+
+	// NATUnrestricted is set if the proxy successfully connects to a symmetric NAT.
+	NATUnrestricted = sfp.NATUnrestricted
 )
 
 // SnowflakeProxy - Class to start and stop a Snowflake proxy.
@@ -213,6 +227,11 @@ func (sp *SnowflakeProxy) OnNewSnowflakeEvent(e event.SnowflakeEvent) {
 		if sp.ClientEvents != nil {
 			sp.ClientEvents.Stats(ev.ConnectionCount, int64(ev.FailedConnectionCount), ev.InboundBytes, ev.OutboundBytes,
 				ev.InboundUnit, ev.OutboundUnit, ev.SummaryInterval.Nanoseconds())
+		}
+
+	case event.EventOnCurrentNATTypeDetermined:
+		if sp.ClientEvents != nil {
+			sp.ClientEvents.NatTypeUpdated(ev.CurNATType)
 		}
 
 	default:
