@@ -61,6 +61,12 @@ after getting successfully established.
  */
 - (void)disconnected:(NSString* _Nullable)country;
 /**
+ * NatTypeUpdated - is invoked when the NAT type of the client is determined during the proxy connection process.
+
+@param natType will either be `NATUnknown`, `NATRestricted` or `NATUnrestricted`.
+ */
+- (void)natTypeUpdated:(NSString* _Nullable)natType;
+/**
  * Stats - callback method to handle snowflake proxy client statistics.
 
 @param connectionCount Completed successful connections.
@@ -291,6 +297,18 @@ FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyLogFileName;
  */
 FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyMeekLite;
 /**
+ * NATRestricted is set if the proxy times out when connecting to a symmetric NAT.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyNATRestricted;
+/**
+ * NATUnknown is set if the proxy cannot connect to probetest.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyNATUnknown;
+/**
+ * NATUnrestricted is set if the proxy successfully connects to a symmetric NAT.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyNATUnrestricted;
+/**
  * Obfs2 - DEPRECATED transport implemented in Lyrebird.
  */
 FOUNDATION_EXPORT NSString* _Nonnull const IPtProxyObfs2;
@@ -403,6 +421,12 @@ for statistics of the snowflake proxy. For use with StartSnowflakeProxy
 after getting successfully established.
  */
 - (void)disconnected:(NSString* _Nullable)country;
+/**
+ * NatTypeUpdated - is invoked when the NAT type of the client is determined during the proxy connection process.
+
+@param natType will either be `NATUnknown`, `NATRestricted` or `NATUnrestricted`.
+ */
+- (void)natTypeUpdated:(NSString* _Nullable)natType;
 /**
  * Stats - callback method to handle snowflake proxy client statistics.
 

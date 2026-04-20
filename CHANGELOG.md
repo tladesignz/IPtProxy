@@ -1,5 +1,9 @@
 # IPtProxy Changelog
 
+## 5.4.1
+- Added callback to expose the determined NAT type for `SnowflakeProxy`.
+- Updated minor dependencies.
+
 ## 5.4.0
 - Updated Snowflake to version 2.13.1.
 - Added support for Snowflake Proxy `CovertDTLSConfig` configuration option.
