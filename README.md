@@ -72,28 +72,54 @@ On Android, you might resort to a subclassed [`Application`](https://developer.a
 object, if you already use one, or just any holder object: 
 
 ```kotlin
-import IPtProxy
+import IPtProxy.Controller
+import IPtProxy.SnowflakeProxy
 
 object Transports {
 
-    // See below how to get `ptDir`!
+    // See below how to get `ptDir`, can use the File returned by a Context object's getCacheDir() method
     var ptDir = ""
 
-    // Set `ptDir` first, before accessing this the first time! 
+    // save logs to the state dir
+    val enableLogging = true
+
+    // if true, disable the address scrubber
+    val unsafeLogging = false
+
+    val logLevel = "INFO"
+
+    // Set `ptDir` first, before accessing this the first time!     
     val controller: Controller by lazy {
-        Controller(ptDir, true, false, "INFO", null)
+        Controller(ptDir, enableLogging, unsafeLogging, logLevel, object : IPtProxy.OnTransportEvents {
+            override fun connected(name: String?) { }
+            override fun error(name: String?, error: java.lang.Exception?) { }
+            override fun stopped(name: String?, error: java.lang.Exception?) { }
+        })
     }
-    
     val snowflakeProxy: SnowflakeProxy by lazy {
-        val sp = SnowflakeProxy()
-        sp.capacity = 0
-        sp.brokerUrl = "..."
-        sp.relayUrl = "..."
-        sp.stunServer = "..."
-        sp.natProbeUrl = "..."
-        sp.pollInterval = 60
-        
-        sp
+        SnowflakeProxy().apply {
+            capacity = 0L
+            brokerUrl = "..."
+            relayUrl = "..."
+            stunServer = "..."
+            natProbeUrl = "..."
+            pollInterval = 60
+            clientEvents = object : IPtProxy.SnowflakeClientEvents {
+                override fun connected() { }
+                override fun connectionFailed() { }
+                override fun disconnected(country: String?) { }
+                override fun natTypeUpdated(natType: String?) { }
+                override fun stats(
+                    connectionCount: Long,
+                    failedConnectionCount: Long,
+                    inboundBytes: Long,
+                    outboundBytes: Long,
+                    inboundUnit: String?,
+                    outboundUnit: String?,
+                    summaryInterval: Long
+                ) { }
+            }
+        }
     }
 }
 ```
@@ -114,7 +140,7 @@ pod 'IPtProxy', '~> 5.4'
 Before using IPtProxy you need to specify a place on disk for the transports 
 to store their state information and log files.
 
-**From version 2.0.0 onwards, there's no default anymore!**
+**From version 2.0.0 onward, there's no default anymore!**
 This is out of security concerns, esp. on Android.
 
 You will need to provide `stateDir` *before* use of any transport:
@@ -161,10 +187,10 @@ the new [`TorManager` project](https://github.com/tladesignz/TorManager).
 
 From version 1.9.0 onward, IPtProxy is available through 
 [Maven Central](https://central.sonatype.com/artifact/com.netzarchitekten/IPtProxy). 
-To install it, simply add the following line to your `build.gradle` file:
+To install it, simply add the following line to your `build.gradle.kts` file:
 
-```groovy
-implementation 'com.netzarchitekten:IPtProxy:5.4.1'
+```kts
+implementation("com.netzarchitekten:IPtProxy:5.4.1")
 ```
 
 #### Security Concerns:
@@ -180,38 +206,37 @@ https://docs.gradle.org/5.1/userguide/declaring_repositories.html#sec::matching_
 
 ### Getting Started
 
-If you are building a new Android application be sure to declare that it uses the
-`INTERNET` permission in your Android Manifest:
+If you are building a new Android application be sure to declare the `INTERNET` permission in your Android Manifest:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="my.test.app">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <application ...
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- ..... -->
 
+</manifest>
 ```
 
 Before using IPtProxy you need to specify a place on disk for the transports
 to store their state information and log files.
 
-**From version 2.0.0 onwards, there's no default anymore!**
+**From version 2.0.0 onward, there's no default anymore!**
 This is out of security concerns, esp. on Android.
 
-You will need to provide `stateDir` *before* use of any transport.
+You will need to provide `stateDir` *before* the use of any transport.
 
 `Context#getCacheDir()`, `Context#getFilesDir()` or `Context#getNoBackupFilesDir()` 
 are good choices for this.
 
 **Do not use a directory outside the app's private storage!**
 
-```java
-import IPtProxy
+```kt
+import IPtProxy.Controller
 
-File ptDir = new File(getCacheDir(), "pt_state");
-
-Controller ptc = Controller(ptDir.getPath(), true, false, "INFO", null);
+val stateDir = applicationContext.cacheDir.path
+val iptProxyController = Controller(stateDir, ...)
 ```
 
 
