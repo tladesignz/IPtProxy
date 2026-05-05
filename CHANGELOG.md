@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 5.4.2
+- Updated DNSTT to version 1.20260501.0.
+
 ## 5.4.1
 - Added callback to expose the determined NAT type for `SnowflakeProxy`.
 - Updated minor dependencies.
