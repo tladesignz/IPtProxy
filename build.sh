@@ -50,7 +50,7 @@ if test -e ".git"; then
     cd ..
 else
     # No .git directory - That's a normal install.
-    git clone --depth 1 --branch "e111260c" https://github.com/tladesignz/dnstt.git
+    git clone --depth 1 --branch "f1b9b97a" https://github.com/tladesignz/dnstt.git
 fi
 
 TEMPDIR="$(mktemp -d)"

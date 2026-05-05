@@ -11,7 +11,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 |-----------|--------------|
 | Lyrebird  | 0.8.1        |
 | Snowflake | 2.13.1       |
-| DNSTT     | 1.20260311.0 |
+| DNSTT     | 1.20260501.0 |
 
 Lyrebird/Obfs4proxy as well as Snowflake and DNSTT Pluggable Transports are written in Go, which
 is a little annoying to use on iOS and Android.
