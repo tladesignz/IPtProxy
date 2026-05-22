@@ -305,7 +305,7 @@ gomobile: failed to find android SDK platform (API level: 24)
 exit status 1
 ```
 
-`IPtProxy` requires that you have a valid Android SDK of 24+ (the absolute minimum) in `$ANDROID_HOME/platforms`. However, it's standard practice to be using the latest stable SDK that's available. As of this writing, the latest stable Android SDK is 36.1, and SDK 37.0 is about to leave beta sometime soon. The problem is that  `gomobile` has a bug preventing it from detecting SDKs 36.1+. This means that, until there is a `gomobile` update, you **must also obtain a copy of SDK 36 from the Android SDK manager in order to build `IPtProxy`!!!**. This is because with API 36.1+ the Android SDK installation directory is verioned with a decimal number, and [`gomobile` is only able to find SDK directories that are versioned with natural numbers...](https://github.com/golang/go/issues/79606).
+`IPtProxy` requires that you have a valid Android SDK of 24+ (the absolute minimum) in `$ANDROID_HOME/platforms`. However, it's standard practice to be using the latest stable SDK that's available. As of this writing, the latest stable Android SDK is 36.1, and SDK 37.0 is about to leave beta sometime soon. The problem is that  `gomobile` has a bug preventing it from detecting SDKs 36.1+. This means that, until there is a `gomobile` update, you **must also obtain a copy of SDK 36 from the Android SDK manager in order to build `IPtProxy`!**. This is because with API 36.1+ the Android SDK installation directory uses a decimal point in its version number, and [`gomobile` is only able to find SDK directories that have use natural numbers for their version number...](https://github.com/golang/go/issues/79606).
 
 ```
 $ pwd
