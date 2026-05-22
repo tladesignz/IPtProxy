@@ -250,16 +250,6 @@ If you want to compile it yourself, you'll need Go 1.24 as a prerequisite.
 You will also need Xcode installed when compiling for iOS and (preferably) the
 latest Android NDK when compiling for Android.
 
-The build script needs the gomobile binary and will install it, if not available, yet.
-However, you'll still need to make it accessible in your `$PATH`.
-
-So, if it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
-for `$GOPATH` is `$HOME/go`: 
-
-```shell
-export PATH=$HOME/go/bin/:$PATH` 
-```
-
 ### iOS/macOS
 
 Make sure Xcode and Xcode's command line tools are installed. Then run
