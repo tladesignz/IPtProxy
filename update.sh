@@ -3,7 +3,7 @@
 cd "$(dirname "$0")" || exit 1
 
 cd dnstt || exit
-git pull
+git pull origin master
 
 cd ../IPtProxy.go || exit
 go get gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib@latest

@@ -6,7 +6,7 @@ MIN_ANDROID_API_LEVEL=24
 
 if [ "$1" = "android" ]; then
   TARGET=android # all ABIs (386, amd64, arm, arm64)
-  # TARGET=android/arm,android/arm64
+  #TARGET=android/arm64
   OUTPUT=IPtProxy.aar
   MIN_NDK_VERSION=28
 
@@ -36,8 +36,6 @@ fi
 
 # Install dependencies. Go itself is a prerequisite.
 printf '\n--- Golang 1.24 or up needs to be installed! Try "brew install go" on MacOS or "snap install go --classic" on Linux if we fail further down!'
-printf '\n--- Installing gomobile...\n'
-go install golang.org/x/mobile/cmd/gomobile@latest
 
 # Fetch DNSTT submodule.
 printf '\n\n--- Fetching transport dependencies...\n'
@@ -63,12 +61,11 @@ cp -a dnstt "$TEMPDIR/"
 
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
-export PATH=~/go/bin:$PATH
 cd "$TEMPDIR/IPtProxy.go" || exit 1
+go run golang.org/x/mobile/cmd/gomobile@latest init
 
-gomobile init
 
-MACOSX_DEPLOYMENT_TARGET=11.0 gomobile bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
+MACOSX_DEPLOYMENT_TARGET=11.0 go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
 
 ### Note:
 # $ go tool link -h
