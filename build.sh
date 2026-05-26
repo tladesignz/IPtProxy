@@ -62,7 +62,6 @@ cp -a dnstt "$TEMPDIR/"
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
 cd "$TEMPDIR/IPtProxy.go" || exit 1
-go mod tidy
 go run golang.org/x/mobile/cmd/gomobile@latest init
 
 
