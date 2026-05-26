@@ -293,6 +293,38 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
 if you don't want to rely on Maven Central.
 
+### Dealing with Possible Android Build Errors 
+
+#### - `gomobile bind` can't find a valid SDK directory in `$ANDROID_HOME/platforms`
+
+If you're positive you've configured `ANDROID_HOME` correctly, and you see SDKs when you run `ls $ANDROID_HOME/platforms` you may be running into a `gomobile bug`.
+If the above is true and you get this error compiling the go code of `IPtProxy`, then follow the steps below...
+
+```
+gomobile: failed to find android SDK platform (API level: 24)
+exit status 1
+```
+
+`IPtProxy` requires that you have a valid Android SDK of 24+ (the absolute minimum) in `$ANDROID_HOME/platforms`. However, it's standard practice to be using the latest stable SDK that's available. As of this writing, the latest stable Android SDK is 36.1, and SDK 37.0 is about to leave beta sometime soon. The problem is that  `gomobile` has a bug preventing it from detecting SDKs 36.1+. This means that, until there is a `gomobile` update, you **must also obtain a copy of SDK 36 from the Android SDK manager in order to build `IPtProxy`!**. This is because with API 36.1+ the Android SDK installation directory uses a decimal point in its version number, and [`gomobile` is only able to find SDK directories that use natural numbers for their version number...](https://github.com/golang/go/issues/79606).
+
+```
+$ pwd
+/home/username/Android/Sdk/platforms
+$ ls -al
+total 28
+drwxrwxr-x  7 a a 4096 May 21 22:30 .
+drwxrwxr-x 17 a a 4096 Apr 26 07:37 ..
+drwxrwxr-x  6 a a 4096 Apr 28 17:57 android-31
+drwxrwxr-x  6 a a 4096 May  3 21:48 android-35
+drwxrwxr-x  6 a a 4096 Apr  1 21:12 android-36   <-- gomobile will default to using this one
+drwxrwxr-x  6 a a 4096 Mar 24 00:50 android-36.1 <-- can't detect this
+drwxrwxr-x  6 a a 4096 Apr 28 13:19 android-37.0 <-- can't detect this 
+$ 
+```
+
+
+#### - `unsupported setting GO386=387`
+
 On certain CPU architectures `gobind` might fail with this error due to setting
 a flag that is no longer supported by Go since version 1.16:
 
