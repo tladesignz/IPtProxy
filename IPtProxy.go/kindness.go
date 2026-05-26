@@ -114,7 +114,7 @@ type SnowflakeProxy struct {
 	ClientEvents SnowflakeClientEvents
 
 	// ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
-	// Defaults to "iptproxy" + the platform and architecutre, if empty.
+	// Defaults to "iptproxy" + the platform and architecture, if empty.
 	// ie: "iptproxy-darwin/arm64", "iptproxy-android/arm", "iptproxy-ios/arm64", etc
 	// ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
 	ProxyTypeIdentifier string
