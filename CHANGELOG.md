@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 5.5.0
+- Updated Snowflake to version 2.14.0.
+
 ## 5.4.2
 - Updated DNSTT to version 1.20260501.0.
 
