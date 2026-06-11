@@ -68,6 +68,9 @@ import (
 	"path"
 
 	"fmt"
+	"strconv"
+	"sync"
+
 	pt "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib"
 	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/transports"
@@ -75,8 +78,6 @@ import (
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
 	sfversion "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/version"
 	"golang.org/x/net/proxy"
-	"strconv"
-	"sync"
 	dnsttclient "www.bamsoftware.com/git/dnstt.git/dnstt-client/lib"
 )
 
@@ -421,7 +422,7 @@ func createStateDir(path string) error {
 // @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 //
 // @throws if the proxy URL cannot be parsed, if the given `methodName` cannot be found, if the transport cannot
-// be initialized or if it couldn't bind a port for listening.
+// be initialized, or if it couldn't bind a port for listening.
 func (c *Controller) Start(methodName string, proxy string) error {
 	var proxyURL *url.URL
 	var err error
