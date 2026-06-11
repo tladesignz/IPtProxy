@@ -61,6 +61,7 @@ cp -a dnstt "$TEMPDIR/"
 
 # Compile framework.
 printf '\n\n--- Compile %s...\n' "$OUTPUT"
+export GOPRIVATE=gitlab.torproject.org
 cd "$TEMPDIR/IPtProxy.go" || exit 1
 go run golang.org/x/mobile/cmd/gomobile@latest init
 

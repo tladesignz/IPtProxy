@@ -3,10 +3,12 @@ package IPtProxy
 import (
 	"log"
 
+	"time"
+
+	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/covertdtls"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
 	sfp "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/proxy/lib"
-	"time"
 )
 
 // SnowflakeClientEvents - Interface to get information about clients connecting, disconnecting, failing to connect and
@@ -133,9 +135,11 @@ type SnowflakeProxy struct {
 }
 
 // Start - Start the Snowflake proxy.
-func (sp *SnowflakeProxy) Start() {
+//
+// @throws if CovertDTLSConfig is invalid.
+func (sp *SnowflakeProxy) Start() error {
 	if sp.isRunning {
-		return
+		return nil
 	}
 	if sp.Capacity < 1 {
 		sp.Capacity = 0
@@ -155,6 +159,12 @@ func (sp *SnowflakeProxy) Start() {
 
 	if sp.CovertDTLSConfig == "" {
 		sp.CovertDTLSConfig = CovertDTLSConfigRandomizeMimic
+	}
+
+	covertDtlsConf, err := covertdtls.ParseCovertDTLSConfigString(sp.CovertDTLSConfig)
+	if err != nil {
+		ptlog.Errorf("Failed to parse CovertDTLSConfig: %s", err.Error())
+		return err
 	}
 
 	eventDispatcher := event.NewSnowflakeEventDispatcher()
@@ -177,7 +187,7 @@ func (sp *SnowflakeProxy) Start() {
 		ProxyType:                       sp.ProxyTypeIdentifier,
 		EventDispatcher:                 eventDispatcher,
 		SummaryInterval:                 time.Duration(sp.SummaryInterval) * time.Second,
-		CovertDTLSConfig:                covertdtls.ParseConfigString(sp.CovertDTLSConfig),
+		CovertDTLSConfig:                covertDtlsConf,
 	}
 
 	go func() {
@@ -189,6 +199,8 @@ func (sp *SnowflakeProxy) Start() {
 			log.Print(err)
 		}
 	}()
+
+	return nil
 }
 
 // Stop - Stop the Snowflake proxy.
