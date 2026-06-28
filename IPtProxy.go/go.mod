@@ -9,7 +9,7 @@ replace www.bamsoftware.com/git/dnstt.git => ../dnstt
 require (
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20260312101154-fc105a03c0e0
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.1
 	golang.org/x/net v0.56.0
 	www.bamsoftware.com/git/dnstt.git v1.20260501.0
 )
