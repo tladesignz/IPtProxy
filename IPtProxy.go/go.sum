@@ -188,8 +188,8 @@ gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-2
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20260312101154-fc105a03c0e0/go.mod h1:uCIr865SJMJ4LHn90G3+L/MmMCA8cix7ZAvV74HcWLo=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/ptutil v0.0.0-20250815012447-418f76dcf315 h1:9lmXguW9aH5sdZR5h5jOrdInCt0tQ9NRa7+wFD4MQBk=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/ptutil v0.0.0-20250815012447-418f76dcf315/go.mod h1:PK7EvweKeypdelDyh1m7N922aldSeCAG8n0lJ7RAXWQ=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.0 h1:+eG1iimS4JBpTDBD3foLTOdIbWFPNsJAPBClwgfpTsQ=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.0/go.mod h1:hly8E4WHyMmpUhN0j9YcJP2ySpnAm2wNVZ4uhNPlgpk=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.1 h1:YsvVB5dmf3T4NHjLbB8FlUVmFLzTPm+j21O9n3FdWmo=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.14.1/go.mod h1:hly8E4WHyMmpUhN0j9YcJP2ySpnAm2wNVZ4uhNPlgpk=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.3 h1:/uY4/KT/U4+mFznyb8UUIs/KJoWc6ShbaGTefQ+LJvE=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.3/go.mod h1:aEzSbkzOc38Cg7gLg0BmRDwQgxwjbbKSiAv052xTS7I=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
