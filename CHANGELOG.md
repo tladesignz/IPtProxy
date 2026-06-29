@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 5.5.1
+- Updated Snowflake to version 2.14.1.
+
 ## 5.5.0
 - Updated Snowflake to version 2.14.0.
 
