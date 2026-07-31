@@ -166,7 +166,7 @@ Only needed when you want to do the rendezvous over AMP instead of a domain fron
 @param proxy HTTP, SOCKS4 or SOCKS5 proxy to be used behind Lyrebird. E.g. "socks5://127.0.0.1:12345"
 
 @throws if the proxy URL cannot be parsed, if the given `methodName` cannot be found, if the transport cannot
-be initialized or if it couldn't bind a port for listening.
+be initialized, or if it couldn't bind a port for listening.
  */
 - (BOOL)start:(NSString* _Nullable)methodName proxy:(NSString* _Nullable)proxy error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -272,8 +272,10 @@ Defaults to `CovertDTLSConfigRandomizeMimic`.
 
 /**
  * Start - Start the Snowflake proxy.
+
+@throws if CovertDTLSConfig is invalid.
  */
-- (void)start;
+- (BOOL)start:(NSError* _Nullable* _Nullable)error;
 /**
  * Stop - Stop the Snowflake proxy.
  */

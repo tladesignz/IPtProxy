@@ -10,7 +10,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 | Transport | Version      |
 |-----------|--------------|
 | Lyrebird  | 0.8.1        |
-| Snowflake | 2.13.1       |
+| Snowflake | 2.14.1       |
 | DNSTT     | 1.20260501.0 |
 
 Lyrebird/Obfs4proxy as well as Snowflake and DNSTT Pluggable Transports are written in Go, which
@@ -132,7 +132,7 @@ IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your `Podfile`:
 
 ```ruby
-pod 'IPtProxy', '~> 5.4'
+pod 'IPtProxy', '~> 5.5'
 ```
 
 ### Getting Started
@@ -190,7 +190,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle.kts` file:
 
 ```kts
-implementation("com.netzarchitekten:IPtProxy:5.4.2")
+implementation("com.netzarchitekten:IPtProxy:5.5.1")
 ```
 
 #### Security Concerns:
@@ -250,16 +250,6 @@ If you want to compile it yourself, you'll need Go 1.24 as a prerequisite.
 You will also need Xcode installed when compiling for iOS and (preferably) the
 latest Android NDK when compiling for Android.
 
-The build script needs the gomobile binary and will install it, if not available, yet.
-However, you'll still need to make it accessible in your `$PATH`.
-
-So, if it's not already, add `$GOPATH/bin` to `$PATH`. The default location 
-for `$GOPATH` is `$HOME/go`: 
-
-```shell
-export PATH=$HOME/go/bin/:$PATH` 
-```
-
 ### iOS/macOS
 
 Make sure Xcode and Xcode's command line tools are installed. Then run
@@ -292,6 +282,10 @@ rm -rf IPtProxy.aar IPtProxy-sources.jar && ./build.sh android
 
 This will create an `IPtProxy.aar` file, which you can directly drop in your app, 
 if you don't want to rely on Maven Central.
+
+### Dealing with Possible Android Build Errors 
+
+#### - `unsupported setting GO386=387`
 
 On certain CPU architectures `gobind` might fail with this error due to setting
 a flag that is no longer supported by Go since version 1.16:
