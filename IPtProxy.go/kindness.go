@@ -2,9 +2,8 @@ package IPtProxy
 
 import (
 	"log"
-
+	"runtime"
 	"time"
-
 	ptlog "gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird/common/log"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/covertdtls"
 	"gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2/common/event"
@@ -116,7 +115,8 @@ type SnowflakeProxy struct {
 	ClientEvents SnowflakeClientEvents
 
 	// ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
-	// Defaults to "iptproxy", if empty.
+	// Defaults to "iptproxy" + the platform and architecture, if empty.
+	// ie: "iptproxy-darwin/arm64", "iptproxy-android/arm", "iptproxy-ios/arm64", etc
 	// ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
 	ProxyTypeIdentifier string
 
@@ -150,7 +150,8 @@ func (sp *SnowflakeProxy) Start() error {
 	}
 
 	if sp.ProxyTypeIdentifier == "" {
-		sp.ProxyTypeIdentifier = "iptproxy"
+		// "iptproxy-$PLATFORM/ARCHITECTURE"
+		sp.ProxyTypeIdentifier = "iptproxy-" + runtime.GOOS + "/" + runtime.GOARCH
 	}
 
 	if sp.SummaryInterval <= 0 {
