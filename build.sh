@@ -66,7 +66,7 @@ cd "$TEMPDIR/IPtProxy.go" || exit 1
 go run golang.org/x/mobile/cmd/gomobile@latest init
 
 
-MACOSX_DEPLOYMENT_TARGET=11.0 go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
+MACOSX_DEPLOYMENT_TARGET=12.0 go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
 
 ### Note:
 # $ go tool link -h
