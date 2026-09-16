@@ -35,7 +35,7 @@ if [ -e $OUTPUT ]; then
 fi
 
 # Install dependencies. Go itself is a prerequisite.
-printf '\n--- Golang 1.24 or up needs to be installed! Try "brew install go" on MacOS or "snap install go --classic" on Linux if we fail further down!'
+printf '\n--- Golang 1.26 or up needs to be installed! Try "brew install go" on MacOS or "snap install go --classic" on Linux if we fail further down!'
 
 # Fetch DNSTT submodule.
 printf '\n\n--- Fetching transport dependencies...\n'
