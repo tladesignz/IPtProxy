@@ -9,7 +9,7 @@ Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Androi
 
 | Transport | Version      |
 |-----------|--------------|
-| Lyrebird  | 0.8.1        |
+| Lyrebird  | 0.9.0        |
 | Snowflake | 2.14.1       |
 | DNSTT     | 1.20260501.0 |
 

@@ -1,5 +1,11 @@
 # IPtProxy Changelog
 
+## 5.6.0
+- Updated Lyrebird to version 0.9.0.
+- Build with Xcode 27.0, dropped macOS 11 support.
+- Build with Go v1.26.
+- Updated other dependencies.
+
 ## 5.5.1
 - Updated Snowflake to version 2.14.1.
 

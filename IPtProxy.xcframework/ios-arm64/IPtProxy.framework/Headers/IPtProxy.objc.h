@@ -248,7 +248,8 @@ if you want to do UI stuff!
 @property (nonatomic) id<IPtProxySnowflakeClientEvents> _Nullable clientEvents;
 /**
  * ProxyTypeIdentifier - Identifier for the proxy type. Used for logging and identification purposes.
-Defaults to "iptproxy", if empty.
+Defaults to "iptproxy" + the platform and architecture, if empty.
+ie: "iptproxy-darwin/arm64", "iptproxy-android/arm", "iptproxy-ios/arm64", etc
 ATTENTION: This will affect Tor Project statistics. Only change if you talked to Tor Project about it.
  */
 @property (nonatomic) NSString* _Nonnull proxyTypeIdentifier;
