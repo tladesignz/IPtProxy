@@ -3,9 +3,10 @@
 Lyrebird/Obfs4proxy and Snowflake Pluggable Transports for iOS, MacOS and Android
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.netzarchitekten/IPtProxy.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/com.netzarchitekten/IPtProxy)
-[![Version](https://img.shields.io/cocoapods/v/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
-[![License](https://img.shields.io/cocoapods/l/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
-[![Platform](https://img.shields.io/cocoapods/p/IPtProxy.svg?style=flat)](https://cocoapods.org/pods/IPtProxy)
+[![Swift Package](https://img.shields.io/badge/SPM-Compatible-swift.svg?style=flat)](https://github.com/apple/swift-package-manager)
+[![Version](https://img.shields.io/github/v/tag/tladesignz/IPtProxy.svg?style=flat)](https://github.com/tladesignz/IPtProxy/tags)
+[![License](https://img.shields.io/github/license/tladesignz/IPtProxy?style=flat)](https://github.com/tladesignz/IPtProxy/blob/master/LICENSE)
+[![Platform](https://img.shields.io/badge/platform-iOS%20%7C%20macOS%20%7C%20Android-lightgrey.svg?style=flat)](https://github.com/tladesignz/IPtProxy/blob/master/Package.swift)
 
 | Transport | Version      |
 |-----------|--------------|
@@ -128,12 +129,8 @@ object Transports {
 
 ### Installation
 
-IPtProxy is available through [CocoaPods](https://cocoapods.org). To install
-it, simply add the following line to your `Podfile`:
-
-```ruby
-pod 'IPtProxy', '~> 5.5'
-```
+IPtProxy is available through Swift Package Manager. To install
+it, simply add this repository to the Xcode project.
 
 ### Getting Started
 
@@ -190,7 +187,7 @@ From version 1.9.0 onward, IPtProxy is available through
 To install it, simply add the following line to your `build.gradle.kts` file:
 
 ```kts
-implementation("com.netzarchitekten:IPtProxy:5.5.1")
+implementation("com.netzarchitekten:IPtProxy:5.7.0")
 ```
 
 #### Security Concerns:
@@ -259,7 +256,7 @@ rm -rf IPtProxy.xcframework && ./build.sh
 ```
 
 This will create an `IPtProxy.xcframework`, which you can directly drop in your app,
-if you don't want to rely on CocoaPods.
+if you don't want to rely on SPM.
 
 ### Android
 
@@ -339,11 +336,6 @@ git push
 git push --tags
 ```
 
-### CocoaPods
-
-```shell
-pod trunk push
-```
 
 ### Maven Central
 
