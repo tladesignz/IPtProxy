@@ -5,8 +5,8 @@ OUTPUT=IPtProxy.xcframework
 MIN_ANDROID_API_LEVEL=24
 
 if [ "$1" = "android" ]; then
-  TARGET=android # all ABIs (386, amd64, arm, arm64)
-  #TARGET=android/arm64
+  # excludes 32bit x86 architecture, add it if needed with android/386
+  TARGET=android/arm64,android/arm,android/amd64
   OUTPUT=IPtProxy.aar
   MIN_NDK_VERSION=28
 
