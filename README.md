@@ -315,7 +315,7 @@ A release commit needs the following:
 
 ### Update IPtProxy and dependencies' version numbers in 
 
-  - [Podspec](IPtProxy.podspec)
+  - [Package.swift](Package.swift)
   - [README](README.md)
   - [controller.go](IPtProxy.go/controller.go)
 
