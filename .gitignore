@@ -156,3 +156,6 @@ IPtProxy-sources.jar
 bundle
 bundle-IPtProxy-*.jar
 bundle-IPtProxy-*.zip
+
+# Apple publishing stuff.
+IPtProxy.xcframework
