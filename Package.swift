@@ -15,7 +15,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "IPtProxy",
-            url: "https://github.com/tladesignz/IPtProxy/releases/download/5.8.0/tor.xcframework.zip",
+            url: "https://github.com/tladesignz/IPtProxy/releases/download/5.8.1/IPtProxy.xcframework.zip",
             checksum: "8218a706709fded3c783f096b583d48c52c289712595879b0a07c684eaca9220"
         ),
     ],

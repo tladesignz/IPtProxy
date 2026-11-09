@@ -1,5 +1,8 @@
 # IPtProxy Changelog
 
+## 5.8.1
+- Fixed SPM dependency name.
+
 ## 5.8.0
 - Updated Snowflake to version 2.15.3.
 - Updated Lyrebird to version 0.10.0.
