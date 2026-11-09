@@ -252,7 +252,7 @@ latest Android NDK when compiling for Android.
 Make sure Xcode and Xcode's command line tools are installed. Then run
 
 ```shell
-rm -rf IPtProxy.xcframework && ./build.sh
+rm -rf IPtProxy.xcframework* && ./build.sh
 ```
 
 This will create an `IPtProxy.xcframework`, which you can directly drop in your app,
@@ -322,7 +322,7 @@ A release commit needs the following:
 ### Do fresh builds
 
 ```shell
-rm -rf IPtProxy.xcframework && ./build.sh
+rm -rf IPtProxy.xcframework* && ./build.sh
 rm -f IPtProxy.aar IPtProxy-sources.jar && ./build-android.sh
 ```
 

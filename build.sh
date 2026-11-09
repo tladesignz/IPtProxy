@@ -65,13 +65,20 @@ export GOPRIVATE=gitlab.torproject.org
 cd "$TEMPDIR/IPtProxy.go" || exit 1
 go run golang.org/x/mobile/cmd/gomobile@latest init
 
+if [ "$1" = "android" ]; then
+  go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
+else
+  # Don't strip debug symbols for Apple builds. App Store Connect likes to have them.
+  MACOSX_DEPLOYMENT_TARGET=12.0 go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -v -tags=netcgo -trimpath
 
-MACOSX_DEPLOYMENT_TARGET=12.0 go run golang.org/x/mobile/cmd/gomobile@latest bind -target=$TARGET -ldflags="-s -w -checklinkname=0" -o "$CURRENT/$OUTPUT" -iosversion=15.0 -androidapi=$MIN_ANDROID_API_LEVEL -v -tags=netcgo -trimpath
+  zip -r -y -9 "$CURRENT/$OUTPUT.zip" "$CURRENT/$OUTPUT"
+  shasum -a 256 "$CURRENT/$OUTPUT.zip"
+fi
 
 ### Note:
 # $ go tool link -h
 #  -s	disable symbol table
-#  -w	disable DWARF generation
+#  -w	disable DWARF generation (not doing that on Apple platforms anymore, since App Store Connect started to complain about it.
 #
 # -> Saves > 50% of file size on all targets!
 # See https://github.com/guardianproject/orbot/pull/1061
