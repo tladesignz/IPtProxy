@@ -313,7 +313,7 @@ A release commit needs the following:
 
 ### Append [CHANGELOG](CHANGELOG.md).
 
-### Update IPtProxy and dependencies' version numbers in 
+### Update IPtProxy and dependencies' version numbers and SHA hashes in 
 
   - [Package.swift](Package.swift)
   - [README](README.md)
@@ -336,6 +336,11 @@ git push
 git push --tags
 ```
 
+### SPM
+
+- Go to https://github.com/tladesignz/IPtProxy/releases
+- Create a new release.
+- Add IPtProxy.xcframework.zip to the release.
 
 ### Maven Central
 

@@ -1,5 +1,12 @@
 # IPtProxy Changelog
 
+## 5.8.0
+- Updated Snowflake to version 2.15.3.
+- Updated Lyrebird to version 0.10.0.
+- Updated other dependencies.
+- Stopped stripping debug symbols for Apple platforms. App Store Connect started complaining about that.
+- Removed 32 Bit Intel ABI from Android builds, as they're hardly ever used.
+
 ## 5.7.0
 - Updated Snowflake to version 2.15.1.
 - Updated other dependencies.
