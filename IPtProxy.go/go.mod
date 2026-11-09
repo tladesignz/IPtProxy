@@ -1,6 +1,6 @@
 module github.com/tladesignz/IPtProxy.git
 
-go 1.26.0
+go 1.26.10
 
 tool golang.org/x/mobile/cmd/gomobile
 
@@ -8,9 +8,9 @@ replace www.bamsoftware.com/git/dnstt.git => ../dnstt
 
 require (
 	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261008205628-362a60bb4e3f
-	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.1
-	golang.org/x/net v0.61.0
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261104192811-59ac7e400c38
+	gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.3
+	golang.org/x/net v0.62.0
 	www.bamsoftware.com/git/dnstt.git v1.20260501.0
 )
 

@@ -181,12 +181,12 @@ gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266 h1:Ivjs
 gitlab.com/yawning/edwards25519-extra v0.0.0-20231005122941-2149dcafc266/go.mod h1:K/3SQWdJL6udzwInHk1gaYaECYxMp9dDayniPq6gCSo=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0 h1:KD9m+mRBwtEdqe94Sv72uiedMWeRdIr4sXbrRyzRiIo=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/goptlib v1.6.0/go.mod h1:70bhd4JKW/+1HLfm+TMrgHJsUHG4coelMWwiVEJ2gAg=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261008205628-362a60bb4e3f h1:iQzghnWKOjCh0lCwlfYckalo4Xmf91z2f9T89bXbXIM=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261008205628-362a60bb4e3f/go.mod h1:klAZIGqJ782bWabeluciUW4ZrBXwNZvGsJI1odFaqb0=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261104192811-59ac7e400c38 h1:h9X9Tz+tNRIp4zjLqPR2KCkVZKZGFIQnQzmIlfEsRBI=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird v0.0.0-20261104192811-59ac7e400c38/go.mod h1:VA8Wnlj4zGoeQG06REE75Ptd5IlFPc5cH4jckqmdd4s=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/ptutil v0.0.0-20250815012447-418f76dcf315 h1:9lmXguW9aH5sdZR5h5jOrdInCt0tQ9NRa7+wFD4MQBk=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/ptutil v0.0.0-20250815012447-418f76dcf315/go.mod h1:PK7EvweKeypdelDyh1m7N922aldSeCAG8n0lJ7RAXWQ=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.1 h1:QUVDPSkMrvdKlBnDuAFvN2WgqwueU6MoV11c51CpcFg=
-gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.1/go.mod h1:LIfwK5C1dPDFrrldJMIX9Sk1XSoc09IpKmoaYIRTQHs=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.3 h1:788Sb0TUg9M9tVLhX+U35Q//ltyAvOFrpCziDL5CFpU=
+gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 v2.15.3/go.mod h1:2i5odtYaKNWdhq2gslsymHkpkMCyi4gf/AP6ZxaALZM=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.7 h1:c7PutWnnXJytefsiENNo+iq2qAbE2RfUbggGtnnmuAA=
 gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/webtunnel v0.0.7/go.mod h1:GlxU1bY/uoCOkbMJpmsiynfU20eL36CGitONPa3Z2gs=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
@@ -227,8 +227,8 @@ golang.org/x/net v0.0.0-20220722155237-a158d28d115b/go.mod h1:XRhObCWvk6IyKnWLug
 golang.org/x/net v0.2.0/go.mod h1:KqCZLdyyvdV855qA2rE3GC2aiw5xGR5TEjj8smXukLY=
 golang.org/x/net v0.6.0/go.mod h1:2Tu9+aMcznHK/AK1HMvgo6xiTLG5rD5rZLDS+rp2Bjs=
 golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
-golang.org/x/net v0.61.0 h1:RR+6j/BTBCrggOLugxa+66R8FvoN6MHlzDlZIbN9YFw=
-golang.org/x/net v0.61.0/go.mod h1:WgDCOTH8iwtB66T4/GfI94AHo/hhdb7Hah9NDseQfiI=
+golang.org/x/net v0.62.0 h1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=
+golang.org/x/net v0.62.0/go.mod h1:WgDCOTH8iwtB66T4/GfI94AHo/hhdb7Hah9NDseQfiI=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
