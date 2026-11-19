@@ -1,5 +1,10 @@
 # IPtProxy Changelog
 
+## 5.9.0
+- Updated Snowflake to version 2.15.4.
+- Fixed minor vulnerability stemming from outdated dependencies of Snowflake. 
+  (see https://github.com/tladesignz/IPtProxy/issues/99)
+
 ## 5.8.1
 - Fixed SPM dependency name.
 
